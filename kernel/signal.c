@@ -437,6 +437,10 @@ flush_signal_handlers(struct task_struct *t, int force_default)
 		if (force_default || ka->sa.sa_handler != SIG_IGN)
 			ka->sa.sa_handler = SIG_DFL;
 		ka->sa.sa_flags = 0;
+<<<<<<< HEAD
+=======
+
+>>>>>>> fc9b728... update12
 #if defined(__ARCH_HAS_SA_RESTORER) || defined(SA_RESTORER)
 		ka->sa.sa_restorer = NULL;
 #endif

@@ -1909,8 +1909,13 @@ static const isx012_regset_t ISX012_Init_Reg[] =
 ////////////////MWB & AWB Æ©´×////////////
 {0x6244,0x0B81,0x02},    // USER0R :
 {0x6246,0x1832,0x02},    // USER0B :
+<<<<<<< HEAD
 {0x6248,0x0C9E,0x02},    // USER1R : Daylight
 {0x624A,0x1766,0x02},    // USER1B :
+=======
+{0x6248,0x09C8,0x02},    // USER1R : Daylight
+{0x624A,0x1A06,0x02},    // USER1B :
+>>>>>>> fc9b728... update12
 {0x624C,0x09C8,0x02},    // USER2R : Cloudy
 {0x624E,0x1A06,0x02},    // USER2B :
 {0x6250,0x0D61,0x02},    // USER3R : Fluorescent
@@ -1918,8 +1923,13 @@ static const isx012_regset_t ISX012_Init_Reg[] =
 {0x6254,0x130B,0x02},    // USER4R : A
 {0x6256,0x0E92,0x02},    // USER4B :
 
+<<<<<<< HEAD
 {0x6270,0x0000,0x02},    // USER2_CONT_SHIFT_R : Cloudy cont shift
 {0x6272,0x0000,0x02},    // USER2_CONT_SHIFT_B :
+=======
+{0x6270,0xFD92,0x02},    // USER2_CONT_SHIFT_R : Cloudy cont shift
+{0x6272,0x0388,0x02},    // USER2_CONT_SHIFT_B :
+>>>>>>> fc9b728... update12
 {0x62C6,0x1096,0x02},    // A_LIGHT_R :
 {0x62C8,0x0F26,0x02},    // A_LIGHT_B :
 {0x62CA,0x00B0,0x02},    // A_LIGHT_AIM_SHIFT_R :
@@ -2237,7 +2247,11 @@ static const isx012_regset_t ISX012_Init_Reg[] =
 {0x02AA,0x0A,0x01},    //ISO_TYPE3 : ISO200
 {0x02AB,0x00,0x01},    //ISO_TYPE4 : AUTO
 {0x02AC,0x01,0x01},    //AE_SUB_SN1 :
+<<<<<<< HEAD
 {0x02AD,0x00,0x01},    //AE_SUB_SN2 :
+=======
+{0x02AD,0x03,0x01},    //AE_SUB_SN2 :
+>>>>>>> fc9b728... update12
 {0x02AE,0x01,0x01},    //AE_SUB_SN3 :
 {0x02AF,0x01,0x01},    //AE_SUB_SN4 :
 {0x02B0,0x01,0x01},    //AE_SUB_SN5 :
@@ -4068,19 +4082,30 @@ static const isx012_regset_t ISX012_Camcorder_Mode_OFF[] = {
 
 static const isx012_regset_t ISX012_Halfrelease_Mode[] =
 {
+<<<<<<< HEAD
 {0x0082,0x01,0x01},    // MONI_REFRESH
 {0x00B1,0x01,0x01},    //AF_RESTART_F :
 {0x00B2,0x03,0x01},    //AFMODE_MONI : AF OFF
 {0x00B3,0x00,0x01},    //AFMODE_HREL :
 //{0xFFFF,0x42,0x01},  //$wait, 66
+=======
+{0x00B2,0x03,0x01},    //AFMODE_MONI : AF OFF
+{0x00B3,0x00,0x01},    //AFMODE_HREL :
+{0xFFFF,0x42,0x01},//$wait, 66
+>>>>>>> fc9b728... update12
 {0x0081,0x01,0x01},    //MODESEL
 };
 
 static const isx012_regset_t ISX012_Barcode_SAF[] =
 {
+<<<<<<< HEAD
 {0x0082,0x01,0x01},    // MONI_REFRESH
 {0x00B1,0x01,0x01},    //AF_RESTART_F :
 //{0xFFFF,0x21,0x01},  //$wait, 33
+=======
+{0x00B1,0x01,0x01},    //AF_RESTART_F :
+{0xFFFF,0x21,0x01},    //$wait, 33
+>>>>>>> fc9b728... update12
 {0x00B2,0x00,0x01},    //AFMODE_MONI :
 };
 
@@ -4091,18 +4116,27 @@ static const isx012_regset_t ISX012_Lowlux_night_Halfrelease_Mode[] =
 {0x664A,0x01,0x01},    // AF_DROPN_ON_PEAK_DETECT :
 {0x6640,0x01,0x01},    // AF_DROPN_ON_PEAK_DETECT_SECOND :
 {0x0289,0x21,0x01},    //AWB_SN8
+<<<<<<< HEAD
 {0x6674,0x01,0x01},    // AF_MONICHG_MOVE_F
 {0x0082,0x01,0x01},    // MONI_REFRESH
 {0x00B1,0x01,0x01},    //AF_RESTART_F
 {0x00B3,0x00,0x01},    //AFMODE_HREL :
 //{0xFFFF,0x42,0x01},  //$wait, 66
+=======
+{0x00B1,0x01,0x01},    //AF_RESTART_F
+{0x00B3,0x00,0x01},    //AFMODE_HREL :
+{0xFFFF,0x42,0x01},//$wait, 66
+>>>>>>> fc9b728... update12
 {0x0081,0x01,0x01},    //MODESEL
 };
 
 static const isx012_regset_t ISX012_AF_Cancel_Macro_ON[] =
 {
+<<<<<<< HEAD
 {0x6674,0x00,0x01},    // AF_MONICHG_MOVE_F
 {0x0082,0x01,0x01},    // MONI_REFRESH
+=======
+>>>>>>> fc9b728... update12
 {0x00B2,0x02,0x01},    //AFMODE_MONI : Manual AF mode
 {0x0081,0x00,0x01},    //MODESEL : Monitoring mode
 {0x6648,0x02BC,0x02},    //AF_MANUAL_POS : MANUA AF search start position
@@ -4111,8 +4145,11 @@ static const isx012_regset_t ISX012_AF_Cancel_Macro_ON[] =
 
 static const isx012_regset_t ISX012_AF_Cancel_Macro_OFF[] =
 {
+<<<<<<< HEAD
 {0x6674,0x00,0x01},    // AF_MONICHG_MOVE_F
 {0x0082,0x01,0x01},    // MONI_REFRESH
+=======
+>>>>>>> fc9b728... update12
 {0x00B2,0x02,0x01},    //AFMODE_MONI : Manual AF mode
 {0x0081,0x00,0x01},    //MODESEL : Monitoring mode
 {0x6648,0x00C8,0x02},    //AF_MANUAL_POS : MANUA AF search start position
@@ -4122,7 +4159,10 @@ static const isx012_regset_t ISX012_AF_Cancel_Macro_OFF[] =
 static const isx012_regset_t ISX012_AF_ReStart[] =
 {
 {0x00B1,0x01,0x01},    //AF_RESTART_F
+<<<<<<< HEAD
 {0x0082,0x01,0x01},    // MONI_REFRESH
+=======
+>>>>>>> fc9b728... update12
 };
 
 static const isx012_regset_t ISX012_AF_Macro_OFF[] =
@@ -4134,7 +4174,11 @@ static const isx012_regset_t ISX012_AF_Macro_OFF[] =
 {0x028E,0x00,0x01},    //AF_SEARCH_DIR : NEAR->FAR
 {0x00B3,0x00,0x01},    //AFMODE_HREL : Manual AF mode
 {0x00B2,0x02,0x01},    //AFMODE_MONI : Manual AF mode
+<<<<<<< HEAD
 //{0xFFFF,0x21,0x01},  //$wait, 33
+=======
+{0xFFFF,0x21,0x01},//$wait, 33
+>>>>>>> fc9b728... update12
 };
 
 static const isx012_regset_t ISX012_AF_Macro_ON[] =
@@ -4146,33 +4190,51 @@ static const isx012_regset_t ISX012_AF_Macro_ON[] =
 {0x028E,0x01,0x01},    //AF_SEARCH_DIR : NEAR->FAR
 {0x00B3,0x00,0x01},    //AFMODE_HREL : Manual AF mode
 {0x00B2,0x02,0x01},    //AFMODE_MONI : Manual AF mode
+<<<<<<< HEAD
 //{0xFFFF,0x21,0x01},  //$wait, 33
+=======
+{0xFFFF,0x21,0x01},//$wait, 33
+>>>>>>> fc9b728... update12
 };
 
 static const isx012_regset_t ISX012_AF_SAF[] =
 {
+<<<<<<< HEAD
 {0x0082,0x01,0x01},    // MONI_REFRESH
 {0x00B1,0x01,0x01},    //AF_RESTART_F :
 {0x00B2,0x03,0x01},    //AFMODE_MONI : AF OFF
 {0x00B3,0x00,0x01},    //AFMODE_HREL :
 //{0xFFFF,0x42,0x01},  //$wait, 66
+=======
+{0x00B2,0x03,0x01},    //AFMODE_MONI : AF OFF
+{0x00B3,0x00,0x01},    //AFMODE_HREL :
+{0xFFFF,0x21,0x01},//$wait, 33
+>>>>>>> fc9b728... update12
 {0x0081,0x01,0x01},    //MODESEL
 };
 
 static const isx012_regset_t ISX012_AF_SAF_OFF[] =
 {
+<<<<<<< HEAD
 {0x6674,0x00,0x01},    // AF_MONICHG_MOVE_F
 {0x0082,0x01,0x01},    // MONI_REFRESH
 //{0xFFFF,0x42,0x01},  //$wait, 66
+=======
+{0xFFFF,0x42,0x01},//$wait, 66
+>>>>>>> fc9b728... update12
 {0x00B2,0x03,0x01},    //AFMODE_MONI : AF OFF
 {0x00B3,0x03,0x01},    //AFMODE_HREL : AF OFF
 };
 
 static const isx012_regset_t ISX012_AF_TouchSAF_OFF[] =
 {
+<<<<<<< HEAD
 {0x6674,0x00,0x01},    // AF_MONICHG_MOVE_F
 {0x0082,0x01,0x01},    // MONI_REFRESH
 //{0xFFFF,0x42,0x01},  //$wait, 66
+=======
+{0xFFFF,0x42,0x01},//$wait, 66
+>>>>>>> fc9b728... update12
 {0x00B2,0x03,0x01},    //AFMODE_MONI : AF OFF
 {0x00B3,0x03,0x01},    //AFMODE_HREL : AF OFF
 {0x0081,0x00,0x01},    //MODESEL
@@ -4180,9 +4242,14 @@ static const isx012_regset_t ISX012_AF_TouchSAF_OFF[] =
 
 static const isx012_regset_t ISX012_Camcorder_SAF_Start[] =
 {
+<<<<<<< HEAD
 {0x0082,0x01,0x01},    // MONI_REFRESH
 {0x00B1,0x01,0x01}, /* AF_RESTART_F */
 //{0xFFFF,0x21,0x01}, /* $wait, 33 */
+=======
+{0x00B1,0x01,0x01}, /* AF_RESTART_F */
+{0xFFFF,0x21,0x01}, /* $wait, 33 */
+>>>>>>> fc9b728... update12
 {0x00B2,0x00,0x01}, /* AFMODE_MONI */
 };
 
@@ -11094,11 +11161,17 @@ static const isx012_regset_t ISX012_Flash_ON[] =
 {0x6450,0x1D,0x01},    // INFRM_FLTOP :
 {0x6451,0x00,0x01},    // INFRM_FLBOTM :
 //halfrelease_mode value
+<<<<<<< HEAD
 {0x0082,0x01,0x01},    // MONI_REFRESH
 {0x00B1,0x01,0x01},    //AF_RESTART_F :
 {0x00B2,0x03,0x01},    //AFMODE_MONI : AF OFF
 {0x00B3,0x00,0x01},    //AFMODE_HREL :
 {0xFFFF,0x42,0x01},//$wait, 66
+=======
+{0x00B1,0x01,0x01},    //AF_RESTART_F
+{0x00B3,0x00,0x01},    //AFMODE_HREL :
+{0xFFFF,0x21,0x01},//$wait, 33
+>>>>>>> fc9b728... update12
 {0x0081,0x01,0x01},    //MODESEL
 };
 

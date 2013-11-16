@@ -162,4 +162,10 @@ source "drivers/staging/mei/Kconfig"
 
 source "drivers/staging/nvec/Kconfig"
 
+<<<<<<< HEAD
+=======
+source "drivers/staging/cpupower/Kconfig" 
+
+source "drivers/staging/vnswap/Kconfig"
+>>>>>>> fc9b728... update12
 endif # STAGING

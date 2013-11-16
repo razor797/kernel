@@ -19,8 +19,13 @@
 
 /*
  * File     yas_pcb_test.h
+<<<<<<< HEAD
  * Date     2013/1/22
  * Revision 1.4.3
+=======
+ * Date     2012/10/05
+ * Revision 1.4.1
+>>>>>>> fc9b728... update12
  */
 
 #ifndef __YAS_PCB_TEST_H__
@@ -61,10 +66,20 @@
 
 /* V Core */
 #define YAS_VCORE			(18)
+<<<<<<< HEAD
+=======
+/* noise */
+>>>>>>> fc9b728... update12
 #define YAS_PCB_NOISE_OVERFLOW		(6000)
 #define YAS_PCB_NOISE_UNDERFLOW		(2000)
 #define YAS_PCB_NOISE_INTERVAL		(50)
 
+<<<<<<< HEAD
+=======
+#define YAS_NOISE_MAX	(18000)
+#define YAS_NOISE_MIN	(-18000)
+
+>>>>>>> fc9b728... update12
 struct yas_pcb_test_callback {
 	int	(*power_on)(void);
 	int	(*power_off)(void);

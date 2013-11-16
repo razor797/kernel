@@ -654,8 +654,12 @@ static int __devinit Si47xx_i2c_probe(struct i2c_client *client,
 
 	return ret;
 
+<<<<<<< HEAD
 MISC_IRQ_DREG:
 	free_irq(client->irq, NULL);
+=======
+dev_init_err:
+>>>>>>> fc9b728... update12
 	mutex_destroy(&Si47xx_dev->lock);
 	kfree(Si47xx_dev);
 	return ret;

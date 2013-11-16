@@ -78,12 +78,64 @@ struct si47xx_info {
 #define I2C_NUM_2MIC	4
 #define I2C_NUM_CODEC	7
 #define SET_PLATDATA_2MIC(i2c_pd)	s3c_i2c4_set_platdata(i2c_pd)
-#define SET_PLATDATA_CODEC(i2c_pd)	s3c_i2c7_set_platdata(i2c_pd)
 #else /* for CONFIG_ARCH_EXYNOS4 */
 #define I2C_NUM_2MIC	6
 #define I2C_NUM_CODEC	4
 #define SET_PLATDATA_2MIC(i2c_pd)	s3c_i2c6_set_platdata(i2c_pd)
-#define SET_PLATDATA_CODEC(i2c_pd)	s3c_i2c4_set_platdata(i2c_pd)
+#endif
+
+#ifdef CONFIG_USE_ADC_DET
+static struct jack_zone midas_jack_zones[] = {
+	{
+		/* adc == 0, unstable zone, default to 3pole if it stays
+		 * in this range for 100ms (10ms delays, 10 samples)
+		 */
+		.adc_high = 0,
+		.delay_ms = 10,
+		.check_count = 10,
+		.jack_type = SEC_HEADSET_3POLE,
+	},
+	{
+		/* 0 < adc <= 1200, unstable zone, default to 3pole if it stays
+		 * in this range for 100ms (10ms delays, 10 samples)
+		 */
+#if defined(CONFIG_MACH_GC2PD)
+		.adc_high = 1150,
+#else
+		.adc_high = 1200,
+#endif
+		.delay_ms = 10,
+		.check_count = 10,
+		.jack_type = SEC_HEADSET_3POLE,
+	},
+	{
+		/* 1200 < adc <= 2600, unstable zone, default to 4pole if it
+		 * stays in this range for 100ms (10ms delays, 10 samples)
+		 */
+		.adc_high = 2600,
+		.delay_ms = 10,
+		.check_count = 10,
+		.jack_type = SEC_HEADSET_4POLE,
+	},
+	{
+		/* 2600 < adc <= 3800, 4 pole zone, default to 4pole if it
+		 * stays in this range for 50ms (10ms delays, 5 samples)
+		 */
+		.adc_high = 3800,
+		.delay_ms = 10,
+		.check_count = 5,
+		.jack_type = SEC_HEADSET_4POLE,
+	},
+	{
+		/* adc > 3800, unstable zone, default to 3pole if it stays
+		 * in this range for two seconds (10ms delays, 200 samples)
+		 */
+		.adc_high = 0x7fffffff,
+		.delay_ms = 10,
+		.check_count = 200,
+		.jack_type = SEC_HEADSET_3POLE,
+	},
+};
 #endif
 
 #ifdef CONFIG_USE_ADC_DET
@@ -261,7 +313,11 @@ static struct wm8994_drc_cfg drc_value[] = {
 		.regs[4] = 0x0000,
 	},
 #endif
+<<<<<<< HEAD
 #if defined(CONFIG_MACH_P4NOTE) || defined(CONFIG_MACH_KONA)
+=======
+#if defined(CONFIG_MACH_P4NOTE) || defined(CONFIG_MACH_SP7160LTE) || defined(CONFIG_MACH_KONA)
+>>>>>>> fc9b728... update12
 {
 		.name = "cam rec DRC",
 		.regs[0] = 0x019B,
@@ -269,6 +325,15 @@ static struct wm8994_drc_cfg drc_value[] = {
 		.regs[2] = 0x0408,
 		.regs[3] = 0x0108,
 		.regs[4] = 0x0120,
+	},
+#elif defined(CONFIG_MACH_TAB3)
+{
+		.name = "cam rec DRC",
+		.regs[0] = 0x01BA,
+		.regs[1] = 0x0844,
+		.regs[2] = 0x04E8,
+		.regs[3] = 0x0210,
+		.regs[4] = 0x012D,
 	},
 #endif
 };
@@ -309,8 +374,17 @@ static struct wm8994_pdata wm1811_pdata = {
 	.micbias = {0x22, 0x22},
 #elif defined(CONFIG_MACH_C1_USA_ATT)
 	.micbias = {0x2f, 0x29},
+<<<<<<< HEAD
 #elif defined(CONFIG_MACH_KONA)
 	.micbias = {0x2f, 0x2f},
+=======
+#elif defined(CONFIG_MACH_GC1) | defined(CONFIG_MACH_GC2PD)
+	.micbias = {0x2f, 0x2b},
+#elif defined(CONFIG_MACH_KONA)
+	.micbias = {0x2f, 0x2f},
+#elif defined(CONFIG_MACH_TAB3)
+	.micbias = {0x25, 0x2f},
+>>>>>>> fc9b728... update12
 #else
 	.micbias = {0x2f, 0x27},
 #endif
@@ -322,7 +396,8 @@ static struct wm8994_pdata wm1811_pdata = {
 #ifdef CONFIG_TARGET_LOCALE_KOR
 	.lineout2_diff = 0,
 #endif
-#if defined(CONFIG_MACH_C1) || defined(CONFIG_MACH_BAFFIN)
+#if defined(CONFIG_MACH_C1) || defined(CONFIG_MACH_BAFFIN) || \
+	defined(CONFIG_MACH_SP7160LTE)
 	.lineout1fb = 0,
 #else
 	.lineout1fb = 1,
@@ -332,7 +407,11 @@ static struct wm8994_pdata wm1811_pdata = {
 	defined(CONFIG_MACH_P4NOTE) || defined(CONFIG_MACH_GC1) || \
 	defined(CONFIG_MACH_C1_USA_ATT) || defined(CONFIG_MACH_T0) || \
 	defined(CONFIG_MACH_M3) || defined(CONFIG_MACH_BAFFIN) || \
+<<<<<<< HEAD
 	defined(CONFIG_MACH_KONA)
+=======
+	defined(CONFIG_MACH_TAB3) || defined(CONFIG_MACH_KONA)
+>>>>>>> fc9b728... update12
 	.lineout2fb = 0,
 #else
 	.lineout2fb = 1,
@@ -516,6 +595,17 @@ static struct platform_device *midas_sound_devices[] __initdata = {
 
 };
 
+static void midas_sound_i2c_set_platdata(void)
+{
+	struct s3c2410_platform_i2c *pd;
+
+	pd = &default_i2c_data;
+	pd->bus_num = 4;
+	pd->frequency = 100 * 1000;
+
+	s3c_i2c4_set_platdata(pd);
+}
+
 void __init midas_sound_init(void)
 {
 	printk(KERN_INFO "Sound: start %s\n", __func__);
@@ -528,6 +618,20 @@ void __init midas_sound_init(void)
 #endif
 #endif
 
+#ifdef CONFIG_EXYNOS_SOUND_PLATFORM_DATA
+	pr_info("%s: system rev = %d\n", __func__, system_rev);
+#ifdef CONFIG_USE_ADC_DET
+#if defined(CONFIG_MACH_GC1_USA_ATT)
+	if (system_rev >= 13)
+		midas_sound_pdata.use_jackdet_type = 1;
+#elif defined(CONFIG_MACH_GC1_USA_VZW)
+	if (system_rev >= 17)
+		midas_sound_pdata.use_jackdet_type = 1;
+#elif defined(CONFIG_MACH_GC2PD) || defined(CONFIG_MACH_KONA)
+		midas_sound_pdata.use_jackdet_type = 1;
+#endif
+#endif
+#endif
 	m0_gpio_init();
 
 	platform_add_devices(midas_sound_devices,
@@ -539,20 +643,28 @@ void __init midas_sound_init(void)
 		pr_err("%s: failed to register sound pdata\n", __func__);
 #endif
 
+#ifdef CONFIG_EXYNOS_SOUND_PLATFORM_DATA
+	pr_info("%s: set sound platform data for midas device\n", __func__);
+	if (exynos_sound_set_platform_data(&midas_sound_pdata))
+		pr_err("%s: failed to register sound pdata\n", __func__);
+#endif
+
 #ifdef CONFIG_ARCH_EXYNOS5
 #ifndef CONFIG_MACH_P10_LTE_00_BD
 	i2c_wm1811[0].irq = IRQ_EINT(29);
 #endif
-	SET_PLATDATA_CODEC(NULL);
+	midas_sound_i2c_set_platdata();
 	i2c_register_board_info(I2C_NUM_CODEC, i2c_wm1811,
 					ARRAY_SIZE(i2c_wm1811));
 #else /* for CONFIG_ARCH_EXYNOS4 */
-#ifdef CONFIG_MACH_P4NOTE
+#if defined(CONFIG_MACH_P4NOTE) || defined(CONFIG_MACH_SP7160LTE) || \
+	defined(CONFIG_MACH_TAB3) || defined(CONFIG_MACH_IPCAM)
 	i2c_wm1811[0].irq = 0;
-	SET_PLATDATA_CODEC(NULL);
+	midas_sound_i2c_set_platdata();
 	i2c_register_board_info(I2C_NUM_CODEC, i2c_wm1811,
 					ARRAY_SIZE(i2c_wm1811));
 
+<<<<<<< HEAD
 #elif defined(CONFIG_MACH_GC1)
 		SET_PLATDATA_CODEC(NULL);
 		i2c_register_board_info(I2C_NUM_CODEC, i2c_wm1811,
@@ -563,9 +675,16 @@ void __init midas_sound_init(void)
 	i2c_register_board_info(I2C_NUM_CODEC, i2c_wm1811,
 					ARRAY_SIZE(i2c_wm1811));
 		
+=======
+#elif defined(CONFIG_MACH_GC1) || defined(CONFIG_MACH_GC2PD) || \
+	defined(CONFIG_MACH_M3) || defined(CONFIG_MACH_BAFFIN)
+		midas_sound_i2c_set_platdata();
+		i2c_register_board_info(I2C_NUM_CODEC, i2c_wm1811,
+						ARRAY_SIZE(i2c_wm1811));
+>>>>>>> fc9b728... update12
 #else
-	if (system_rev != 3 && system_rev >= 0) {
-		SET_PLATDATA_CODEC(NULL);
+	if (system_rev != 3) {
+		midas_sound_i2c_set_platdata();
 		i2c_register_board_info(I2C_NUM_CODEC, i2c_wm1811,
 						ARRAY_SIZE(i2c_wm1811));
 	}

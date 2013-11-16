@@ -53,7 +53,8 @@
 <checkbox description="Using ARCH_POWER enables the use of arm topology power functions instead of generic ones." name="ARCH_POWER" action="schedfeat ARCH_POWER" label="ARCH_POWER"/>
 </settingsPane>
 <settingsPane description="These settings control misc kernel and ROM tweaks." name="MISC tweaks">
-<spinner description="Set GPS tweaks based on your location." name="GPS Tweaks" action="gps">
+<spinner description="Set GPS tweaks based on your location. You can also copy your custom GPS configuration to /data/gps.conf then set to Off/Custom, your custom configuration will be applied at every boot and will survive rom flashing." name="GPS Tweaks" action="gps">
+             <spinnerItem name="Off/Custom" value="0"/>
              <spinnerItem name="Africa" value="1"/>
              <spinnerItem name="Asia" value="2"/>
              <spinnerItem name="Europe" value="3"/>

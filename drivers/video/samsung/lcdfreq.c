@@ -83,6 +83,7 @@ struct lcdfreq_info {
 	struct early_suspend	early_suspend;
 };
 
+<<<<<<< HEAD
 static inline struct lcdfreq_info *dev_get_lcdfreq(struct device *dev)
 {
 	struct fb_info *fb = dev_get_drvdata(dev);
@@ -103,6 +104,66 @@ static unsigned int get_vstatus(struct device *dev)
 
 static struct clksrc_clk *get_clksrc(struct device *dev)
 {
+=======
+#ifdef CONFIG_LCD_FREQ_SWITCH_ACCOUNTING
+u64		time_in_state[LEVEL_MAX];
+struct timeval	last_switch;
+static void init_accounting(void); // ZZ: fixed prototype warning which messed things completely up
+static void refresh_last_switch(void); // ZZ: fixed prototype warning which messed things completely up
+
+void init_accounting(void) // ZZ: fixed prototype warning which messed things completely up
+{
+	int i;
+
+	for (i = 0; i < LEVEL_MAX; i++) {
+		time_in_state[i] = 0;
+	}
+
+	do_gettimeofday(&last_switch);
+}
+
+void refresh_last_switch(void)
+{
+	do_gettimeofday(&last_switch);
+}
+
+static void do_time_slice(enum lcdfreq_level idx)
+{
+	u64 delta;
+	struct timeval now;	
+	
+	do_gettimeofday(&now);
+	
+	delta = (now.tv_sec - last_switch.tv_sec) * USEC_PER_SEC +
+		    (now.tv_usec - last_switch.tv_usec);
+
+	time_in_state[idx] += delta;
+
+	last_switch = now;
+}
+#endif
+
+static inline struct lcdfreq_info *dev_get_lcdfreq(struct device *dev)
+{
+	struct fb_info *fb = dev_get_drvdata(dev);
+
+	return (struct lcdfreq_info *)(fb->fix.reserved[1] << 16 | fb->fix.reserved[0]);
+}
+
+static unsigned int get_vstatus(struct device *dev)
+{
+	struct lcdfreq_info *info = dev_get_drvdata(dev);
+	u32 reg;
+
+	reg = readl(info->ielcd_reg + IELCD_VIDCON1);
+	reg &= VIDCON1_VSTATUS_MASK;
+
+	return reg;
+}
+
+static struct clksrc_clk *get_clksrc(struct device *dev)
+{
+>>>>>>> fc9b728... update12
 	struct clk *clk;
 	struct clksrc_clk *clksrc;
 
@@ -204,10 +265,17 @@ static int get_divider(struct device *dev)
 	info->clksrc = clksrc = get_clksrc(dev->parent);
 	clk = clk_get_parent(&clksrc->clk);
 	rate = clk_get_rate(clk);
+<<<<<<< HEAD
 
 	for (i = 0; i < LEVEL_MAX; i++)
 		info->table[i].cmu_div = DIV_ROUND_CLOSEST(rate, info->table[i].vclk);
 
+=======
+
+	for (i = 0; i < LEVEL_MAX; i++)
+		info->table[i].cmu_div = DIV_ROUND_CLOSEST(rate, info->table[i].vclk);
+
+>>>>>>> fc9b728... update12
 	if (info->table[LIMIT].cmu_div > (1 << clksrc->reg_div.size))
 		fimd_div = gcd(info->table[NORMAL].cmu_div, info->table[LIMIT].cmu_div);
 	else
@@ -269,6 +337,9 @@ static int set_lcdfreq_div(struct device *dev, enum lcdfreq_level level)
 		dev_err(dev, "skip to change lcd freq\n");
 		goto exit;
 	}
+#ifdef CONFIG_LCD_FREQ_SWITCH_ACCOUNTING
+	do_time_slice(info->level);
+#endif
 
 	info->level = level;
 
@@ -323,7 +394,30 @@ static int lcdfreq_lock_free(struct device *dev)
 
 	return ret;
 }
+#ifdef CONFIG_CPU_FREQ_LCD_FREQ_DFS
+#include <linux/cpufreq.h>
+struct device *ddev;
+atomic_t *usagep;
 
+<<<<<<< HEAD
+=======
+int _lcdfreq_lock(int lock)
+{
+	int ext_lock;
+	if(ddev != NULL) {
+		ext_lock = atomic_read(usagep);
+		if(!!lock && !ext_lock) {
+			return lcdfreq_lock(ddev, LIMIT);
+		} else if(!!ext_lock) {
+			return lcdfreq_lock_free(ddev);
+		}
+	}
+	
+	return -EINVAL;
+}
+#endif
+
+>>>>>>> fc9b728... update12
 static ssize_t level_show(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
@@ -348,11 +442,19 @@ static ssize_t level_store(struct device *dev,
 		dev_err(info->dev, "%s reject. enable flag is %d\n", __func__, info->enable);
 		return -EINVAL;
 	}
+<<<<<<< HEAD
 
 	ret = kstrtoul(buf, 0, (unsigned long *)&value);
 
 	dev_info(info->dev, "%s :: value=%d\n", __func__, value);
 
+=======
+
+	ret = kstrtoul(buf, 0, (unsigned long *)&value);
+
+	dev_info(info->dev, "%s :: value=%d\n", __func__, value);
+
+>>>>>>> fc9b728... update12
 	if (value >= LEVEL_MAX)
 		return -EINVAL;
 
@@ -375,16 +477,89 @@ static ssize_t usage_show(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
 	struct lcdfreq_info *info = dev_get_lcdfreq(dev);
+<<<<<<< HEAD
+=======
 
 	return sprintf(buf, "%d\n", atomic_read(&info->usage));
 }
 
+#ifdef CONFIG_LCD_FREQ_SWITCH_ACCOUNTING
+static ssize_t time_in_state_show(struct device *dev,
+		struct device_attribute *attr, char *buf)
+{
+	struct lcdfreq_info *info = dev_get_lcdfreq(dev);
+
+	do_time_slice(info->level);
+
+	return sprintf(buf, "%llu %d (60Hz)\n%llu %d (40Hz)\n", 
+		(unsigned long long)time_in_state[NORMAL], NORMAL,
+		(unsigned long long)time_in_state[LIMIT], LIMIT);
+}
+#endif
+
+static ssize_t freq_show(struct device *dev,
+		struct device_attribute *attr, char *buf)
+{
+	struct fb_info *fb = dev_get_drvdata(dev);
+	struct s3cfb_window *win = fb->par;
+	struct s3cfb_global *fbdev = get_fimd_global(win->id);
+	struct s3cfb_lcd *lcd = fbdev->lcd;
+
+	return sprintf(buf, "%dhz, hfp=%d, hbp=%d, hsw=%d, div=%d\n", lcd->freq,
+	lcd->timing.h_fp, lcd->timing.h_bp, lcd->timing.h_sw, get_div(fbdev)+1);
+}
+
+extern void s5p_dsim_set_lcd_freq_change(struct s3cfb_lcd_timing *timing);
+
+static ssize_t freq_store(struct device *dev,
+		struct device_attribute *attr, const char *buf, size_t count)
+{
+	struct fb_info *fb = dev_get_drvdata(dev);
+	struct s3cfb_window *win = fb->par;
+	struct s3cfb_global *fbdev = get_fimd_global(win->id);
+	struct s3cfb_lcd *lcd = fbdev->lcd;
+	struct s3cfb_lcd_timing *timing = &lcd->timing;
+	struct fb_var_screeninfo *var = &fb->var;
+
+	lcd->freq_limit = 0;
+	sscanf(buf, "%d %d %d %d", &lcd->freq,
+		&timing->h_fp, &timing->h_bp, &timing->h_sw);
+
+	var->hsync_len = timing->h_sw;
+	var->left_margin = timing->h_bp;
+	var->right_margin = timing->h_fp;
+
+	var->pixclock = (lcd->freq *
+		(var->left_margin + var->right_margin
+		+ var->hsync_len + var->xres) *
+		(var->upper_margin + var->lower_margin
+		+ var->vsync_len + var->yres));
+	var->pixclock = KHZ2PICOS(var->pixclock/1000);
+>>>>>>> fc9b728... update12
+
+	return sprintf(buf, "%d\n", atomic_read(&info->usage));
+}
+
+<<<<<<< HEAD
+=======
+static DEVICE_ATTR(freq, S_IRUGO|S_IWUSR, freq_show, freq_store);
+>>>>>>> fc9b728... update12
 static DEVICE_ATTR(level, S_IRUGO|S_IWUSR, level_show, level_store);
 static DEVICE_ATTR(usage, S_IRUGO, usage_show, NULL);
+#ifdef CONFIG_LCD_FREQ_SWITCH_ACCOUNTING
+static DEVICE_ATTR(time_in_state, S_IRUGO, time_in_state_show, NULL);
+#endif
 
 static struct attribute *lcdfreq_attributes[] = {
 	&dev_attr_level.attr,
 	&dev_attr_usage.attr,
+<<<<<<< HEAD
+=======
+	&dev_attr_freq.attr,
+#ifdef CONFIG_LCD_FREQ_SWITCH_ACCOUNTING
+	&dev_attr_time_in_state.attr,
+#endif
+>>>>>>> fc9b728... update12
 	NULL,
 };
 
@@ -404,6 +579,9 @@ static void lcdfreq_early_suspend(struct early_suspend *h)
 	lcdfreq->enable = false;
 	lcdfreq->level = NORMAL;
 	atomic_set(&lcdfreq->usage, 0);
+#ifdef CONFIG_LCD_FREQ_SWITCH_ACCOUNTING
+	do_time_slice(lcdfreq->level);
+#endif
 	mutex_unlock(&lcdfreq->lock);
 
 	return;
@@ -418,6 +596,9 @@ static void lcdfreq_late_resume(struct early_suspend *h)
 
 	mutex_lock(&lcdfreq->lock);
 	lcdfreq->enable = true;
+#ifdef CONFIG_LCD_FREQ_SWITCH_ACCOUNTING
+	refresh_last_switch();
+#endif
 	mutex_unlock(&lcdfreq->lock);
 
 	return;
@@ -577,6 +758,7 @@ static int lcdfreq_probe(struct platform_device *pdev)
 	/* info->pm_noti.notifier_call = lcdfreq_pm_notifier_event; */
 	info->reboot_noti.notifier_call = lcdfreq_reboot_notify;
 	register_reboot_notifier(&info->reboot_noti);
+<<<<<<< HEAD
 
 	info->early_suspend.suspend = lcdfreq_early_suspend;
 	info->early_suspend.resume = lcdfreq_late_resume;
@@ -586,6 +768,25 @@ static int lcdfreq_probe(struct platform_device *pdev)
 	info->ielcd_reg = ioremap(IELCD_REG_BASE, IELCD_MAP_SIZE);
 	info->enable = true;
 
+=======
+
+	info->early_suspend.suspend = lcdfreq_early_suspend;
+	info->early_suspend.resume = lcdfreq_late_resume;
+	info->early_suspend.level = EARLY_SUSPEND_LEVEL_STOP_DRAWING + 1;
+	register_early_suspend(&info->early_suspend);
+
+	info->ielcd_reg = ioremap(IELCD_REG_BASE, IELCD_MAP_SIZE);
+	info->enable = true;
+
+#ifdef CONFIG_CPU_FREQ_LCD_FREQ_DFS
+	ddev = info->dev;
+	usagep = &info->usage;
+#endif
+
+#ifdef CONFIG_LCD_FREQ_SWITCH_ACCOUNTING
+	init_accounting();
+#endif
+>>>>>>> fc9b728... update12
 	dev_info(info->dev, "%s is done\n", __func__);
 
 	return 0;
@@ -604,6 +805,7 @@ static struct platform_driver lcdfreq_driver = {
 		.owner	= THIS_MODULE,
 	},
 };
+<<<<<<< HEAD
 
 static int __init lcdfreq_init(void)
 {
@@ -615,5 +817,18 @@ static void __exit lcdfreq_exit(void)
 {
 	platform_driver_unregister(&lcdfreq_driver);
 }
+=======
+
+static int __init lcdfreq_init(void)
+{
+	return platform_driver_register(&lcdfreq_driver);
+}
+late_initcall(lcdfreq_init);
+
+static void __exit lcdfreq_exit(void)
+{
+	platform_driver_unregister(&lcdfreq_driver);
+}
+>>>>>>> fc9b728... update12
 module_exit(lcdfreq_exit);
 

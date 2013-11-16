@@ -96,7 +96,23 @@ struct mif_time_block {
 	char buff[MAX_TIM_LOG_SIZE];
 };
 
+<<<<<<< HEAD
 int mif_dump_dpram(struct io_device *);
+=======
+static inline int ns2us(long ns)
+{
+	return (ns > 0) ? (ns / 1000) : 0;
+}
+
+static inline int ns2ms(long ns)
+{
+	return (ns > 0) ? (ns / 1000000) : 0;
+}
+
+void ts2utc(struct timespec *ts, struct utc_time *utc);
+void get_utc_time(struct utc_time *utc);
+
+>>>>>>> fc9b728... update12
 int mif_dump_log(struct modem_shared *, struct io_device *);
 
 #define mif_irq_log(msd, map, data, len) \
@@ -141,7 +157,11 @@ static inline unsigned int countbits(unsigned int n)
 }
 
 /* print IPC message as hex string with UTC time */
+<<<<<<< HEAD
 int pr_ipc(const char *str, const char *data, size_t len);
+=======
+void pr_ipc(int level, const char *tag, const char *data, size_t len);
+>>>>>>> fc9b728... update12
 
 /* print buffer as hex string */
 int pr_buffer(const char *tag, const char *data, size_t data_len,
@@ -286,6 +306,7 @@ void print_ip4_packet(u8 *ip_pkt, bool tx);
 bool is_dns_packet(u8 *ip_pkt);
 bool is_syn_packet(u8 *ip_pkt);
 
+<<<<<<< HEAD
 int memcmp16_to_io(const void __iomem *to, void *from, int size);
 int mif_test_dpram(char *dp_name, u8 __iomem *start, u32 size);
 
@@ -300,5 +321,15 @@ static const inline char *get_dev_name(int dev)
 	else
 		return "NONE";
 }
+=======
+int mif_register_isr(unsigned int irq, irq_handler_t isr, unsigned long flags,
+			const char *name, void *data);
+int mif_test_dpram(char *dp_name, void __iomem *start, u16 bytes);
+
+struct file *mif_open_file(const char *path);
+void mif_save_file(struct file *fp, const char *buff, size_t size);
+void mif_close_file(struct file *fp);
+>>>>>>> fc9b728... update12
 
 #endif/*__MODEM_UTILS_H__*/
+

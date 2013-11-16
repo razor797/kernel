@@ -292,11 +292,15 @@ struct pcmcia_device_id {
 #define INPUT_DEVICE_ID_LED_MAX		0x0f
 #define INPUT_DEVICE_ID_SND_MAX		0x07
 #define INPUT_DEVICE_ID_FF_MAX		0x7f
+<<<<<<< HEAD
 /*#ifdef CONFIG_SENSORS_HALL
 #define INPUT_DEVICE_ID_SW_MAX		0x17
 #else*/
 #define INPUT_DEVICE_ID_SW_MAX		0x10
 //#endif
+=======
+#define INPUT_DEVICE_ID_SW_MAX		0x17
+>>>>>>> fc9b728... update12
 
 #define INPUT_DEVICE_ID_MATCH_BUS	1
 #define INPUT_DEVICE_ID_MATCH_VENDOR	2

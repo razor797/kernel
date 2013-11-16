@@ -23,7 +23,11 @@
 
 #include "yas_cfg.h"
 
+<<<<<<< HEAD
 #define YAS_VERSION	"9.0.8"
+=======
+#define YAS_VERSION                        "6.0.2"
+>>>>>>> fc9b728... update12
 
 /* ------------------ */
 /*  Typedef definition    */
@@ -57,12 +61,15 @@
 #define YAS_REPORT_OVERFLOW_OCCURED         (0x04)
 #define YAS_REPORT_HARD_OFFSET_CHANGED      (0x08)
 #define YAS_REPORT_CALIB_OFFSET_CHANGED     (0x10)
+<<<<<<< HEAD
 #define YAS_X_OVERFLOW						(0x01)
 #define YAS_X_UNDERFLOW						(0x02)
 #define YAS_Y1_OVERFLOW						(0x04)
 #define YAS_Y1_UNDERFLOW					(0x08)
 #define YAS_Y2_OVERFLOW						(0x10)
 #define YAS_Y2_UNDERFLOW					(0x20)
+=======
+>>>>>>> fc9b728... update12
 
 #define YAS_HARD_OFFSET_UNKNOWN             (0x7f)
 #define YAS_CALIB_OFFSET_UNKNOWN            (0x7fffffff)
@@ -77,7 +84,10 @@
 #define YAS_ERROR_RESTARTSYS                (-7)
 #define YAS_ERROR_HARDOFFSET_NOT_WRITTEN    (-8)
 #define YAS_ERROR_INTERRUPT                 (-9)
+<<<<<<< HEAD
 #define YAS_ERROR_CALREG					(-10)
+=======
+>>>>>>> fc9b728... update12
 #define YAS_ERROR_ERROR                     (-128)
 
 enum cable_type_t {
@@ -104,9 +114,12 @@ enum cable_type_t {
 #ifndef M_PI
 #define M_PI (3.14159265358979323846)
 #endif
+<<<<<<< HEAD
 #ifndef __GNUC__
 #define __attribute__(x) /* NOTHING */
 #endif
+=======
+>>>>>>> fc9b728... update12
 
 enum {
 	YAS532_POSITION_0 = 1,

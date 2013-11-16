@@ -2824,11 +2824,35 @@ static int __devinit mms_ts_probe(struct i2c_client *client,
 	msleep(100);
 
 	i2c_set_clientdata(client, info);
+<<<<<<< HEAD
 	ret = i2c_master_recv(client, buf, 1);
 	if (ret < 0) {		/* tsp connect check */
 		dev_err(&client->dev, "%s: tsp connect err [%d], Add[%d]\n",
 			   __func__, ret, info->client->addr);
 		goto err_config;
+=======
+
+	ret = gpio_get_value(GPIO_OLED_DET);
+
+	if (ret == 0) {
+		dev_err(&client->dev, "GPIO_OLED_DET low\n");
+
+		while (retries--) {
+			ret = i2c_master_recv(client, buf, 1);
+			if (ret >= 0) {
+				dev_info(&client->dev, "tsp i2c success\n");
+				break;
+			}
+			dev_err(&client->dev, "tsp i2c fail [%d]\n", ret);
+		}
+
+		if (retries < 0) {
+			dev_err(&client->dev, "tsp connect err [%d], Add[%d]\n",
+						ret, info->client->addr);
+			goto err_config;
+		}
+		dev_info(&client->dev, "GPIO_OLED_DET low but i2c pass\n");
+>>>>>>> fc9b728... update12
 	}
 
 	if (system_rev < 2) {

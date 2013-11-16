@@ -26,6 +26,21 @@
 #include <linux/workqueue.h>
 #include <linux/gpio.h>
 #include <linux/irqdesc.h>
+<<<<<<< HEAD
+=======
+#ifdef CONFIG_FAST_BOOT
+#include <linux/fake_shut_down.h>
+#include <linux/wakelock.h>
+#endif
+
+#ifdef CONFIG_TOUCH_WAKE
+#include <linux/touch_wake.h>
+#endif
+
+#ifdef CONFIG_S2W 
+#include <linux/i2c/mxt224_u1.h>
+#endif
+>>>>>>> fc9b728... update12
 
 extern struct class *sec_class;
 
@@ -52,6 +67,13 @@ struct gpio_keys_drvdata {
 	bool flip_cover;
 	struct delayed_work flip_cover_dwork;
 #endif
+
+#ifdef CONFIG_SENSORS_HALL
+	int gpio_flip_cover;
+	bool flip_cover;
+	struct delayed_work flip_cover_dwork;
+#endif
+
 	struct gpio_button_data data[0];
 	/* WARNING: this area can be expanded. Do NOT add any member! */
 };
@@ -343,7 +365,13 @@ static ssize_t key_pressed_show(struct device *dev,
 
 	for (i = 0; i < ddata->n_buttons; i++) {
 		struct gpio_button_data *bdata = &ddata->data[i];
-		keystate |= bdata->key_state;
+		if (bdata->button->code != SW_FLIP) {
+			keystate |= bdata->key_state;
+#if defined(CONFIG_MACH_IPCAM)
+			if (bdata->button->code == KEY_POWER)
+				keystate |= !gpio_get_value(GPIO_RESET_KEY);
+#endif
+		}
 	}
 
 	if (keystate)
@@ -391,6 +419,7 @@ static ssize_t hall_detect_show(struct device *dev,
 				struct device_attribute *attr, char *buf)
 {
 	struct gpio_keys_drvdata *ddata = dev_get_drvdata(dev);
+<<<<<<< HEAD
 
 	if (ddata->flip_cover){
 	        printk("%s: OPEN",__func__);
@@ -399,6 +428,21 @@ static ssize_t hall_detect_show(struct device *dev,
 	        printk("%s: CLOSE",__func__);
 		sprintf(buf, "CLOSE");
 	}
+=======
+	int i = 0;
+	int keystate = 0;
+
+	for (i = 0; i < ddata->n_buttons; i++) {
+		struct gpio_button_data *bdata = &ddata->data[i];
+		if (bdata->button->code == SW_FLIP)
+			keystate = bdata->key_state;
+	}
+
+	if (keystate)
+		sprintf(buf, "OPEN");
+	else
+		sprintf(buf, "CLOSE");
+>>>>>>> fc9b728... update12
 
 	return strlen(buf);
 }
@@ -450,11 +494,39 @@ void gpio_keys_check_zoom_exception(unsigned int code,
 	}
 	*zoomkey = true;
 }
+
+#define ZOOM_OUT    0
+#define ZOOM_MIDDLE 1
+#define ZOOM_IN     2
+
+bool is_zoom_key(unsigned int code, unsigned int *type)
+{
+	if (code == KEY_CAMERA_ZOOMIN ||
+		code == 0x221) {
+		*type = ZOOM_IN;
+		return true;
+	} else if (code == KEY_CAMERA_ZOOMOUT ||
+		code == 0x222) {
+		*type == ZOOM_OUT;
+		return true;
+	}
+
+	*type = ZOOM_MIDDLE;
+	return false;
+}
+
+unsigned int check_zoom_state(struct gpio_keys_drvdata *ddata)
+{
+	if (ddata->data[5].key_state || ddata->data[3].key_state)
+		return ZOOM_IN;
+	else if (ddata->data[6].key_state || ddata->data[4].key_state)
+		return ZOOM_OUT;
+
+	return ZOOM_MIDDLE;
+}
 #endif
 
 #ifdef CONFIG_FAST_BOOT
-extern bool fake_shut_down;
-
 struct timer_list fake_timer;
 bool fake_pressed;
 
@@ -476,6 +548,46 @@ static void gpio_keys_fake_off_check(unsigned long _data)
 }
 #endif
 
+<<<<<<< HEAD
+=======
+static inline int64_t get_time_inms(void) {
+	int64_t tinms;
+	struct timespec cur_time = current_kernel_time();
+	tinms =  cur_time.tv_sec * MSEC_PER_SEC;
+	tinms += cur_time.tv_nsec / NSEC_PER_MSEC;
+	return tinms;
+}
+
+#define HOME_KEY_VAL	0xac
+extern void mdnie_toggle_negative(void);
+#ifndef CONFIG_CPU_EXYNOS4210
+extern void mdnie_toggle_nightmode(void);
+#endif
+
+static int mdnie_shortcut_enabled = 0;
+module_param_named(mdnie_shortcut_enabled, mdnie_shortcut_enabled, int, S_IRUGO | S_IWUSR | S_IWGRP);
+
+static int nightmode_shortcut_enabled = 1;
+module_param_named(nightmode_shortcut_enabled, nightmode_shortcut_enabled, int, S_IRUGO | S_IWUSR | S_IWGRP);
+
+#if defined(CONFIG_MACH_KONA)
+//#define AUTO_POWER_ON_OFF_FLAG //for auto power-onoff test 2012 12 31 sexykyu
+#ifdef AUTO_POWER_ON_OFF_FLAG
+static struct timer_list poweroff_keypad_timer;
+static void poweroff_keypad_timer_handler(unsigned long data)
+{
+	struct gpio_button_data *bdata	= (struct gpio_button_data *)data;
+	struct gpio_keys_button *button = bdata->button;
+	struct input_dev *input = bdata->input;
+	unsigned int type = button->type ?: EV_KEY;
+	printk("force to press powerkey.\n");
+	input_event(input, type, KEY_POWER, 1);
+	input_sync(input);
+}
+#endif
+#endif
+
+>>>>>>> fc9b728... update12
 static void gpio_keys_report_event(struct gpio_button_data *bdata)
 {
 	struct gpio_keys_button *button = bdata->button;
@@ -526,8 +638,85 @@ static void gpio_keys_report_event(struct gpio_button_data *bdata)
 
 		gpio_keys_check_zoom_exception(button->code, &zoomkey,
 				&hotkey, &index_hotkey);
+	} else if (system_rev >= 6) {
+		/*exclusive check for zoom dial*/
+		unsigned int zoom_type = 0;
+		unsigned int current_zoom_state = 0;
+		bool pass_cur_event = false;
+
+		if (is_zoom_key(button->code, &zoom_type)) {
+			current_zoom_state = check_zoom_state(ddata);
+
+			if (zoom_type == ZOOM_IN
+				&& current_zoom_state == ZOOM_OUT)
+					pass_cur_event = true;
+			else if (zoom_type == ZOOM_OUT
+				&& current_zoom_state == ZOOM_IN)
+					pass_cur_event = true;
+
+			if (pass_cur_event) {
+#if !defined(CONFIG_SAMSUNG_PRODUCT_SHIP)
+				printk(KERN_DEBUG "[keys] Pass zoom"
+					"current %d, code %d\n",
+					current_zoom_state, button->code);
+#endif
+				return ;
+			}
+		}
 	}
 #endif
+<<<<<<< HEAD
+=======
+/*
+	// mdnie negative effect toggle by gm + added nightmode effect and dual toggle by ff
+	// 4x moderately quick presses = negative toggle
+	// 3x superquick presses = nightmode (red) toggle
+	if (button->code == HOME_KEY_VAL) {
+		if (state) {
+			// process toggle on button down-state
+			
+			// find out how many ms have passed
+			delta = get_time_inms() - time_homekey_pressed;
+			
+			if (delta < 150) {
+				// check for superquick presses to trigger nightmode
+				ctr_homekey_nightmode++;
+				printk(KERN_INFO "[keys] repeated home_key action: nightmode, count: %d.\n", ctr_homekey_nightmode);
+			} else if (delta < 400) {
+				// check for normalquick presses to trigger negative mode
+				ctr_homekey_negative++;
+				ctr_homekey_nightmode = 0;
+				printk(KERN_INFO "[keys] repeated home_key action: negative, count: %d.\n", ctr_homekey_negative);
+			} else {
+				// user didn't press it fast enough to register either, so reset.
+				ctr_homekey_nightmode = 0;
+				ctr_homekey_negative = 0;
+				time_homekey_pressed = 0;
+			}
+            
+			if (ctr_homekey_negative >= 3 && mdnie_shortcut_enabled) {
+				// apply negative effect
+				mdnie_toggle_negative();
+				ctr_homekey_nightmode = 0;
+				ctr_homekey_negative = 0;
+				time_homekey_pressed = 0;
+#ifndef CONFIG_CPU_EXYNOS4210
+			} else if (ctr_homekey_nightmode >= 2 && nightmode_shortcut_enabled) {
+				// apply nightmode effect
+				mdnie_toggle_nightmode();
+				ctr_homekey_nightmode = 0;
+				ctr_homekey_negative = 0;
+				time_homekey_pressed = 0;
+#endif
+			}
+
+		} else {
+			// record the time on button up-state
+			time_homekey_pressed = get_time_inms();
+		}
+	}
+*/
+>>>>>>> fc9b728... update12
 
 	if (type == EV_ABS) {
 		if (state) {
@@ -814,7 +1003,11 @@ static int __devinit gpio_keys_probe(struct platform_device *pdev)
 	input->name = pdata->name ? : pdev->name;
 	input->phys = "gpio-keys/input0";
 	input->dev.parent = &pdev->dev;
+<<<<<<< HEAD
 /*#ifdef CONFIG_SENSORS_HALL
+=======
+#ifdef CONFIG_MACH_GC1
+>>>>>>> fc9b728... update12
 	input->evbit[0] |= BIT_MASK(EV_SW);
 	input_set_capability(input, EV_SW, SW_FLIP);
 #endif*/
@@ -887,6 +1080,17 @@ static int __devinit gpio_keys_probe(struct platform_device *pdev)
 #endif
 	device_init_wakeup(&pdev->dev, wakeup);
 
+#if defined(CONFIG_MACH_KONA)
+#ifdef AUTO_POWER_ON_OFF_FLAG
+	init_timer(&poweroff_keypad_timer);
+	poweroff_keypad_timer.function = poweroff_keypad_timer_handler;
+	poweroff_keypad_timer.data = (unsigned long)&ddata->data[0];
+	poweroff_keypad_timer.expires = jiffies + 40*HZ;
+	add_timer(&poweroff_keypad_timer);
+
+	printk("AUTO_POWER_ON_OFF_FLAG Test Start !!!\n");
+#endif
+#endif
 	return 0;
 
  fail3:
@@ -945,6 +1149,10 @@ static int gpio_keys_suspend(struct device *dev)
 	if (device_may_wakeup(&pdev->dev)) {
 		for (i = 0; i < pdata->nbuttons; i++) {
 			struct gpio_keys_button *button = &pdata->buttons[i];
+#if defined(CONFIG_SENSORS_HALL)
+			if (button->code == SW_FLIP)
+				button->wakeup = 1;
+#endif
 			if (button->wakeup) {
 				int irq = gpio_to_irq(button->gpio);
 				enable_irq_wake(irq);
@@ -965,6 +1173,15 @@ static int gpio_keys_resume(struct device *dev)
 	for (i = 0; i < pdata->nbuttons; i++) {
 
 		struct gpio_keys_button *button = &pdata->buttons[i];
+
+#if defined(CONFIG_SENSORS_HALL)
+		if (button->code == SW_FLIP)
+			button->wakeup = 1;
+#endif
+
+		if (button->code == 0x220)
+			continue;
+
 		if (button->wakeup && device_may_wakeup(&pdev->dev)) {
 			int irq = gpio_to_irq(button->gpio);
 			disable_irq_wake(irq);

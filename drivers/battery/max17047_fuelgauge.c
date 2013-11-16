@@ -100,6 +100,10 @@ struct max17047_fuelgauge_data {
 	/* adjust full soc */
 	int				full_soc;
 
+#if defined(CONFIG_MACH_GC1) || defined(CONFIG_MACH_GD2)
+	int				prev_status;
+#endif
+
 #ifdef USE_TRIM_ERROR_DETECTION
 	/* trim error state */
 	bool				trim_err;
@@ -281,12 +285,6 @@ static int max17047_get_soc(struct i2c_client *client)
 	fullsoc = fg_data->full_soc - empty;
 	rawsoc -= empty;
 
-/* adjust fullsoc value for fast termination */
-#if defined(USE_2STEP_TERM) && !defined(CONFIG_TARGET_LOCALE_KOR)
-	fullsoc *= 99;
-	fullsoc /= 100;
-#endif
-
 	soc = fg_data->soc =
 		((rawsoc < empty) ? 0 : (min((rawsoc * 100 / fullsoc), 100)));
 
@@ -324,6 +322,47 @@ static void max17047_reset_soc(struct i2c_client *client)
 
 	return;
 }
+
+#if defined(CONFIG_MACH_GC1) || defined(CONFIG_MACH_GD2)
+void max17047_set_rcomp(struct i2c_client *client, int state)
+{
+	u8 rst_cmd[2];
+
+	if (state) {
+		rst_cmd[1] = 0x00;
+#if defined(CONFIG_MACH_GC1_USA_VZW)
+		rst_cmd[0] = 0xC1;
+#elif defined(CONFIG_MACH_GD2)
+		rst_cmd[0] = 0x70;
+#else/*GC1 default*/
+		rst_cmd[0] = 0xCF;
+#endif
+	} else {
+		rst_cmd[1] = 0x00;
+#if defined(CONFIG_MACH_GC1_USA_VZW)
+		rst_cmd[0] = 0x8D;
+#elif defined(CONFIG_MACH_GD2)
+		rst_cmd[0] = 0x54;
+#else/*GC1 default*/
+		rst_cmd[0] = 0x8F;
+#endif
+	}
+
+	max17047_i2c_write(client, MAX17047_REG_RCOMP, rst_cmd);
+	pr_info("%s: state = %d\n", __func__, state);
+}
+
+void max17047_get_rcomp(struct i2c_client *client, int status)
+{
+	u8 data[2];
+
+	if (max17047_i2c_read(client, MAX17047_REG_RCOMP, data) < 0)
+		return;
+
+	pr_info("%s: COMP(0x%02x%02x), status=%d\n",
+		__func__, data[1], data[0], status);
+}
+#endif
 
 static void max17047_adjust_fullsoc(struct i2c_client *client)
 {
@@ -645,6 +684,24 @@ static int max17047_set_property(struct power_supply *psy,
 		/* adjust full soc */
 		max17047_adjust_fullsoc(fg_data->client);
 		break;
+<<<<<<< HEAD
+=======
+#if defined(CONFIG_MACH_GC1) || defined(CONFIG_MACH_GD2)
+	case POWER_SUPPLY_PROP_RCOMP:
+		if (fg_data->prev_status == val->intval) {
+			pr_debug("%s: No rcomp change, prev(%d) = cur(%d)\n",
+				__func__, fg_data->prev_status, val->intval);
+		} else {
+			if (val->intval == POWER_SUPPLY_STATUS_CHARGING)
+				max17047_set_rcomp(fg_data->client, 1);
+			else
+				max17047_set_rcomp(fg_data->client, 0);
+			max17047_get_rcomp(fg_data->client, val->intval);
+			fg_data->prev_status = val->intval;
+		}
+		break;
+#endif
+>>>>>>> fc9b728... update12
 	default:
 		return -EINVAL;
 	}
@@ -872,7 +929,14 @@ static int __devinit max17047_fuelgauge_i2c_probe(struct i2c_client *client,
 	else
 		fg_data->fuelgauge.name = "max17047-fuelgauge";
 
+<<<<<<< HEAD
 	fg_data->fuelgauge.type = POWER_SUPPLY_TYPE_BATTERY;
+=======
+#if defined(CONFIG_MACH_GC1) || defined(CONFIG_MACH_GD2)
+	fg_data->prev_status = POWER_SUPPLY_STATUS_DISCHARGING;
+#endif
+	fg_data->fuelgauge.type = POWER_SUPPLY_TYPE_UNKNOWN;
+>>>>>>> fc9b728... update12
 	fg_data->fuelgauge.properties = max17047_fuelgauge_props;
 	fg_data->fuelgauge.num_properties =
 				ARRAY_SIZE(max17047_fuelgauge_props);

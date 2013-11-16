@@ -17,6 +17,7 @@
 #include "sr130pc20.h"
 #include <linux/gpio.h>
 
+<<<<<<< HEAD
 #define i2c_read_nop() \
 	(cam_err("error, not used read function, line %d\n", __LINE__))
 #define i2c_write_nop() \
@@ -31,6 +32,10 @@
 #define sr130pc20_writeb(sd, addr, data) sr130pc20_i2c_write(sd, addr, data)
 #define sr130pc20_writew(sd, addr, data) i2c_write_nop()
 #define sr130pc20_writel(sd, addr, data) i2c_write_nop()
+=======
+#define sr130pc20_readb(sd, addr, data) sr130pc20_i2c_read(sd, addr, data)
+#define sr130pc20_writeb(sd, addr, data) sr130pc20_i2c_write(sd, addr, data)
+>>>>>>> fc9b728... update12
 
 static int dbg_level;
 
@@ -46,11 +51,23 @@ static const struct sr130pc20_framesize sr130pc20_preview_frmsizes[] = {
 	{ PREVIEW_SZ_320x240,	320,  240 },
 	{ PREVIEW_SZ_CIF,	352,  288 },
 	{ PREVIEW_SZ_VGA,	640,  480 },
+<<<<<<< HEAD
+=======
+#ifndef CONFIG_MACH_KONA
+	{ PREVIEW_SZ_640x360,	640,  360 },
+#endif
+>>>>>>> fc9b728... update12
 };
 
 static const struct sr130pc20_framesize sr130pc20_capture_frmsizes[] = {
 /*	{ CAPTURE_SZ_VGA,	640,  480 },*/
 	{ CAPTURE_SZ_1MP,	1280, 960 },
+<<<<<<< HEAD
+=======
+#ifndef CONFIG_MACH_KONA
+	{ CAPTURE_SZ_1280x720,	1280, 720 },
+#endif
+>>>>>>> fc9b728... update12
 };
 
 static struct sr130pc20_control sr130pc20_ctrls[] = {
@@ -155,10 +172,25 @@ static const struct sr130pc20_regs reg_datas = {
 				sr130pc20_320_240_Preview, 0),
 		SR130PC20_REGSET(PREVIEW_SZ_CIF, sr130pc20_352_288_Preview, 0),
 		SR130PC20_REGSET(PREVIEW_SZ_VGA, sr130pc20_640_480_Preview, 0),
+<<<<<<< HEAD
 	},
 	.capture_size = {
 		/*SR130PC20_REGSET(CAPTURE_SZ_VGA, sr130pc20_VGA_Capture, 0),*/
 		SR130PC20_REGSET(CAPTURE_SZ_1MP, sr130pc20_1280_960_Capture, 0),
+=======
+#ifndef CONFIG_MACH_KONA
+		SR130PC20_REGSET(PREVIEW_SZ_640x360, sr130pc20_640_360_Preview, 0),
+#endif
+	},
+	.capture_size = {
+		/*SR130PC20_REGSET(CAPTURE_SZ_VGA, sr130pc20_VGA_Capture, 0),*/
+#ifdef CONFIG_MACH_KONA
+		SR130PC20_REGSET(CAPTURE_SZ_1MP, sr130pc20_1280_960_Capture, 0),
+#else
+		SR130PC20_REGSET(CAPTURE_SZ_1MP, SR130PC20_1280_960_Capture_Size, 0),
+		SR130PC20_REGSET(CAPTURE_SZ_1280x720, SR130PC20_1280_720_Capture_Size, 0),
+#endif
+>>>>>>> fc9b728... update12
 	},
 
 	.init_reg = SR130PC20_REGSET_TABLE(SR130PC20_Init_Reg, 0),
@@ -778,6 +810,11 @@ static int sr130pc20_set_exposure(struct v4l2_subdev *sd, s32 val)
 		return -EINVAL;
 	}
 
+<<<<<<< HEAD
+=======
+	cam_info("%s exposure:%d(%d)\n",__func__,val,GET_EV_INDEX(val));
+
+>>>>>>> fc9b728... update12
 	sr130pc20_set_from_table(sd, "brightness", state->regs->ev,
 		ARRAY_SIZE(state->regs->ev), GET_EV_INDEX(val));
 
@@ -811,6 +848,10 @@ static int sr130pc20_set_capture_size(struct v4l2_subdev *sd)
 {
 	struct sr130pc20_state *state = to_state(sd);
 	u32 width, height;
+<<<<<<< HEAD
+=======
+	int err = 0;
+>>>>>>> fc9b728... update12
 
 	if (unlikely(!state->capture.frmsize)) {
 		cam_warn("warning, capture resolution not set\n");
@@ -823,11 +864,25 @@ static int sr130pc20_set_capture_size(struct v4l2_subdev *sd)
 	width = state->capture.frmsize->width;
 	height = state->capture.frmsize->height;
 
+<<<<<<< HEAD
 	state->preview.update_frmsize = 1;
 
 	cam_dbg("set capture size(%dx%d)\n", width, height);
 
 	return 0;
+=======
+	cam_dbg("set capture size(%dx%d)\n", width, height);
+
+#ifndef CONFIG_MACH_KONA
+	err = sr130pc20_set_from_table(sd, "capture_size",
+	state->regs->capture_size, ARRAY_SIZE(state->regs->capture_size),
+	state->capture.frmsize->index);
+	CHECK_ERR_MSG(err, "fail to set capture size\n");
+#endif
+	state->preview.update_frmsize = 1;
+
+	return err;
+>>>>>>> fc9b728... update12
 }
 
 /* PX: Set sensor mode */
@@ -871,10 +926,17 @@ static int sr130pc20_set_frame_rate(struct v4l2_subdev *sd, s32 fps)
 	if (!state->initialized || (state->req_fps < 0))
 		return 0;
 
+<<<<<<< HEAD
 	cam_info("set frame rate %d\n", fps);
 
 	if (fps > 25)
 		fps = 25; /* sensor limitation */
+=======
+	if((state->req_fps == state->fps) && (state->fps == 0))
+                return 0;
+
+	cam_info("set frame rate %d\n", fps);
+>>>>>>> fc9b728... update12
 
 	for (i = 0; i < ARRAY_SIZE(sr130pc20_framerates); i++) {
 		if (fps == sr130pc20_framerates[i].fps) {
@@ -885,6 +947,13 @@ static int sr130pc20_set_frame_rate(struct v4l2_subdev *sd, s32 fps)
 		}
 	}
 
+<<<<<<< HEAD
+=======
+#ifndef CONFIG_MACH_KONA
+        state->write_fps = 1;
+#endif
+
+>>>>>>> fc9b728... update12
 	if (unlikely(fps_index < 0)) {
 		cam_err("set_fps: warning, not supported fps %d\n", fps);
 		return 0;
@@ -908,6 +977,7 @@ static int sr130pc20_control_stream(struct v4l2_subdev *sd, u32 cmd)
 		if (!((state->runmode == RUNMODE_RUNNING)
 		    && state->capture.pre_req)) {
 			cam_info("STREAM STOP!!\n");
+<<<<<<< HEAD
 			// [ W/A : Skip stream off sr130pc20 to prevent I2C behavior (P130301-0098)
 			//   - DPM timeout (kernel Panic) happen by I2C behavior during system suspending
 			// ]
@@ -916,6 +986,11 @@ static int sr130pc20_control_stream(struct v4l2_subdev *sd, u32 cmd)
 						&state->regs->stream_stop, 1, 0);
 				CHECK_ERR_MSG(err, "failed to stop stream\n");
 			}
+=======
+			err = sr130pc20_set_from_table(sd, "stream_stop",
+					&state->regs->stream_stop, 1, 0);
+			CHECK_ERR_MSG(err, "failed to stop stream\n");
+>>>>>>> fc9b728... update12
 			state->preview.update_frmsize = 1;
 		}
 	} else {
@@ -1154,6 +1229,10 @@ static int sr130pc20_set_preview_size(struct v4l2_subdev *sd)
 	return 0;
 }
 
+<<<<<<< HEAD
+=======
+#ifdef CONFIG_MACH_KONA
+>>>>>>> fc9b728... update12
 static int sr130pc20_start_preview(struct v4l2_subdev *sd)
 {
 	struct sr130pc20_state *state = to_state(sd);
@@ -1182,6 +1261,45 @@ static int sr130pc20_start_preview(struct v4l2_subdev *sd)
 			RUNMODE_RUNNING : RUNMODE_RECORDING;
 	return 0;
 }
+<<<<<<< HEAD
+=======
+#else
+static int sr130pc20_start_preview(struct v4l2_subdev *sd)
+{
+	struct sr130pc20_state *state = to_state(sd);
+	int err = -EINVAL;
+
+	cam_info("Camera Preview start, runmode = %d\n", state->runmode);
+
+	if ((state->runmode == RUNMODE_NOTREADY) ||
+	    (state->runmode == RUNMODE_CAPTURING)) {
+		cam_err("%s: error - Invalid runmode\n", __func__);
+		return -EPERM;
+	}
+
+	state->focus.status = AF_RESULT_SUCCESS;
+
+	/* Set preview size */
+	sr130pc20_set_preview_size(sd);
+
+	/* Transit preview mode */
+	err = sr130pc20_transit_preview_mode(sd);
+
+	if(state->write_fps == 1)
+	{
+		cam_info("autofps_delay\n");
+		msleep_debug(300, true);
+		state->write_fps = 0;
+	}
+
+	CHECK_ERR_MSG(err, "preview_mode(%d)\n", err);
+
+	state->runmode = (state->sensor_mode == SENSOR_CAMERA) ?
+			RUNMODE_RUNNING : RUNMODE_RECORDING;
+	return 0;
+}
+#endif
+>>>>>>> fc9b728... update12
 
 static int sr130pc20_set_capture(struct v4l2_subdev *sd)
 {
@@ -1284,10 +1402,18 @@ static int sr130pc20_s_mbus_fmt(struct v4l2_subdev *sd,
 		__func__, fmt->code, fmt->colorspace, fmt->width, fmt->height);
 
 	v4l2_fill_pix_format(&state->req_fmt, fmt);
+<<<<<<< HEAD
 	if (fmt->field < IS_MODE_CAPTURE_STILL)
 		state->format_mode = V4L2_PIX_FMT_MODE_PREVIEW;
 	else
 		state->format_mode = V4L2_PIX_FMT_MODE_CAPTURE;
+=======
+	if ((IS_MODE_CAPTURE_STILL == fmt->field)
+	    && (SENSOR_CAMERA == state->sensor_mode))
+		state->format_mode = V4L2_PIX_FMT_MODE_CAPTURE;
+	else
+		state->format_mode = V4L2_PIX_FMT_MODE_PREVIEW;
+>>>>>>> fc9b728... update12
 
 	if (state->format_mode != V4L2_PIX_FMT_MODE_CAPTURE) {
 		previous_index = state->preview.frmsize ?
@@ -1298,21 +1424,32 @@ static int sr130pc20_s_mbus_fmt(struct v4l2_subdev *sd,
 		if (previous_index != state->preview.frmsize->index)
 			state->preview.update_frmsize = 1;
 	} else {
+<<<<<<< HEAD
 		/*
 		 * In case of image capture mode,
 		 * if the given image resolution is not supported,
 		 * use the next higher image resolution. */
+=======
+>>>>>>> fc9b728... update12
 		sr130pc20_set_framesize(sd, sr130pc20_capture_frmsizes,
 			ARRAY_SIZE(sr130pc20_capture_frmsizes), false);
 
 		/* for maket app.
 		 * Samsung camera app does not use unmatched ratio.*/
+<<<<<<< HEAD
 		if (unlikely(NULL == state->preview.frmsize)) {
 			cam_warn("warning, capture without preview resolution\n");
 		} else if (unlikely(FRM_RATIO(state->preview.frmsize)
 		    != FRM_RATIO(state->capture.frmsize))) {
 			cam_warn("warning, capture ratio " \
 				"is different with preview ratio\n");
+=======
+		if (unlikely(!state->preview.frmsize)) {
+			cam_warn("warning, capture without preview\n");
+		} else if (unlikely(FRM_RATIO(state->preview.frmsize)
+		    != FRM_RATIO(state->capture.frmsize))) {
+			cam_warn("warning, preview, capture ratio not matched\n\n");
+>>>>>>> fc9b728... update12
 		}
 	}
 
@@ -1407,10 +1544,21 @@ static int sr130pc20_s_parm(struct v4l2_subdev *sd,
 	cam_dbg("s_parm state->fps=%d, state->req_fps=%d\n",
 		state->fps, state->req_fps);
 
+<<<<<<< HEAD
 	if ((state->req_fps < 0) || (state->req_fps > 30)) {
 		cam_err("%s: error, invalid frame rate %d. we'll set to 30\n",
 				__func__, state->req_fps);
 		state->req_fps = 0;
+=======
+	if (state->req_fps < 0) {
+		cam_err("%s: error, invalid frame rate %d. we'll set to 0\n",
+				__func__, state->req_fps);
+		state->req_fps = 0;
+	} else if (state->req_fps > 25) {
+		cam_err("%s: error, invalid frame rate %d. we'll set to 25\n",
+				__func__, state->req_fps);
+		state->req_fps = 25;
+>>>>>>> fc9b728... update12
 	}
 
 	return sr130pc20_set_frame_rate(sd, state->req_fps);
@@ -1534,10 +1682,18 @@ static int sr130pc20_s_ctrl(struct v4l2_subdev *sd, struct v4l2_control *ctrl)
 		break;
 
 	case V4L2_CID_CAMERA_EFFECT:
+<<<<<<< HEAD
 		err = sr130pc20_set_from_table(sd, "effects",
 			state->regs->effect,
 			ARRAY_SIZE(state->regs->effect), ctrl->value);
 		break;
+=======
+		cam_info("%s effect:%d\n",__func__,ctrl->value);
+		err = sr130pc20_set_from_table(sd, "effects",
+			state->regs->effect,
+			ARRAY_SIZE(state->regs->effect), ctrl->value);
+                break;
+>>>>>>> fc9b728... update12
 
 	case V4L2_CID_CAMERA_METERING:
 		err = sr130pc20_set_from_table(sd, "metering",
@@ -1626,7 +1782,14 @@ static int sr130pc20_s_stream(struct v4l2_subdev *sd, int enable)
 
 	cam_info("stream mode = %d\n", enable);
 
+<<<<<<< HEAD
 	BUG_ON(!state->initialized);
+=======
+	if (unlikely(!state->initialized)) {
+		WARN(1, "s_stream, not initialized\n");
+		return -EPERM;
+	}
+>>>>>>> fc9b728... update12
 
 	switch (enable) {
 	case STREAM_MODE_CAM_OFF:
@@ -1635,6 +1798,7 @@ static int sr130pc20_s_stream(struct v4l2_subdev *sd, int enable)
 		break;
 
 	case STREAM_MODE_CAM_ON:
+<<<<<<< HEAD
 		switch (state->sensor_mode) {
 		case SENSOR_CAMERA:
 			if (state->format_mode == V4L2_PIX_FMT_MODE_CAPTURE)
@@ -1650,6 +1814,12 @@ static int sr130pc20_s_stream(struct v4l2_subdev *sd, int enable)
 		default:
 			break;
 		}
+=======
+		if (state->format_mode == V4L2_PIX_FMT_MODE_CAPTURE)
+			err = sr130pc20_start_capture(sd);
+		else
+			err = sr130pc20_start_preview(sd);
+>>>>>>> fc9b728... update12
 		break;
 
 	case STREAM_MODE_MOVIE_OFF:
@@ -1674,6 +1844,7 @@ static int sr130pc20_s_stream(struct v4l2_subdev *sd, int enable)
 
 static inline int sr130pc20_check_i2c(struct v4l2_subdev *sd, u16 data)
 {
+<<<<<<< HEAD
 	int err;
 	u32 val = 0;
 
@@ -1682,6 +1853,8 @@ static inline int sr130pc20_check_i2c(struct v4l2_subdev *sd, u16 data)
 		return err;
 
 	cam_dbg("version: 0x%04X is 0x6017?\n", val);
+=======
+>>>>>>> fc9b728... update12
 	return 0;
 }
 
@@ -1775,6 +1948,10 @@ static int sr130pc20_s_config(struct v4l2_subdev *sd,
 	state->format_mode = V4L2_PIX_FMT_MODE_PREVIEW;
 	state->fps = 0;
 	state->req_fps = -1;
+<<<<<<< HEAD
+=======
+	state->write_fps = 0;
+>>>>>>> fc9b728... update12
 
 	/* Initialize the independant HW module like flash here */
 	state->flash.mode = FLASH_MODE_OFF;
@@ -1886,6 +2063,25 @@ static int sr130pc20_remove(struct i2c_client *client)
 	return 0;
 }
 
+<<<<<<< HEAD
+=======
+static ssize_t camtype_show(struct device *dev,
+		struct device_attribute *attr, char *buf)
+{
+	/*pr_info("%s\n", __func__);*/
+	return sprintf(buf, "%s_%s\n", "SF", "SR130PC20");
+}
+static DEVICE_ATTR(front_camtype, S_IRUGO, camtype_show, NULL);
+
+static ssize_t camfw_show(struct device *dev,
+	struct device_attribute *attr, char *buf)
+{
+	return sprintf(buf, "%s %s\n", "SR130PC20", "SR130PC20");
+
+}
+static DEVICE_ATTR(front_camfw, S_IRUGO, camfw_show, NULL);
+
+>>>>>>> fc9b728... update12
 static int is_sysdev(struct device *dev, void *str)
 {
 	return !strcmp(dev_name(dev), (char *)str) ? 1 : 0;
@@ -1963,6 +2159,34 @@ static int sr130pc20_create_dbglogfile(struct class *cls)
 	return 0;
 }
 
+<<<<<<< HEAD
+=======
+int sr130pc20_create_sysfs(struct class *cls)
+{
+	struct device *dev = NULL;
+	int err = -ENODEV;
+
+	dev = device_create(cls, NULL, 0, NULL, "front");
+	if (IS_ERR(dev)) {
+		pr_err("cam_init: failed to create device(frontcam_dev)\n");
+		return -ENODEV;
+	}
+
+	err = device_create_file(dev, &dev_attr_front_camtype);
+	if (unlikely(err < 0)) {
+		pr_err("cam_init: failed to create device file, %s\n",
+			dev_attr_front_camtype.attr.name);
+	}
+
+	err = device_create_file(dev, &dev_attr_front_camfw);
+	if (unlikely(err < 0)) {
+		pr_err("cam_init: failed to create device file, %s\n",
+			dev_attr_front_camtype.attr.name);
+	}
+
+	return 0;
+}
+>>>>>>> fc9b728... update12
 static const struct i2c_device_id sr130pc20_id[] = {
 	{ SR130PC20_DRIVER_NAME, 0 },
 	{}
@@ -1980,7 +2204,11 @@ static struct i2c_driver v4l2_i2c_driver = {
 static int __init v4l2_i2c_drv_init(void)
 {
 	pr_info("%s: %s called\n", __func__, SR130PC20_DRIVER_NAME); /* dslim*/
+<<<<<<< HEAD
 	sr130pc20_create_file(camera_class);
+=======
+	sr130pc20_create_sysfs(camera_class);
+>>>>>>> fc9b728... update12
 	sr130pc20_create_dbglogfile(camera_class);
 	return i2c_add_driver(&v4l2_i2c_driver);
 }

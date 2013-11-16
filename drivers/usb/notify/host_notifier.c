@@ -18,6 +18,13 @@
 #include <linux/wakelock.h>
 #include <linux/host_notify.h>
 
+<<<<<<< HEAD
+=======
+#if defined(CONFIG_FAST_BOOT)
+#include <linux/fake_shut_down.h>
+#endif
+
+>>>>>>> fc9b728... update12
 struct  host_notifier_info {
 	struct host_notifier_platform_data *pdata;
 	struct task_struct *th;
@@ -26,6 +33,9 @@ struct  host_notifier_info {
 	wait_queue_head_t	delay_wait;
 	int	thread_remove;
 	int currentlimit_irq;
+#if defined(CONFIG_FAST_BOOT)
+	struct notifier_block fsd_notifier_block;
+#endif
 };
 
 static struct host_notifier_info ninfo;
@@ -108,10 +118,49 @@ static int stop_usbhostd_thread(void)
 
 	return 0;
 }
+<<<<<<< HEAD
 
 static int start_usbhostd_notify(void)
 {
 	pr_info("host_notifier: start usbhostd notify\n");
+=======
+
+int start_usbhostd_wakelock(void)
+{
+	pr_info("host_notifier: start usbhostd wakelock\n");
+	wake_lock(&ninfo.wlock);
+
+	return 0;
+}
+
+int stop_usbhostd_wakelock(void)
+{
+	pr_info("host_notifier: stop usbhostd wakelock\n");
+	wake_unlock(&ninfo.wlock);
+
+	return 0;
+}
+
+#if defined(CONFIG_MACH_P4NOTE) || defined(CONFIG_MACH_SP7160LTE) || defined(CONFIG_MACH_KONA)
+void host_notifier_enable_irq(void)
+{
+	pr_info("host_notifier: %s\n", __func__);
+	enable_irq(ninfo.currentlimit_irq);
+}
+
+void host_notifier_disable_irq(void)
+{
+	pr_info("host_notifier: %s\n", __func__);
+	disable_irq(ninfo.currentlimit_irq);
+}
+#endif
+static int start_usbhostd_notify(void)
+{
+	pr_info("host_notifier: start usbhostd notify\n");
+#if defined(CONFIG_MACH_P4NOTE) || defined(CONFIG_MACH_SP7160LTE) || defined(CONFIG_MACH_KONA)
+	host_notifier_enable_irq();
+#endif
+>>>>>>> fc9b728... update12
 
 	host_state_notify(&ninfo.pdata->ndev, NOTIFY_HOST_ADD);
 	wake_lock(&ninfo.wlock);
@@ -122,6 +171,12 @@ static int start_usbhostd_notify(void)
 static int stop_usbhostd_notify(void)
 {
 	pr_info("host_notifier: stop usbhostd notify\n");
+<<<<<<< HEAD
+=======
+#if defined(CONFIG_MACH_P4NOTE) || defined(CONFIG_MACH_SP7160LTE) || defined(CONFIG_MACH_KONA)
+	host_notifier_disable_irq();
+#endif
+>>>>>>> fc9b728... update12
 
 	host_state_notify(&ninfo.pdata->ndev, NOTIFY_HOST_REMOVE);
 	wake_unlock(&ninfo.wlock);
@@ -132,7 +187,16 @@ static int stop_usbhostd_notify(void)
 static void host_notifier_booster(int enable)
 {
 	pr_info("host_notifier: booster %s\n", enable ? "ON" : "OFF");
+<<<<<<< HEAD
 
+=======
+#if defined(CONFIG_MACH_P4NOTE) || defined(CONFIG_MACH_SP7160LTE) || defined(CONFIG_MACH_KONA)
+	if (enable)
+		host_notifier_enable_irq();
+	else
+		host_notifier_disable_irq();
+#endif
+>>>>>>> fc9b728... update12
 	ninfo.pdata->booster(enable);
 
 	if (ninfo.pdata->thread_enable) {
@@ -182,6 +246,12 @@ static int currentlimit_irq_init(struct host_notifier_info *hostinfo)
 			"overcurrent_detect", hostinfo);
 	if (ret)
 		pr_info("host_notifier: %s return : %d\n", __func__, ret);
+<<<<<<< HEAD
+=======
+#if defined(CONFIG_MACH_P4NOTE) || defined(CONFIG_MACH_SP7160LTE) || defined(CONFIG_MACH_KONA)
+	host_notifier_disable_irq();
+#endif
+>>>>>>> fc9b728... update12
 
 	return ret;
 }
@@ -199,6 +269,33 @@ static void currentlimit_irq_work(struct work_struct *work)
 	return;
 }
 
+<<<<<<< HEAD
+=======
+#if defined(CONFIG_FAST_BOOT)
+static bool restart_hostd;
+static int fsd_host_notifier_call(struct notifier_block *nb,
+		unsigned long cmd, void *_param)
+{
+	if (cmd == FAKE_SHUT_DOWN_CMD_ON) {
+		pr_info("%s: fake shut down ", __func__);
+		host_notifier_booster(0);
+		stop_usbhostd_wakelock();
+		restart_hostd = true;
+	} else {
+		if (restart_hostd) {
+			pr_info("%s: fake shut down ", __func__);
+			restart_hostd = false;
+			if (ninfo.pdata->is_host_working) {
+				host_notifier_booster(1);
+				start_usbhostd_wakelock();
+			}
+		}
+	}
+	return 0;
+}
+#endif
+
+>>>>>>> fc9b728... update12
 static int host_notifier_probe(struct platform_device *pdev)
 {
 	int ret = 0;
@@ -243,6 +340,14 @@ static int host_notifier_probe(struct platform_device *pdev)
 		dev_err(&pdev->dev, "Failed to host_notify_dev_register\n");
 		return ret;
 	}
+<<<<<<< HEAD
+=======
+
+#if defined(CONFIG_FAST_BOOT)
+	ninfo.fsd_notifier_block.notifier_call = fsd_host_notifier_call;
+	register_fake_shut_down_notifier(&ninfo.fsd_notifier_block);
+#endif
+>>>>>>> fc9b728... update12
 	wake_lock_init(&ninfo.wlock, WAKE_LOCK_SUSPEND, "hostd");
 
 	return 0;
@@ -250,6 +355,12 @@ static int host_notifier_probe(struct platform_device *pdev)
 
 static int host_notifier_remove(struct platform_device *pdev)
 {
+<<<<<<< HEAD
+=======
+#if defined(CONFIG_FAST_BOOT)
+	unregister_fake_shut_down_notifier(&ninfo.fsd_notifier_block);
+#endif
+>>>>>>> fc9b728... update12
 	/* gpio_free(ninfo.pdata->gpio); */
 	host_notify_dev_unregister(&ninfo.pdata->ndev);
 	wake_lock_destroy(&ninfo.wlock);

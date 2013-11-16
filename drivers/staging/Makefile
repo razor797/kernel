@@ -72,3 +72,8 @@ obj-$(CONFIG_TOUCHSCREEN_SYNAPTICS_I2C_RMI4)	+= ste_rmi4/
 obj-$(CONFIG_DRM_PSB)		+= gma500/
 obj-$(CONFIG_INTEL_MEI)		+= mei/
 obj-$(CONFIG_MFD_NVEC)		+= nvec/
+<<<<<<< HEAD
+=======
+obj-$(CONFIG_CPUPOWER)		+=cpupower/
+obj-$(CONFIG_VNSWAP)		+= vnswap/
+>>>>>>> fc9b728... update12

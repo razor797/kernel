@@ -24,8 +24,18 @@ struct gpio_keys_platform_data {
 	int (*enable)(struct device *dev);
 	void (*disable)(struct device *dev);
 	const char *name;		/* input device name */
+<<<<<<< HEAD
 #ifdef CONFIG_SENSORS_HALL
 	int gpio_flip_cover;
+=======
+
+#ifdef CONFIG_SENSORS_HALL
+	int gpio_flip_cover;
+#endif
+
+#ifdef CONFIG_MACH_GC1
+	int gpio_strobe_insert;
+>>>>>>> fc9b728... update12
 #endif
 };
 

@@ -168,7 +168,11 @@ static unsigned int get_nr_run_avg(void)
 #define DEF_START_DELAY				(0)
 
 #define UP_THRESHOLD_AT_MIN_FREQ		(40)
+<<<<<<< HEAD
 #define FREQ_FOR_RESPONSIVENESS			(400000)
+=======
+#define FREQ_FOR_RESPONSIVENESS			(500000)
+>>>>>>> fc9b728... update12
 
 #define HOTPLUG_DOWN_INDEX			(0)
 #define HOTPLUG_UP_INDEX			(1)
@@ -265,9 +269,12 @@ static struct dbs_tuners {
 	unsigned int dvfs_debug;
 	unsigned int max_freq;
 	unsigned int min_freq;
+<<<<<<< HEAD
     unsigned int boosted;
     unsigned int freq_boost_time;
     unsigned int boostfreq;
+=======
+>>>>>>> fc9b728... update12
 #ifdef CONFIG_HAS_EARLYSUSPEND
 	int early_suspend;
 #endif
@@ -286,9 +293,12 @@ static struct dbs_tuners {
 	.min_cpu_lock = DEF_MIN_CPU_LOCK,
 	.hotplug_lock = ATOMIC_INIT(0),
 	.dvfs_debug = 0,
+<<<<<<< HEAD
 	.boosted = 1,
 	.freq_boost_time = 500000,
 	.boostfreq = 800000,
+=======
+>>>>>>> fc9b728... update12
 #ifdef CONFIG_HAS_EARLYSUSPEND
 	.early_suspend = -1,
 #endif
@@ -315,7 +325,7 @@ static void apply_hotplug_lock(void)
 	lock = atomic_read(&g_hotplug_lock);
 	flag = lock - online;
 
-	if (flag == 0)
+	if (lock == 0 || flag == 0)
 		return;
 
 	work = flag > 0 ? &dbs_info->up_work : &dbs_info->down_work;
@@ -487,14 +497,32 @@ show_one(up_nr_cpus, up_nr_cpus);
 show_one(max_cpu_lock, max_cpu_lock);
 show_one(min_cpu_lock, min_cpu_lock);
 show_one(dvfs_debug, dvfs_debug);
+<<<<<<< HEAD
 show_one(boostpulse, boosted);
 show_one(boosttime, freq_boost_time);
 show_one(boostfreq, boostfreq);
+=======
+>>>>>>> fc9b728... update12
 static ssize_t show_hotplug_lock(struct kobject *kobj,
 				struct attribute *attr, char *buf)
 {
 	return sprintf(buf, "%d\n", atomic_read(&g_hotplug_lock));
 }
+
+static ssize_t show_cpucore_table(struct kobject *kobj,
+				struct attribute *attr, char *buf)
+{
+	ssize_t count = 0;
+	int i;
+	
+	for (i = CONFIG_NR_CPUS; i > 0; i--) {
+		count += sprintf(&buf[count], "%d ", i);
+	}
+	count += sprintf(&buf[count], "\n");
+
+	return count;
+}
+
 
 #define show_hotplug_param(file_name, num_core, up_down)		\
 static ssize_t show_##file_name##_##num_core##_##up_down		\
@@ -827,9 +855,13 @@ define_one_global_rw(max_cpu_lock);
 define_one_global_rw(min_cpu_lock);
 define_one_global_rw(hotplug_lock);
 define_one_global_rw(dvfs_debug);
+<<<<<<< HEAD
 define_one_global_rw(boostpulse);
 define_one_global_rw(boosttime);
 define_one_global_rw(boostfreq);
+=======
+define_one_global_ro(cpucore_table);
+>>>>>>> fc9b728... update12
 
 static struct attribute *dbs_attributes[] = {
 	&sampling_rate_min.attr,
@@ -845,9 +877,12 @@ static struct attribute *dbs_attributes[] = {
 	&cpu_up_freq.attr,
 	&cpu_down_freq.attr,
 	&up_nr_cpus.attr,
+<<<<<<< HEAD
     &boostpulse.attr,
     &boosttime.attr,
     &boostfreq.attr,
+=======
+>>>>>>> fc9b728... update12
 	/* priority: hotplug_lock > max_cpu_lock > min_cpu_lock
 	   Exception: hotplug_lock on early_suspend uses min_cpu_lock */
 	&max_cpu_lock.attr,
@@ -866,6 +901,10 @@ static struct attribute *dbs_attributes[] = {
 	&hotplug_rq_3_0.attr,
 	&hotplug_rq_3_1.attr,
 	&hotplug_rq_4_0.attr,
+<<<<<<< HEAD
+=======
+	&cpucore_table.attr,
+>>>>>>> fc9b728... update12
 	NULL
 };
 

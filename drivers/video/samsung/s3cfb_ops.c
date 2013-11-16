@@ -1526,11 +1526,15 @@ void s3c_fb_set_busfreq(struct s3cfb_global *fbdev, unsigned int num_of_win)
 	dev_dbg(fbdev->dev, "%s : nWin=%d, busfreq = %d\n", __func__,
 			num_of_win, fb_busfreq_table[num_of_win]);
 
+<<<<<<< HEAD
 #if defined(CONFIG_CPU_EXYNOS4212) || defined(CONFIG_CPU_EXYNOS4412)
 #ifdef CONFIG_BUSFREQ_OPP
 	dev_lock(fbdev->bus_dev, fbdev->dev, fb_busfreq_table[num_of_win]);
 #endif
 #endif
+=======
+	dev_lock(fbdev->bus_dev, fbdev->dev, fb_busfreq_table[num_of_win]);
+>>>>>>> fc9b728... update12
 }
 
 void s3c_fb_update_regs(struct s3cfb_global *fbdev, struct s3c_reg_data *regs)
@@ -1668,7 +1672,10 @@ static inline u32 blendeq(enum s3c_fb_blending blending, u8 transp_length)
 			BLENDEQ_Q_FUNC(BLENDEQ_COEF_ZERO);
 }
 
+<<<<<<< HEAD
 #if 0
+=======
+>>>>>>> fc9b728... update12
 static bool s3c_fb_validate_x_alignment(struct s3cfb_global *fbdev, int x, u32 w,
 		u32 bits_per_pixel)
 {
@@ -1687,7 +1694,10 @@ static bool s3c_fb_validate_x_alignment(struct s3cfb_global *fbdev, int x, u32 w
 
 	return 1;
 }
+<<<<<<< HEAD
 #endif
+=======
+>>>>>>> fc9b728... update12
 
 #if defined(CONFIG_CPU_EXYNOS4212) || defined(CONFIG_CPU_EXYNOS4412)
 static int s3c_fb_set_win_buffer(struct s3cfb_global *fbdev,
@@ -1883,7 +1893,11 @@ static int s3c_fb_set_win_config(struct s3cfb_global *fbdev,
 
 	mutex_lock(&fbdev->output_lock);
 
+<<<<<<< HEAD
 	//if (unlikely(fbdev->system_state == POWER_OFF)) {
+=======
+	if (unlikely(fbdev->system_state == POWER_OFF)) {
+>>>>>>> fc9b728... update12
 		if (fbdev->support_fence == FENCE_NOT_SUPPORT) {
 			win_data->fence = -1;
 		} else {

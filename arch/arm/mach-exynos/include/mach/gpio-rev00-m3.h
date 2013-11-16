@@ -50,6 +50,10 @@ extern void midas_config_sleep_gpio_table(void);
 
 #define GPIO_RGB_SDA_1_8V		EXYNOS4_GPF0(0)
 #define GPIO_RGB_SCL_1_8V		EXYNOS4_GPF0(1)
+#if defined(CONFIG_MACH_M3_USA_TMO)
+#define GPIO_PS_ALS_SDA_28V	EXYNOS4_GPF0(0)
+#define GPIO_PS_ALS_SCL_28V	EXYNOS4_GPF0(1)
+#endif
 #define GPIO_GYRO_INT			EXYNOS4_GPF0(3)
 #define GPIO_MHL_SDA_1_8V		EXYNOS4_GPF0(4)
 #define GPIO_BARO_INT			EXYNOS4_GPF0(5)
@@ -122,7 +126,7 @@ extern void midas_config_sleep_gpio_table(void);
 
 #define GPIO_3_TOUCH_SCL		EXYNOS4_GPL0(1)
 #define GPIO_3_TOUCH_SDA		EXYNOS4_GPL0(2)
-#ifdef CONFIG_TARGET_LOCALE_EUR
+#if defined(CONFIG_TARGET_LOCALE_EUR) || defined(CONFIG_MACH_M3_USA_TMO)
 #define GPIO_VPS_SOUND_EN		EXYNOS4_GPL0(3)
 #endif
 #define GPIO_HDMI_EN			EXYNOS4_GPL0(4)
@@ -208,6 +212,10 @@ extern void midas_config_sleep_gpio_table(void);
 
 #define GPIO_BSENSE_SDA_18V		EXYNOS4_GPY1(0)
 #define GPIO_BENSE_SCL_18V		EXYNOS4_GPY1(1)
+
+#ifdef	CONFIG_MACH_M3_USA_TMO
+#define GPIO_HDMI_HPD_EN		EXYNOS4_GPY1(3)
+#endif
 
 #define GPIO_TF_EN			EXYNOS4_GPY2(0)
 #define GPIO_AP2MDM_PMIC_RESET_N	EXYNOS4_GPY2(3)

@@ -27,6 +27,13 @@
 #include <linux/irq.h>
 #include <linux/gpio.h>
 
+<<<<<<< HEAD
+=======
+#define FULL_SOC_DEFAULT	9650
+#define FULL_SOC_LOW		9300
+#define FULL_SOC_HIGH		10000
+
+>>>>>>> fc9b728... update12
 static ssize_t sec_fg_show_property(struct device *dev,
 				    struct device_attribute *attr, char *buf);
 

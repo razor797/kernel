@@ -36,6 +36,11 @@ obj-$(CONFIG_HAVE_MEMBLOCK) += memblock.o
 
 obj-$(CONFIG_BOUNCE)	+= bounce.o
 obj-$(CONFIG_SWAP)	+= page_io.o swap_state.o swapfile.o thrash.o
+<<<<<<< HEAD
+=======
+obj-$(CONFIG_FRONTSWAP)	+= frontswap.o
+obj-$(CONFIG_ZSWAP)	+= zswap.o
+>>>>>>> fc9b728... update12
 obj-$(CONFIG_HAS_DMA)	+= dmapool.o
 obj-$(CONFIG_HUGETLBFS)	+= hugetlb.o
 obj-$(CONFIG_NUMA) 	+= mempolicy.o

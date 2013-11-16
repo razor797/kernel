@@ -1539,10 +1539,17 @@ static void zcache_frontswap_init(unsigned ignored)
 }
 
 static struct frontswap_ops zcache_frontswap_ops = {
+<<<<<<< HEAD:drivers/staging/zcache/zcache.c
 	.put_page = zcache_frontswap_put_page,
 	.get_page = zcache_frontswap_get_page,
 	.flush_page = zcache_frontswap_flush_page,
 	.flush_area = zcache_frontswap_flush_area,
+=======
+	.store = zcache_frontswap_store,
+	.load = zcache_frontswap_load,
+	.invalidate_page = zcache_frontswap_flush_page,
+	.invalidate_area = zcache_frontswap_flush_area,
+>>>>>>> fc9b728... update12:drivers/staging/zcache/zcache-main.c
 	.init = zcache_frontswap_init
 };
 

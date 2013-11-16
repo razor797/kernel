@@ -75,3 +75,7 @@ ump-y = common/ump_kernel_common.o \
 
 # MALI_SEC
 obj-$(CONFIG_MALI400_UMP) := ump.o
+<<<<<<< HEAD
+=======
+
+>>>>>>> fc9b728... update12

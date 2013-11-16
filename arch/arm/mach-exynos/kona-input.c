@@ -19,11 +19,14 @@
 
 static u32 hw_rev;
 
+<<<<<<< HEAD
 #ifdef CONFIG_SENSORS_HALL
 int ts_powered_on;
 EXPORT(ts_powered_on);
 #endif
 
+=======
+>>>>>>> fc9b728... update12
 #if defined(CONFIG_TOUCHSCREEN_SYNAPTICS_S7301)
 #include <linux/synaptics_s7301.h>
 static bool have_tsp_ldo;
@@ -48,8 +51,11 @@ static int synaptics_ts_set_power(bool en)
 	if (!have_tsp_ldo)
 		return -1;
 	printk(KERN_DEBUG "[TSP] %s(%d)\n", __func__, en);
+<<<<<<< HEAD
 	
 	ts_powered_on = en;
+=======
+>>>>>>> fc9b728... update12
 
 	regulator = regulator_get(NULL, "tsp_3.3v");
 	if (IS_ERR(regulator))
@@ -198,7 +204,11 @@ static struct syna_gpio_data rmi4_default_gpio_data = {
 
 #define SYNA_ADDR 0x20
 
+<<<<<<< HEAD
 static unsigned char SYNA_f1a_button_codes[] =  {KEY_MENU, KEY_BACK};
+=======
+static unsigned char SYNA_f1a_button_codes[] =  {KEY_DUMMY_1, KEY_MENU, KEY_DUMMY_2, KEY_BACK, KEY_DUMMY_3};
+>>>>>>> fc9b728... update12
 
 static struct rmi_button_map SYNA_f1a_button_map = {
 	.nbuttons = ARRAY_SIZE(SYNA_f1a_button_codes),
@@ -387,14 +397,30 @@ struct gpio_keys_button kona_buttons[] = {
 		  1, 1, sec_debug_check_crash_key),
 	GPIO_KEYS(KEY_HOMEPAGE, GPIO_OK_KEY_ANDROID,
 		  1, 1, sec_debug_check_crash_key),
+<<<<<<< HEAD
+=======
+	{
+		.code = SW_FLIP,
+		.gpio = GPIO_HALL_SENSOR_INT,
+		.active_low = 0,
+		.type = EV_SW,
+		.wakeup = 1,
+		.debounce_interval = 10,
+		.value = 1,
+		.isr_hook = sec_debug_check_crash_key,
+	},
+>>>>>>> fc9b728... update12
 };
 
 struct gpio_keys_platform_data kona_gpiokeys_platform_data = {
 	kona_buttons,
 	ARRAY_SIZE(kona_buttons),
+<<<<<<< HEAD
 #ifdef CONFIG_SENSORS_HALL
 	.gpio_flip_cover = GPIO_HALL_SENSOR_INT,
 #endif
+=======
+>>>>>>> fc9b728... update12
 };
 
 static struct platform_device kona_keypad = {
@@ -406,6 +432,7 @@ static struct platform_device kona_keypad = {
 #endif
 void __init kona_key_init(void)
 {
+<<<<<<< HEAD
 	int err;
 #if defined(CONFIG_KEYBOARD_GPIO)
 	platform_device_register(&kona_keypad);
@@ -423,6 +450,10 @@ void __init kona_key_init(void)
 		gpio_free(GPIO_HALL_SENSOR_INT);
 	}
 #endif
+=======
+#if defined(CONFIG_KEYBOARD_GPIO)
+	platform_device_register(&kona_keypad);
+>>>>>>> fc9b728... update12
 #endif
 
 

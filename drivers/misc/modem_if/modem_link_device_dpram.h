@@ -12,6 +12,7 @@
  * GNU General Public License for more details.
  *
  */
+
 #ifndef __MODEM_LINK_DEVICE_DPRAM_H__
 #define __MODEM_LINK_DEVICE_DPRAM_H__
 
@@ -282,20 +283,107 @@ struct dpram_ipc_16k_map {
 	u16 mbx_ap2cp;
 };
 
+<<<<<<< HEAD
 #define DP_MAX_NAME_LEN	32
+=======
+enum dpram_init_status {
+	DPRAM_INIT_STATE_NONE,
+	DPRAM_INIT_STATE_READY,
+};
 
+struct dpram_boot_frame {
+	unsigned req;		/* AP->CP request		*/
+	unsigned resp;		/* response expected by AP	*/
+	ssize_t len;		/* data size in the buffer	*/
+	unsigned offset;	/* offset to write into DPRAM	*/
+	char data[DP_MAX_PAYLOAD_SIZE];
+};
+>>>>>>> fc9b728... update12
+
+struct dpram_dump_arg {
+	char *buff;		/* pointer to the buffer	*/
+	int buff_size;		/* buffer size			*/
+	unsigned req;		/* AP->CP request		*/
+	unsigned resp;		/* CP->AP response		*/
+	int cmd;		/* AP->CP command		*/
+};
+
+/* DPRAM upload/download header */
+struct dpram_udl_header {
+	u8  bop;
+	u16 num_frames;
+	u16 curr_frame;
+	u16 len;
+#ifdef CONFIG_CDMA_MODEM_CBP82
+	u8 pad;
+#endif
+} __packed;
+
+#define MAX_DUMP_SKB_SIZE	4096
+
+enum idpram_link_pm_states {
+	IDPRAM_PM_SUSPEND_PREPARE,
+	IDPRAM_PM_DPRAM_POWER_DOWN,
+	IDPRAM_PM_SUSPEND_START,
+	IDPRAM_PM_RESUME_START,
+	IDPRAM_PM_ACTIVE,
+};
+
+struct idpram_pm_data {
+	atomic_t pm_lock;
+
+	enum idpram_link_pm_states pm_state;
+
+	struct completion down_cmpl;
+
+	struct wake_lock ap_wlock;
+	struct wake_lock hold_wlock;
+
+	struct delayed_work tx_dwork;
+	struct delayed_work resume_dwork;
+
+	struct notifier_block pm_noti;
+
+	unsigned resume_try_cnt;
+
+	/* the last value in the mbx_cp2ap */
+	unsigned last_msg;
+};
+
+struct dpram_link_device;
 struct dpram_ext_op;
+struct idpram_pm_op;
 
 struct dpram_link_device {
 	struct link_device ld;
 
+	enum dpram_type type;	/* DPRAM type */
+	enum ap_type ap;	/* AP type for AP_IDPRAM */
+
+	/* Stirct I/O access (e.g. ioread16(), etc.) is required */
+	bool strict_io_access;
+
 	/* DPRAM address and size */
+<<<<<<< HEAD
 	u8 __iomem *dp_base;		/* DPRAM base virtual address	*/
 	u32 dp_size;			/* DPRAM size			*/
 	enum dpram_type dp_type;	/* DPRAM type			*/
+=======
+	u8 __iomem *base;	/* Virtual address of DPRAM	*/
+	u32 size;		/* DPRAM size			*/
+
+	/* DPRAM SFR */
+	u8 __iomem *sfr_base;	/* Virtual address of SFR	*/
+
+	/* Whether or not this DPRAM can go asleep */
+	bool need_wake_up;
+>>>>>>> fc9b728... update12
 
 	/* DPRAM IRQ GPIO# */
-	unsigned gpio_dpram_int;
+	unsigned gpio_int2ap;
+	unsigned gpio_cp_status;
+	unsigned gpio_cp_wakeup;
+	unsigned gpio_int2cp;
 
 	/* DPRAM IRQ from CP */
 	int irq;
@@ -303,17 +391,17 @@ struct dpram_link_device {
 	char irq_name[DP_MAX_NAME_LEN];
 
 	/* Link to DPRAM control functions dependent on each platform */
+<<<<<<< HEAD
 	int max_ipc_dev;
 	struct modemlink_dpram_control *dpctl;
+=======
+	struct modemlink_dpram_data *dpram;
+>>>>>>> fc9b728... update12
 
 	/* Physical configuration -> logical configuration */
-	union {
-		struct dpram_boot_map bt_map;
-		struct qc_dpram_boot_map qc_bt_map;
-	};
-
-	struct dpram_dload_map dl_map;
-	struct dpram_uload_map ul_map;
+	struct memif_boot_map bt_map;
+	struct memif_dload_map dl_map;
+	struct memif_uload_map ul_map;
 
 	/* IPC device map */
 	struct dpram_ipc_map ipc_map;
@@ -331,27 +419,38 @@ struct dpram_link_device {
 
 	/* For booting */
 	unsigned boot_start_complete;
-	struct completion dpram_init_cmd;
-	struct completion modem_pif_init_done;
 
 	/* For UDL */
-	struct tasklet_struct ul_tsk;
 	struct tasklet_struct dl_tsk;
-	struct completion udl_start_complete;
-	struct completion udl_cmd_complete;
-	struct dpram_udl_check udl_check;
-	struct dpram_udl_param udl_param;
+	struct completion udl_cmpl;
 
+<<<<<<< HEAD
 	/* For CP RAM dump */
 	struct timer_list crash_ack_timer;
 	struct completion dump_start_complete;
 	struct completion dump_recv_done;
 	struct timer_list dump_timer;
 	int dump_rcvd;		/* Count of dump packets received */
+=======
+	/*
+	** For CP crash dump
+	*/
+	bool forced_cp_crash;
+	struct timer_list crash_ack_timer;
+	struct timer_list crash_timer;
+	struct completion crash_cmpl;
+	/* If this field is wanted to be used, it must be initialized only in
+	 * the "ld->dump_start" method.
+	 */
+	struct delayed_work crash_dwork;
+	/* Count of CP crash dump packets received */
+	int crash_rcvd;
+>>>>>>> fc9b728... update12
 
 	/* For locking TX process */
 	spinlock_t tx_lock[MAX_IPC_DEV];
 
+<<<<<<< HEAD
 	/* For efficient RX process */
 	struct tasklet_struct rx_tsk;
 	struct dpram_rxb_queue rxbq[MAX_IPC_DEV];
@@ -361,6 +460,16 @@ struct dpram_link_device {
 
 	/* For retransmission after buffer full state */
 	atomic_t res_required[MAX_IPC_DEV];
+=======
+	/* For retransmission under DPRAM flow control after TXQ full state */
+	unsigned long res_ack_wait_timeout;
+	atomic_t res_required[MAX_IPC_DEV];
+	struct completion req_ack_cmpl[MAX_IPC_DEV];
+
+	/* For efficient RX process */
+	struct delayed_work rx_dwork;
+	struct io_device *iod[MAX_IPC_DEV];
+>>>>>>> fc9b728... update12
 
 	/* For wake-up/sleep control */
 	atomic_t accessing;
@@ -376,10 +485,18 @@ struct dpram_link_device {
 			unsigned int cmd, unsigned long arg);
 
 	/* Alias to DPRAM IRQ handler */
+<<<<<<< HEAD
 	irqreturn_t (*irq_handler)(int irq, void *data);
 
 	/* For DPRAM dump */
 	void (*dpram_dump)(struct link_device *ld, char *buff);
+=======
+	irq_handler_t irq_handler;
+
+	/* For DPRAM logging */
+	struct mem_status_queue stat_list;
+	struct trace_data_queue trace_list;
+>>>>>>> fc9b728... update12
 
 	/* Common operations for each DPRAM */
 	void (*clear_intr)(struct dpram_link_device *dpld);
@@ -404,10 +521,22 @@ struct dpram_link_device {
 	u16 (*get_mask_req_ack)(struct dpram_link_device *dpld, int id);
 	u16 (*get_mask_res_ack)(struct dpram_link_device *dpld, int id);
 	u16 (*get_mask_send)(struct dpram_link_device *dpld, int id);
+<<<<<<< HEAD
 	void (*ipc_rx_handler)(struct dpram_link_device *dpld, u16 int2ap);
+=======
+	void (*get_dpram_status)(struct dpram_link_device *dpld,
+			enum circ_dir_type, struct mem_status *stat);
+	void (*ipc_rx_handler)(struct dpram_link_device *dpld,
+			struct mem_status *stat);
+	void (*reset_dpram_ipc)(struct dpram_link_device *dpld);
+>>>>>>> fc9b728... update12
 
 	/* Extended operations for various modems */
 	struct dpram_ext_op *ext_op;
+
+	/* Power management (PM) for AP_IDPRAM */
+	struct idpram_pm_data pm_data;
+	struct idpram_pm_op *pm_op;
 };
 
 /* converts from struct link_device* to struct xxx_link_device* */
@@ -415,27 +544,73 @@ struct dpram_link_device {
 		container_of(linkdev, struct dpram_link_device, ld)
 
 struct dpram_ext_op {
+	/* flag for checking whether or not a dpram_ext_op instance exists */
 	int exist;
 
+	/* methods for setting up DPRAM maps */
 	void (*init_boot_map)(struct dpram_link_device *dpld);
 	void (*init_dl_map)(struct dpram_link_device *dpld);
 	void (*init_ul_map)(struct dpram_link_device *dpld);
 
+<<<<<<< HEAD
 	int (*download_binary)(struct dpram_link_device *dpld,
 		struct sk_buff *skb);
+=======
+	/* methods for CP booting */
+	int (*xmit_boot)(struct dpram_link_device *dpld, unsigned long arg);
+	int (*xmit_binary)(struct dpram_link_device *dpld, struct sk_buff *skb);
+>>>>>>> fc9b728... update12
 
+	/* methods for DPRAM command handling */
+	void (*cmd_handler)(struct dpram_link_device *dpld, u16 cmd);
 	void (*cp_start_handler)(struct dpram_link_device *dpld);
 
+	/* method for CP firmware upgrade */
+	int (*firm_update)(struct dpram_link_device *dpld, unsigned long arg);
+
+	/* methods for CP crash dump */
 	void (*crash_log)(struct dpram_link_device *dpld);
 	int (*dump_start)(struct dpram_link_device *dpld);
-	int (*dump_update)(struct dpram_link_device *dpld, void *arg);
+	int (*dump_update)(struct dpram_link_device *dpld, unsigned long arg);
+	int (*dump_finish)(struct dpram_link_device *dpld, unsigned long arg);
 
+	/* IOCTL extension */
 	int (*ioctl)(struct dpram_link_device *dpld, struct io_device *iod,
 		unsigned int cmd, unsigned long arg);
 
+<<<<<<< HEAD
 	irqreturn_t (*irq_handler)(int irq, void *data);
+=======
+	/* methods for interrupt handling */
+	irq_handler_t irq_handler;
+	void (*clear_int2ap)(struct dpram_link_device *dpld);
+
+	/* methods for power management */
+	int (*wakeup)(struct dpram_link_device *dpld);
+	void (*sleep)(struct dpram_link_device *dpld);
+>>>>>>> fc9b728... update12
 };
 
 struct dpram_ext_op *dpram_get_ext_op(enum modem_t modem);
 
+struct idpram_pm_op {
+	/* flag for checking whether or not a idpram_pm_op instance exists */
+	int exist;
+	int (*pm_init)(struct dpram_link_device *dpld, struct modem_data *modem,
+			void (*pm_tx_func)(struct work_struct *work));
+	void (*power_down)(struct dpram_link_device *dpld);
+	void (*power_up)(struct dpram_link_device *dpld);
+	void (*halt_suspend)(struct dpram_link_device *dpld);
+	bool (*locked)(struct dpram_link_device *dpld);
+	bool (*int2cp_possible)(struct dpram_link_device *dpld);
+};
+
+struct idpram_pm_op *idpram_get_pm_op(enum ap_type id);
+
+#if 1
 #endif
+
+extern void set_sromc_access(bool access);
+
+#endif
+

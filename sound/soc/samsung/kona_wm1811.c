@@ -657,8 +657,11 @@ static void kona_micdet(void *data)
 
 	snd_soc_update_bits(codec, WM8958_MICBIAS2,
 				WM8958_MICB2_MODE, 0);
+<<<<<<< HEAD
 	snd_soc_update_bits(codec, WM8994_POWER_MANAGEMENT_1,
 				WM8994_MICB2_ENA_MASK, WM8994_MICB2_ENA);
+=======
+>>>>>>> fc9b728... update12
 
 	determine_jack_type(wm1811);
 }

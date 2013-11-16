@@ -30,7 +30,7 @@ file /res/lights.exynos4.so /home/gustavo/kernel/usr/galaxys2_initramfs_files/re
 file /res/power.default.so /home/gustavo/kernel/usr/galaxys2_initramfs_files/res/power.default.so 755 0 0
 file /res/power.default.so.off /home/gustavo/kernel/usr/galaxys2_initramfs_files/res/power.default.so.off 755 0 0
 dir /res/customconfig 755 0 0
-file /res/customconfig/customconfig.xml /home/gustavo/kernel/usr/galaxys2_initramfs_files/res/customconfig/customconfig.xml 755 0 0
+file /res/customconfig/customconfig.xml /home/gustavo/kernel/usr/galaxys2_initramfs_files/res/customconfig/customconfig.xml.omni 755 0 0
 file /res/customconfig/customconfig-helper /home/gustavo/kernel/usr/galaxys2_initramfs_files/res/customconfig/customconfig-helper 755 0 0
 file /res/customconfig/default.profile /home/gustavo/kernel/usr/galaxys2_initramfs_files/res/customconfig/default.profile 755 0 0
 dir /res/customconfig/actions 755 0 0

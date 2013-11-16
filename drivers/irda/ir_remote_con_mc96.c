@@ -33,7 +33,11 @@
 #include <linux/ir_remote_con_mc96.h>
 #include <linux/earlysuspend.h>
 #include "irda_fw.h"
+<<<<<<< HEAD
 #include <mach/gpio-rev00-p4notepq.h>
+=======
+#include <mach/gpio.h>
+>>>>>>> a5ddfda... drivers, without drivers/media + video + samsung
 
 #define MAX_SIZE 2048
 #define MC96_READ_LENGTH	8
@@ -62,8 +66,16 @@ static void ir_remocon_late_resume(struct early_suspend *h);
 
 static int count_number;
 static int ack_number;
+<<<<<<< HEAD
 static int retry_count;
 static int download_pass;
+=======
+<<<<<<< HEAD
+=======
+static int retry_count;
+static int download_pass;
+>>>>>>> a5ddfda... drivers, without drivers/media + video + samsung
+>>>>>>> fc9b728... update12
 
 static int irda_fw_update(struct ir_remocon_data *ir_data)
 {
@@ -74,7 +86,16 @@ static int irda_fw_update(struct ir_remocon_data *ir_data)
 
 	msleep(20);
 	data->pdata->ir_vdd_onoff(0);
+<<<<<<< HEAD
 	msleep(20);
+=======
+<<<<<<< HEAD
+	data->pdata->ir_wake_en(0);
+	data->pdata->ir_wake_en(1);
+=======
+	msleep(20);
+>>>>>>> a5ddfda... drivers, without drivers/media + video + samsung
+>>>>>>> fc9b728... update12
 	data->pdata->ir_vdd_onoff(1);
 	data->pdata->ir_wake_en(1);
 	msleep(100);
@@ -89,10 +110,13 @@ static int irda_fw_update(struct ir_remocon_data *ir_data)
 		}
 	}
 	ret = buf_ir_test[2] << 8 | buf_ir_test[3];
+<<<<<<< HEAD
 
 	if (ret == 0xffff)
 		ret = 0x202;
 
+=======
+>>>>>>> fc9b728... update12
 	if ((ret != FW_VERSION) || (retry_count != 0)) {
 		printk(KERN_INFO "2. %s: chip : %04x, bin : %04x, need update!\n",
 						__func__, ret, FW_VERSION);
@@ -146,9 +170,19 @@ static int irda_fw_update(struct ir_remocon_data *ir_data)
 		checksum = 0;
 		for (k = 0; k < 6; k++)
 			checksum += buf_ir_test[k];
+<<<<<<< HEAD
 
 		msleep(20);
 
+=======
+
+		msleep(20);
+
+<<<<<<< HEAD
+		if (ret == 0x01ba)
+			printk(KERN_INFO "6. %s: boot down complete\n",
+=======
+>>>>>>> fc9b728... update12
 		ret2 = i2c_master_recv(client, buf_ir_test, MC96_READ_LENGTH);
 		if (ret2 < 0)
 			printk(KERN_ERR "6. %s: err %d\n", __func__, ret2);
@@ -159,6 +193,10 @@ static int irda_fw_update(struct ir_remocon_data *ir_data)
 
 		if (ret == checksum) {
 			printk(KERN_INFO "1. %s: boot down complete\n",
+<<<<<<< HEAD
+=======
+>>>>>>> a5ddfda... drivers, without drivers/media + video + samsung
+>>>>>>> fc9b728... update12
 				__func__);
 			download_pass = 1;
 		} else if (ret2 == checksum2) {
@@ -182,7 +220,14 @@ static int irda_fw_update(struct ir_remocon_data *ir_data)
 		ret = buf_ir_test[2] << 8 | buf_ir_test[3];
 		printk(KERN_INFO "7. %s: user mode : Upgrade FW_version : %04x\n",
 						__func__, ret);
+<<<<<<< HEAD
 		data->pdata->ir_wake_en(0);
+=======
+<<<<<<< HEAD
+=======
+		data->pdata->ir_wake_en(0);
+>>>>>>> a5ddfda... drivers, without drivers/media + video + samsung
+>>>>>>> fc9b728... update12
 		data->pdata->ir_vdd_onoff(0);
 		data->on_off = 0;
 		msleep(100);
@@ -201,6 +246,16 @@ static int irda_fw_update(struct ir_remocon_data *ir_data)
 	}
 
 	return 0;
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+err_i2c_fail:
+	printk(KERN_ERR "%s: update fail! i2c ret : %x\n",
+							__func__, ret);
+	return ret;
+=======
+>>>>>>> a5ddfda... drivers, without drivers/media + video + samsung
+>>>>>>> fc9b728... update12
 err_update:
 	printk(KERN_ERR "%s: update fail! count : %x, ret = %x\n",
 							__func__, i, ret);
@@ -428,9 +483,21 @@ static ssize_t remocon_ack(struct device *dev, struct device_attribute *attr,
 	printk(KERN_INFO "%s : ack_number = %d\n", __func__, ack_number);
 
 	if (ack_number == 6)
+<<<<<<< HEAD
 		return sprintf(buf, "1\n");
 	else
 		return sprintf(buf, "0\n");
+=======
+<<<<<<< HEAD
+		return snprintf(buf, 1, "%d\n", 1);
+	else
+		return snprintf(buf, 1, "%d\n", 0);
+=======
+		return sprintf(buf, "1\n");
+	else
+		return sprintf(buf, "0\n");
+>>>>>>> a5ddfda... drivers, without drivers/media + video + samsung
+>>>>>>> fc9b728... update12
 }
 
 static DEVICE_ATTR(ir_send, 0664, remocon_show, remocon_store);
@@ -478,11 +545,21 @@ static int __devinit ir_remocon_probe(struct i2c_client *client,
 
 	i2c_set_clientdata(client, data);
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+	irda_fw_update(data);
+=======
+>>>>>>> fc9b728... update12
 	for (i = 0; i < 6; i++) {
 		if (download_pass == 1)
 			break;
 		irda_fw_update(data);
 	}
+<<<<<<< HEAD
+=======
+>>>>>>> a5ddfda... drivers, without drivers/media + video + samsung
+>>>>>>> fc9b728... update12
 /*
 	irda_read_device_info(data);
 */

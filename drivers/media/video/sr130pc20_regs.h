@@ -252,11 +252,15 @@ static const sr130pc20_regset_t SR130PC20_Init_Reg[] = {
 0xce6c,	/* 20120517 modify*/
 0xcf84,	/* 20120517 modify*/
 
+<<<<<<< HEAD
 /*0xd4a6,*/
 /*0xd5ac,*/
 /*0xd6a6,*/
 /*0xd7ac,*/
 /*add 20120517*/
+=======
+
+>>>>>>> fc9b728... update12
 0xdc00,   /* Added*/
 0xddaf,   /* Added*/
 0xde00,   /* Added*/
@@ -1048,7 +1052,11 @@ static const sr130pc20_regset_t SR130PC20_Init_Reg[] = {
 0x1880,
 0x1900,
 0x1aa0,
+<<<<<<< HEAD
 /*0x1b0d,*/
+=======
+
+>>>>>>> fc9b728... update12
 0x1c02,
 0x1d0e,
 0x1e07,
@@ -1061,7 +1069,11 @@ static const sr130pc20_regset_t SR130PC20_Init_Reg[] = {
 0x2600,
 0x2708,
 0x2800,
+<<<<<<< HEAD
 /*0x2b40,*/
+=======
+
+>>>>>>> fc9b728... update12
 
 0x3005,
 0x3100,
@@ -1310,11 +1322,14 @@ static const sr130pc20_regset_t sr130pc20_VT_Init_Reg[] = {
 0xce6c,	/* 20120517 modify*/
 0xcf84,	/* 20120517 modify*/
 
+<<<<<<< HEAD
 /*0xd4a6,*/
 /*0xd5ac,*/
 /*0xd6a6,*/
 /*0xd7ac,*/
 /*add 20120517*/
+=======
+>>>>>>> fc9b728... update12
 0xdc00,   /* Added*/
 0xddaf,   /* Added*/
 0xde00,   /* Added*/
@@ -1431,8 +1446,11 @@ static const sr130pc20_regset_t sr130pc20_VT_Init_Reg[] = {
 
 0x603f,	/*GbGr all enable*/
 0x620f,	/*GbGr offset*/
+<<<<<<< HEAD
 /*0x6325,*/	/*GbGr max_20120605_off*/
 /*0x6410,*/	/*GbGr min_20120605_off*/
+=======
+>>>>>>> fc9b728... update12
 
 0x650c,	/*Outdoor GbGr rate H 100% M 25% L 100%*/
 0x660c,	/*Indoor GbGr  rate H 100% M 25% L 100%*/
@@ -2117,12 +2135,20 @@ static const sr130pc20_regset_t sr130pc20_VT_Init_Reg[] = {
 0x1880,
 0x1900,
 0x1aa0,
+<<<<<<< HEAD
 /*0x1b0d,*/
+=======
+
+>>>>>>> fc9b728... update12
 0x1c02,
 0x1d0e,
 0x1e07,
 0x1f08,
+<<<<<<< HEAD
 /*0x2000,*/
+=======
+
+>>>>>>> fc9b728... update12
 
 0x2200,
 0x2301,
@@ -2131,10 +2157,13 @@ static const sr130pc20_regset_t sr130pc20_VT_Init_Reg[] = {
 0x2600,
 0x2708,
 0x2800,
+<<<<<<< HEAD
 /*0x2a06,*/
 /*0x2b40,*/
 /*0x2c04,*/
 /*0x2db0,*/
+=======
+>>>>>>> fc9b728... update12
 
 0x3005,
 0x3100,
@@ -2143,10 +2172,13 @@ static const sr130pc20_regset_t sr130pc20_VT_Init_Reg[] = {
 0x3309,
 0x3401,
 0x3501,
+<<<<<<< HEAD
 /*0x3601,*/
 /*0x3707,*/
 /*0x3802,*/
 /*0x3902,*/
+=======
+>>>>>>> fc9b728... update12
 
 0x0300,
 0x0101,
@@ -2386,11 +2418,14 @@ static const sr130pc20_regset_t sr130pc20_SmartStay_Init_Reg[] = {
 0xce6c,	/* 20120517 modify*/
 0xcf84,	/* 20120517 modify*/
 
+<<<<<<< HEAD
 /*0xd4a6,*/
 /*0xd5ac,*/
 /*0xd6a6,*/
 /*0xd7ac,*/
 /*add 20120517*/
+=======
+>>>>>>> fc9b728... update12
 0xdc00,   /* Added*/
 0xddaf,   /* Added*/
 0xde00,   /* Added*/
@@ -3183,7 +3218,10 @@ static const sr130pc20_regset_t sr130pc20_SmartStay_Init_Reg[] = {
 0x1880,
 0x1900,
 0x1aa0,
+<<<<<<< HEAD
 /*0x1b0d,*/
+=======
+>>>>>>> fc9b728... update12
 0x1c02,
 0x1d0e,
 0x1e07,
@@ -3196,7 +3234,10 @@ static const sr130pc20_regset_t sr130pc20_SmartStay_Init_Reg[] = {
 0x2600,
 0x2708,
 0x2800,
+<<<<<<< HEAD
 /*0x2b40,*/
+=======
+>>>>>>> fc9b728... update12
 
 0x3005,
 0x3100,
@@ -3227,9 +3268,12 @@ static const sr130pc20_regset_t SR130PC20_Preview_Mode[] =
 0x0322,
 0x107d,/*AWB off*/
 
+<<<<<<< HEAD
 0x0300,
 0x1011,
 /* 0x1190, *//*0x91 : mirror mode*/
+=======
+>>>>>>> fc9b728... update12
 
 /* page 11  yc_lpf */
 0x0311,
@@ -3281,6 +3325,7 @@ static const sr130pc20_regset_t SR130PC20_Preview_Mode[] =
 0x1880,
 0x1900,
 0x1aa0,
+<<<<<<< HEAD
 /*0x1b0d,*/
 0x1c02,
 /*0x1d09,*/
@@ -3288,6 +3333,15 @@ static const sr130pc20_regset_t SR130PC20_Preview_Mode[] =
 0x1e07,
 0x1f08,
 /*0x2000,*/
+=======
+
+0x1c02,
+
+0x1d0e,
+0x1e07,
+0x1f08,
+
+>>>>>>> fc9b728... update12
 
 0x2200,
 0x2301,
@@ -3296,6 +3350,7 @@ static const sr130pc20_regset_t SR130PC20_Preview_Mode[] =
 0x2600,
 0x2708,
 0x2800,
+<<<<<<< HEAD
 /*0x2a06,*/
 /*0x2b40,*/
 /*0x2c04,*/
@@ -3303,15 +3358,22 @@ static const sr130pc20_regset_t SR130PC20_Preview_Mode[] =
 
 0x3005,
 0x3100,
+=======
+
+
+>>>>>>> fc9b728... update12
 
 0x3207,
 0x3309,
 0x3401,
 0x3501,
+<<<<<<< HEAD
 /*0x3601,*/
 /*0x3707,*/
 /*0x3802,*/
 /*0x3902,*/
+=======
+>>>>>>> fc9b728... update12
 
 0x0300,
 0x0100,
@@ -3328,9 +3390,12 @@ static const sr130pc20_regset_t SR130PC20_Capture_Mode[] =
 0x0322,
 0x107d,/*AWB off*/
 
+<<<<<<< HEAD
 0x0300,
 0x1000,
 /* 0x1190, */
+=======
+
 
 0x0302,
 0x2faa,
@@ -3376,12 +3441,12 @@ static const sr130pc20_regset_t SR130PC20_Capture_Mode[] =
 0x1880,
 0x1900,
 0x1aa0,
-/*0x1b0d,*/
+
 0x1c02,
 0x1d0d, /* 0c:90ns , 0b:110ns */
 0x1e0f,
 0x1f0a,
-/*0x2000,*/
+
 
 0x2200,
 0x2301,
@@ -3390,10 +3455,175 @@ static const sr130pc20_regset_t SR130PC20_Capture_Mode[] =
 0x2600,
 0x2708,
 0x2800,
+
+
+0x320d,
+0x330b,
+0x3402,
+0x3504,
+0x3601,
+0x3709,
+
+
+0x0300,
+0x0100,/*sleep off*/
+};
+
+static const sr130pc20_regset_t SR130PC20_1280_960_Capture_Size[] =
+{
+0x0300,
+0x0101,/*sleep*/
+
+0x0300,
+0x1000,
+
+
+/* PAGE 18 START*/
+0x0318,
+0x1000,
+
+0x0348,
+/* MIPI TX Setting */
+0x300a,
+0x3100,
+
+0x0300,
+0x0100,/*sleep off*/
+
+};
+
+
+static const sr130pc20_regset_t SR130PC20_1280_720_Capture_Size[] =
+{
+0x0300,
+0x0101,/*sleep*/
+
+0x0300,
+0x1000,
+
+
+/* PAGE 18 START*/
+0x0318,
+0x1007,
+0x1200,
+0x2005,
+0x2100,
+0x2203,
+0x23c0,
+0x2400,
+0x2500,
+0x2600,
+0x2778,
+0x2805,
+0x2900,
+0x2a03,
+0x2b48,
+0x2c08,
+0x2d00,
+0x2e08,
+0x2f00,
+0x3004,
+
+
+0x0348,
+/* MIPI TX Setting */
+0x300a,
+0x3100,
+
+0x0300,
+0x0100,/*sleep off*/
+
+};
+
+
+static const sr130pc20_regset_t SR130PC20_1280_960_Capture_Mode[] =
+{
+0x0300,
+0x0101,/*sleep*/
+
+0xd005,/*Pll off*/
+
+0x0322,
+0x107d,/*AWB off*/
+
+0x0300,
+0x1000,
+
+>>>>>>> fc9b728... update12
+
+0x0302,
+0x2faa,
+
+0x0311,
+0x5b00,/*don't touch*/
+
+0x0312,
+0x200f,
+0x210f,
+
+/*preview DPC*/
+0xd267,
+0xd502,
+0xd718,
+
+0x0313,
+0x10c5,
+0x80c1,/*Sharpness 2D On[0xc1] Off[0xc0]*/
+
+/* PAGE 18 START*/
+0x0318,
+0x1400,
+
+0x0300,
+0xd005,/*pll on*/
+0xd130,
+0xd201,
+0xd320,
+0xd085,
+0xd085,
+0xd085,
+0xd095,
+
+0x0348,
+/* MIPI TX Setting */
+0x101c,
+0x1100,
+0x1200,
+0x1400,
+0x1604,
+0x1700,
+0x1880,
+0x1900,
+0x1aa0,
+<<<<<<< HEAD
+/*0x1b0d,*/
+=======
+
+>>>>>>> fc9b728... update12
+0x1c02,
+0x1d0d, /* 0c:90ns , 0b:110ns */
+0x1e0f,
+0x1f0a,
+<<<<<<< HEAD
+/*0x2000,*/
+=======
+
+>>>>>>> fc9b728... update12
+
+0x2200,
+0x2301,
+0x241e,
+0x2500,
+0x2600,
+0x2708,
+0x2800,
+<<<<<<< HEAD
 /*0x2a06,*/
 /*0x2b40,*/
 /*0x2c04,*/
 /*0x2db0,*/
+=======
+>>>>>>> fc9b728... update12
 
 0x300a,
 0x3100,
@@ -3404,14 +3634,136 @@ static const sr130pc20_regset_t SR130PC20_Capture_Mode[] =
 0x3504,
 0x3601,
 0x3709,
+<<<<<<< HEAD
 /*0x3802,*/
 /*0x3902,*/
+=======
+
+>>>>>>> fc9b728... update12
+
+0x0300,
+0x0100,/*sleep off*/
+
+<<<<<<< HEAD
+};
+
+=======
+
+
+};
+
+static const sr130pc20_regset_t SR130PC20_1280_720_Capture_Mode[] =
+{
+  
+0x0300,
+0x0101,/*sleep*/
+
+0xd005,/*Pll off*/
+
+0x0322,
+0x107d,/*AWB off*/
+
+0x0300,
+0x1000,
+
+
+0x0302,
+0x2faa,
+
+0x0311,
+0x5b00,/*don't touch*/
+
+0x0312,
+0x200f,
+0x210f,
+
+/*preview DPC*/
+0xd267,
+0xd502,
+0xd718,
+
+0x0313,
+0x10c5,
+0x80c1,/*Sharpness 2D On[0xc1] Off[0xc0]*/
+
+/* PAGE 18 START*/
+
+0x0318,
+0x1007,
+0x1200,
+0x2005,
+0x2100,
+0x2203,
+0x23c0,
+0x2400,
+0x2500,
+0x2600,
+0x2778,
+0x2805,
+0x2900,
+0x2a03,
+0x2b48,
+0x2c08,
+0x2d00,
+0x2e08,
+0x2f00,
+0x3004,
+
+0x0300,
+0xd005,/*pll on*/
+0xd130,
+0xd201,
+0xd320,
+0xd085,
+0xd085,
+0xd085,
+0xd095,
+
+0x0348,
+/* MIPI TX Setting */
+0x101c,
+0x1100,
+0x1200,
+0x1400,
+0x1604,
+0x1700,
+0x1880,
+0x1900,
+0x1aa0,
+
+0x1c02,
+0x1d0d, /* 0c:90ns , 0b:110ns */
+0x1e0f,
+0x1f0a,
+
+
+0x2200,
+0x2301,
+0x241e,
+0x2500,
+0x2600,
+0x2708,
+0x2800,
+
+0x300a,
+0x3100,
+
+0x320d,
+0x330b,
+0x3402,
+0x3504,
+0x3601,
+0x3709,
+
 
 0x0300,
 0x0100,/*sleep off*/
 
 };
 
+
+
+>>>>>>> fc9b728... update12
 static const sr130pc20_regset_t SR130PC20_Lowlux_Night_Capture_Mode[] =
 {
 0x0300,
@@ -3424,7 +3776,11 @@ static const sr130pc20_regset_t SR130PC20_Lowlux_Night_Capture_Mode[] =
 
 0x0300,
 0x1000,
+<<<<<<< HEAD
 /* 0x1190, */
+=======
+
+>>>>>>> fc9b728... update12
 
 0x0302,
 0x2faa,
@@ -3470,12 +3826,20 @@ static const sr130pc20_regset_t SR130PC20_Lowlux_Night_Capture_Mode[] =
 0x1880,
 0x1900,
 0x1aa0,
+<<<<<<< HEAD
 /*0x1b0d,*/
+=======
+
+>>>>>>> fc9b728... update12
 0x1c02,
 0x1d0d, /* 0c:90ns , 0b:110ns */
 0x1e0f,
 0x1f0a,
+<<<<<<< HEAD
 /*0x2000,*/
+=======
+
+>>>>>>> fc9b728... update12
 
 0x2200,
 0x2301,
@@ -3484,10 +3848,14 @@ static const sr130pc20_regset_t SR130PC20_Lowlux_Night_Capture_Mode[] =
 0x2600,
 0x2708,
 0x2800,
+<<<<<<< HEAD
 /*0x2a06,*/
 /*0x2b40,*/
 /*0x2c04,*/
 /*0x2db0,*/
+=======
+
+>>>>>>> fc9b728... update12
 
 0x300a,
 0x3100,
@@ -3498,8 +3866,12 @@ static const sr130pc20_regset_t SR130PC20_Lowlux_Night_Capture_Mode[] =
 0x3504,
 0x3601,
 0x3709,
+<<<<<<< HEAD
 /*0x3802,*/
 /*0x3902,*/
+=======
+
+>>>>>>> fc9b728... update12
 
 0x0300,
 0x0100,/*sleep off*/
@@ -3523,7 +3895,10 @@ static const sr130pc20_regset_t sr130pc20_Effect_Black_White[] =
 0x1103,
 0x1233,
 0x1302,
+<<<<<<< HEAD
 0x4080,
+=======
+>>>>>>> fc9b728... update12
 0x4480,
 0x4580,
 };
@@ -3534,7 +3909,10 @@ static const sr130pc20_regset_t SR130PC20_Effect_Negative[] =
 0x1103,
 0x1238,
 0x1302,
+<<<<<<< HEAD
 0x4080,
+=======
+>>>>>>> fc9b728... update12
 0x4480,
 0x4580,
 };
@@ -3550,7 +3928,10 @@ static const sr130pc20_regset_t sr130pc20_Effect_Normal[] =
 0x1103,
 0x1230,
 0x1302,
+<<<<<<< HEAD
 0x4080,
+=======
+>>>>>>> fc9b728... update12
 0x4480,
 0x4580,
 };
@@ -3561,7 +3942,10 @@ static const sr130pc20_regset_t sr130pc20_Effect_Sepia[] =
 0x1103,
 0x1233,
 0x1302,
+<<<<<<< HEAD
 0x4080,
+=======
+>>>>>>> fc9b728... update12
 0x4470,
 0x4598,
 };
@@ -3919,6 +4303,7 @@ static const sr130pc20_regset_t sr130pc20_640_480_Preview[] = {
 0x0348,
 0x3005,
 0x3100,
+<<<<<<< HEAD
 
 0x0300,
 0x0100,
@@ -3926,6 +4311,45 @@ static const sr130pc20_regset_t sr130pc20_640_480_Preview[] = {
 0xff0a,
 };
 
+=======
+};
+
+static const sr130pc20_regset_t sr130pc20_640_360_Preview[] = {
+0x0300,
+0x0101,
+
+0x0300,
+0x1011,
+
+0x0318,
+0x1007,
+0x1200,
+0x2005,
+0x2100,
+0x2201,
+0x23e0,
+0x2400,
+0x2500,
+0x2600,
+0x273c,
+0x2805,
+0x2900,
+0x2a01,
+0x2ba4,
+0x2c08,
+0x2d00,
+0x2e08,
+0x2f00,
+0x3004,
+
+0x0348,
+0x3005,
+0x3100,
+
+};
+
+
+>>>>>>> fc9b728... update12
 static const sr130pc20_regset_t sr130pc20_352_288_Preview[] = {
 0x0300,
 0x0101,
@@ -3957,10 +4381,13 @@ static const sr130pc20_regset_t sr130pc20_352_288_Preview[] = {
 0x3002,
 0x31c0,
 
+<<<<<<< HEAD
 0x0300,
 0x0100,
 
 0xff28,
+=======
+>>>>>>> fc9b728... update12
 };
 
 static const sr130pc20_regset_t sr130pc20_320_240_Preview[] = {
@@ -3977,10 +4404,14 @@ static const sr130pc20_regset_t sr130pc20_320_240_Preview[] = {
 0x3002,
 0x3180,
 
+<<<<<<< HEAD
 0x0300,
 0x0100,
 
 0xff28,
+=======
+
+>>>>>>> fc9b728... update12
 };
 
 static const sr130pc20_regset_t sr130pc20_176_144_Preview[] = {
@@ -3996,11 +4427,89 @@ static const sr130pc20_regset_t sr130pc20_960_720_Capture[] = {
 };
 
 static const sr130pc20_regset_t sr130pc20_VGA_Capture[] = {
+<<<<<<< HEAD
 0xff00
 };
 
 static const sr130pc20_regset_t sr130pc20_fps_auto[] = {
 0xff00,
+=======
+0xff00,
+};
+
+static const sr130pc20_regset_t sr130pc20_fps_auto[] = {
+0x0300,
+0x0101,
+
+0x1190,
+
+0x4200,
+0x4364,
+
+0x0320,
+0x101C,
+
+0x0322,
+0x10fd,
+
+0x0310,	/*page 10*/
+
+0x411a,
+0x604f,
+0x63ff,	/*auto decresment on AG th*/
+
+0x0322,
+0x8f5a,
+0x9059,
+0x9155,
+0x924e,
+0x9344,
+0x943a,
+
+0x0320,
+0x2afd,
+0x2bf8,
+
+0x8301, /*EXP Normal 33.33 fps */
+0x845f,
+0x8590,
+
+0x8601, /*EXPMin 7500.00 fps*/
+0x8790,
+
+0x8805, /*EXP Max(120Hz) 8.00 fps */
+0x89b8,
+0x8ad8,
+
+0xa505, /*EXP Max(100Hz) 8.33 fps */
+0xa67e,
+0xa740,
+
+0x8B75, /*EXP100 */
+0x8C30,
+0x8D61, /*EXP120 */
+0x8Ea8,
+0x9c09, /*EXP Limit 1250.00 fps */
+0x9d60,
+0x9e01, /*EXP Unit */
+0x9f90,
+0x989d,
+
+0x0320,
+0x109C,
+
+0x0322,
+0x10fd,
+
+0x0300,
+0x1190,
+
+0x0300,
+0x0101,
+
+0x0300,
+0x0100,
+>>>>>>> fc9b728... update12
 };
 
 static const sr130pc20_regset_t sr130pc20_fps_7fix[] = {

@@ -38,7 +38,11 @@ static int accel_gpio_init(void)
 	return ret;
 }
 
+<<<<<<< HEAD
 static int acceleromter_get_position(void)
+=======
+static u8 acceleromter_get_position(void)
+>>>>>>> fc9b728... update12
 {
 	int position = 0;
 
@@ -177,6 +181,14 @@ static struct platform_device opt_gp2a = {
 		.platform_data = &gp2a_pdata,
 	},
 };
+<<<<<<< HEAD
+=======
+
+static struct platform_device light_gp2a = {
+	.name = "light_sensor",
+	.id = -1,
+};
+>>>>>>> fc9b728... update12
 #endif
 
 #if defined(CONFIG_SENSORS_GP2A) || defined(CONFIG_SENSORS_AL3201)
@@ -244,6 +256,16 @@ int kona_sensor_init(void)
 			__func__, ret);
 		return ret;
 	}
+<<<<<<< HEAD
+=======
+
+	ret = platform_device_register(&light_gp2a);
+	if (ret < 0) {
+		pr_err("%s, failed to register light_gp2a(err=%d)\n",
+			__func__, ret);
+		return ret;
+	}
+>>>>>>> fc9b728... update12
 #elif defined(CONFIG_SENSORS_AL3201)
 	i2c_register_board_info(12, i2c_devs12_emul,
 				ARRAY_SIZE(i2c_devs12_emul));

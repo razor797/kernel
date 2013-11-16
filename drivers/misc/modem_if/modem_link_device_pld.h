@@ -131,6 +131,7 @@
 
 #define PLD_ADDR_MASK(x)	(0x00003FFF & (unsigned long)(x))
 
+<<<<<<< HEAD
 enum host_boot_mode {
 	HOST_BOOT_MODE_NORMAL,
 	HOST_BOOT_MODE_DUMP,
@@ -359,6 +360,131 @@ struct dpram_ipc_16k_map {
 	u16 raw_tx_head;
 	u16 raw_tx_tail;
 	u8  raw_tx_buff[DP_16K_RAW_TX_BUFF_SZ];
+=======
+enum pld_init_status {
+	PLD_INIT_STATE_NONE,
+	PLD_INIT_STATE_READY,
+};
+
+#if 1
+#define MAX_RXBQ_SIZE	256
+
+struct mif_rxb {
+	u8 *buff;
+	unsigned size;
+
+	u8 *data;
+	unsigned len;
+};
+
+struct mif_rxb_queue {
+	int size;
+	int in;
+	int out;
+	struct mif_rxb *rxb;
+};
+
+/*
+** RXB (DPRAM RX buffer) functions
+*/
+static inline struct mif_rxb *rxbq_create_pool(unsigned size, int count)
+{
+	struct mif_rxb *rxb;
+	u8 *buff;
+	int i;
+
+	rxb = kzalloc(sizeof(struct mif_rxb) * count, GFP_KERNEL);
+	if (!rxb) {
+		mif_info("ERR! kzalloc rxb fail\n");
+		return NULL;
+	}
+
+	buff = kzalloc((size * count), GFP_KERNEL|GFP_DMA);
+	if (!buff) {
+		mif_info("ERR! kzalloc buff fail\n");
+		kfree(rxb);
+		return NULL;
+	}
+
+	for (i = 0; i < count; i++) {
+		rxb[i].buff = buff;
+		rxb[i].size = size;
+		buff += size;
+	}
+
+	return rxb;
+}
+
+static inline unsigned rxbq_get_page_size(unsigned len)
+{
+	return ((len + PAGE_SIZE - 1) >> PAGE_SHIFT) << PAGE_SHIFT;
+}
+
+static inline bool rxbq_empty(struct mif_rxb_queue *rxbq)
+{
+	return (rxbq->in == rxbq->out) ? true : false;
+}
+
+static inline int rxbq_free_size(struct mif_rxb_queue *rxbq)
+{
+	int in = rxbq->in;
+	int out = rxbq->out;
+	int qsize = rxbq->size;
+	return (in < out) ? (out - in - 1) : (qsize + out - in - 1);
+}
+
+static inline struct mif_rxb *rxbq_get_free_rxb(struct mif_rxb_queue *rxbq)
+{
+	struct mif_rxb *rxb = NULL;
+
+	if (likely(rxbq_free_size(rxbq) > 0)) {
+		rxb = &rxbq->rxb[rxbq->in];
+		rxbq->in++;
+		if (rxbq->in >= rxbq->size)
+			rxbq->in -= rxbq->size;
+		rxb->data = rxb->buff;
+	}
+
+	return rxb;
+}
+
+static inline int rxbq_size(struct mif_rxb_queue *rxbq)
+{
+	int in = rxbq->in;
+	int out = rxbq->out;
+	int qsize = rxbq->size;
+	return (in >= out) ? (in - out) : (qsize - out + in);
+}
+
+static inline struct mif_rxb *rxbq_get_data_rxb(struct mif_rxb_queue *rxbq)
+{
+	struct mif_rxb *rxb = NULL;
+
+	if (likely(!rxbq_empty(rxbq))) {
+		rxb = &rxbq->rxb[rxbq->out];
+		rxbq->out++;
+		if (rxbq->out >= rxbq->size)
+			rxbq->out -= rxbq->size;
+	}
+
+	return rxb;
+}
+
+static inline u8 *rxb_put(struct mif_rxb *rxb, unsigned len)
+{
+	rxb->len = len;
+	return rxb->data;
+}
+
+static inline void rxb_clear(struct mif_rxb *rxb)
+{
+	rxb->data = NULL;
+	rxb->len = 0;
+}
+#endif
+
+struct pld_ext_op;
+>>>>>>> fc9b728... update12
 
 	u16 fmt_rx_head;
 	u16 fmt_rx_tail;
@@ -388,7 +514,7 @@ struct dpram_link_device {
 	enum dpram_type dp_type;	/* DPRAM type			*/
 
 	/* DPRAM IRQ GPIO# */
-	unsigned gpio_dpram_int;
+	unsigned gpio_ipc_int2ap;
 
 	/* DPRAM IRQ from CP */
 	int irq;
@@ -396,20 +522,20 @@ struct dpram_link_device {
 	char irq_name[DP_MAX_NAME_LEN];
 
 	/* Link to DPRAM control functions dependent on each platform */
+<<<<<<< HEAD
 	int max_ipc_dev;
 	struct modemlink_dpram_control *dpctl;
+=======
+	struct modemlink_dpram_data *dpram;
+>>>>>>> fc9b728... update12
 
 	/* Physical configuration -> logical configuration */
-	union {
-		struct dpram_boot_map bt_map;
-		struct qc_dpram_boot_map qc_bt_map;
-	};
-
-	struct dpram_dload_map dl_map;
-	struct dpram_uload_map ul_map;
+	struct memif_boot_map bt_map;
+	struct memif_dload_map dl_map;
+	struct memif_uload_map ul_map;
 
 	/* IPC device map */
-	struct dpram_ipc_map ipc_map;
+	struct pld_ipc_map ipc_map;
 
 	/* Pointers (aliases) to IPC device map */
 	u16 __iomem *magic_ap2cp;
@@ -432,19 +558,21 @@ struct dpram_link_device {
 	struct completion modem_pif_init_done;
 
 	/* For UDL */
-	struct tasklet_struct ul_tsk;
 	struct tasklet_struct dl_tsk;
 	struct completion udl_start_complete;
 	struct completion udl_cmd_complete;
-	struct dpram_udl_check udl_check;
-	struct dpram_udl_param udl_param;
 
 	/* For CP RAM dump */
 	struct timer_list crash_ack_timer;
+<<<<<<< HEAD
 	struct completion dump_start_complete;
 	struct completion dump_recv_done;
 	struct timer_list dump_timer;
 	int dump_rcvd;		/* Count of dump packets received */
+=======
+	struct completion crash_start_complete;
+	struct completion crash_recv_done;
+>>>>>>> fc9b728... update12
 
 	/* For locking TX process */
 	spinlock_t tx_rx_lock;

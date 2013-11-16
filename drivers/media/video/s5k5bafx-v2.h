@@ -23,7 +23,11 @@
 /* #define S5K5BAFX_USLEEP */
 #define S5K5BAFX_BURST_MODE
 /* #define CONFIG_LOAD_FILE */
+<<<<<<< HEAD
 /* #define SUPPORT_FACTORY_TEST */
+=======
+#define SUPPORT_FACTORY_TEST
+>>>>>>> fc9b728... update12
 
 /** Debuging Feature **/
 #define CONFIG_CAM_DEBUG

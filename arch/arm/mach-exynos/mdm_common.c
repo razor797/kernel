@@ -223,6 +223,12 @@ static void mdm_silent_reset(void)
 {
 	pr_info("mdm: silent reset!!\n");
 
+<<<<<<< HEAD
+=======
+
+	set_shutdown();
+	mdm_drv->mdm_ready = 0;
+>>>>>>> fc9b728... update12
 	mdm_drv->boot_type = CHARM_NORMAL_BOOT;
 	complete(&mdm_needs_reload);
 	if (!wait_for_completion_timeout(&mdm_boot,
@@ -374,6 +380,18 @@ static void mdm_fatal_fn(struct work_struct *work)
 
 static DECLARE_WORK(mdm_fatal_work, mdm_fatal_fn);
 
+static void mdm_reconnect_fn(struct work_struct *work)
+{
+	pr_info("mdm: check 2nd enumeration\n");
+
+	if (mdm_check_main_connect(rmnet_pm_dev))
+		return;
+
+	mdm_silent_reset();
+}
+
+static DECLARE_DELAYED_WORK(mdm_reconnect_work, mdm_reconnect_fn);
+
 static void mdm_status_fn(struct work_struct *work)
 {
 	int value = gpio_get_value(mdm_drv->mdm2ap_status_gpio);
@@ -385,6 +403,8 @@ static void mdm_status_fn(struct work_struct *work)
 	if (value) {
 		request_boot_lock_release(rmnet_pm_dev);
 		request_active_lock_set(rmnet_pm_dev);
+		queue_delayed_work(mdm_queue, &mdm_reconnect_work,
+							msecs_to_jiffies(3000));
 	}
 #endif
 }
@@ -465,6 +485,10 @@ static void sim_status_check(struct work_struct *work)
 		mdm_drv->sim_changed = 1;
 		pr_info("sim state = %s\n",
 			mdm_drv->sim_state == 1 ? "Attach" : "Detach");
+#ifdef CONFIG_FAST_BOOT
+		if (fake_shut_down)
+			mdm_drv->sim_shutdown_req = true;
+#endif
 		wake_up_interruptible(&mdm_drv->wq);
 	} else
 		mdm_drv->sim_changed = 0;
@@ -738,6 +762,21 @@ static int mdm_debugfs_init(void)
 }
 #endif
 
+<<<<<<< HEAD
+=======
+#ifdef CONFIG_FAST_BOOT
+static void sim_detect_complete(struct device *dev)
+{
+	if (!mdm_drv->sim_irq && mdm_drv->sim_shutdown_req) {
+		pr_info("fake shutdown sim changed shutdown\n");
+		kernel_power_off();
+		/*kernel_restart(NULL);*/
+		mdm_drv->sim_shutdown_req = false;
+	}
+}
+#endif
+
+>>>>>>> fc9b728... update12
 static void mdm_modem_initialize_data(struct platform_device  *pdev,
 				struct mdm_ops *mdm_ops)
 {
@@ -820,6 +859,10 @@ static void mdm_modem_initialize_data(struct platform_device  *pdev,
 	mdm_drv->pdata    = pdev->dev.platform_data;
 	dump_timeout_ms = mdm_drv->pdata->ramdump_timeout_ms > 0 ?
 		mdm_drv->pdata->ramdump_timeout_ms : MDM_RDUMP_TIMEOUT;
+#ifdef CONFIG_FAST_BOOT
+	mdm_drv->pdata->modem_complete = sim_detect_complete;
+	mdm_drv->sim_shutdown_req = false;
+#endif
 }
 
 int mdm_common_create(struct platform_device  *pdev,

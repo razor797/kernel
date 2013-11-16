@@ -12,7 +12,11 @@
 
 # set up defaults if not defined by the user
 TIMESTAMP ?= default
+<<<<<<< HEAD
 OS_MEMORY_KERNEL_BUFFER_SIZE_IN_MB ?= 24
+=======
+OS_MEMORY_KERNEL_BUFFER_SIZE_IN_MB ?= 16
+>>>>>>> fc9b728... update12
 USING_GPU_UTILIZATION ?= 1
 PROFILING_SKIP_PP_JOBS ?= 0
 PROFILING_SKIP_PP_AND_GP_JOBS ?= 0
@@ -44,6 +48,10 @@ MALI_PLATFORM_FILES = $(subst $(srctree)/$(src)/,,$(wildcard $(srctree)/$(src)/p
 # For customer releases the Linux Device Drivers will be provided as ARM proprietary and GPL releases:
 # The ARM proprietary product will only include the license/proprietary directory
 # The GPL product will only include the license/gpl directory
+<<<<<<< HEAD
+=======
+$(warning Current directory is $(srctree)/$(src) from $(shell pwd))
+>>>>>>> fc9b728... update12
 ifeq ($(wildcard $(srctree)/$(src)/linux/license/gpl/*),)
     ccflags-y += -I$(srctree)/$(src)/linux/license/proprietary
     ifeq ($(CONFIG_MALI400_PROFILING),y)
@@ -144,7 +152,11 @@ ccflags-y += -DPROFILING_SKIP_PP_AND_GP_JOBS=$(PROFILING_SKIP_PP_AND_GP_JOBS)
 ccflags-y += -DMALI_PP_SCHEDULER_FORCE_NO_JOB_OVERLAP=$(MALI_PP_SCHEDULER_FORCE_NO_JOB_OVERLAP)
 ccflags-y += -DMALI_PP_SCHEDULER_KEEP_SUB_JOB_STARTS_ALIGNED=$(MALI_PP_SCHEDULER_KEEP_SUB_JOB_STARTS_ALIGNED)
 ccflags-y += -DMALI_PP_SCHEDULER_FORCE_NO_JOB_OVERLAP_BETWEEN_APPS=$(MALI_PP_SCHEDULER_FORCE_NO_JOB_OVERLAP_BETWEEN_APPS)
+<<<<<<< HEAD
 ccflags-y += -DMALI_STATE_TRACKING=0
+=======
+ccflags-y += -DMALI_STATE_TRACKING=1
+>>>>>>> fc9b728... update12
 ccflags-y += -DMALI_OS_MEMORY_KERNEL_BUFFER_SIZE_IN_MB=$(OS_MEMORY_KERNEL_BUFFER_SIZE_IN_MB)
 ccflags-y += -DUSING_GPU_UTILIZATION=$(USING_GPU_UTILIZATION)
 

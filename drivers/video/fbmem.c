@@ -1393,13 +1393,17 @@ fb_mmap(struct file *file, struct vm_area_struct * vma)
 		return -EINVAL;
 	}
 #endif
+<<<<<<< HEAD
 
+=======
+>>>>>>> fc9b728... update12
 	mmio_pgoff = PAGE_ALIGN((start & ~PAGE_MASK) + len) >> PAGE_SHIFT;
 	if (vma->vm_pgoff >= mmio_pgoff) {
 		vma->vm_pgoff -= mmio_pgoff;
 		start = info->fix.mmio_start;
 		len = info->fix.mmio_len;
 	}
+
 	mutex_unlock(&info->mm_lock);
 
 	vma->vm_page_prot = vm_get_page_prot(vma->vm_flags);

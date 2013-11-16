@@ -752,7 +752,11 @@ int fimc_mmap_own_mem(struct file *filp, struct vm_area_struct *vma)
 	struct fimc_control *ctrl = prv_data->ctrl;
 	u32 start_phy_addr = 0;
 	u32 size = vma->vm_end - vma->vm_start;
+<<<<<<< HEAD
 	u32 pfn = vma->vm_pgoff;
+=======
+	u32 pfn, idx = vma->vm_pgoff;
+>>>>>>> fc9b728... update12
 	u32 buf_length = 0;
 
 	buf_length = ctrl->mem.size;

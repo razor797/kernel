@@ -380,7 +380,8 @@ int fc8150_get_rssi(HANDLE hDevice, int *rssi)
 		PGA = PREAMP_PGA;
 
 	/* *rssi = (LNA & 0x07) * 6 + (RFVGA & 0x1F)
-	+ ((CSF & 0x03)+((CSF & 0x70) >> 4) ) * 6 - PGA * 0.25f + K ; */
+	+ ((CSF & 0x03)+((CSF & 0x70) >> 4) ) * 6 - PGA * 0.25f
+	+ A2 * CRNTMODE1 + A3 * CRNTMODE0 + K ; */
 	*rssi = (LNA & 0x07) * 6 + (RFVGA & 0x1F)
 		+ ((CSF & 0x03) + ((CSF & 0x70) >> 4)) * 6 - PGA / 4 + K;
 

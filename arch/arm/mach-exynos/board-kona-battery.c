@@ -50,7 +50,11 @@ static bool is_jig_on;
 
 
 /* cable state */
+<<<<<<< HEAD
 bool is_cable_attached;
+=======
+extern bool is_cable_attached;
+>>>>>>> fc9b728... update12
 
 static void sec_bat_initial_check(void)
 {
@@ -438,10 +442,13 @@ static sec_battery_platform_data_t sec_battery_pdata = {
 	.chg_polarity_status = 0,
 	.chg_irq_attr = IRQF_TRIGGER_RISING,
 	.chg_float_voltage = 4300,
+<<<<<<< HEAD
 
 	.chg_curr_siop_lv1 = 1500,
 	.chg_curr_siop_lv2 = 1000,
 	.chg_curr_siop_lv3 = 500,
+=======
+>>>>>>> fc9b728... update12
 };
 
 /* set NCP1851 Charger gpio i2c */

@@ -24,6 +24,11 @@ enum SCENARIO {
 	UI_MODE,
 	VIDEO_MODE,
 	CAMERA_MODE = 4,
+<<<<<<< HEAD
+=======
+	VIDEO_WARM_MODE,
+	VIDEO_COLD_MODE,
+>>>>>>> fc9b728... update12
 	NAVI_MODE,
 	GALLERY_MODE,
 	VT_MODE,
@@ -33,10 +38,30 @@ enum SCENARIO {
 	EMAIL_MODE,
 #endif
 	SCENARIO_MAX,
+<<<<<<< HEAD
+=======
+};
+
+enum SCENARIO_COLOR_TONE {
+>>>>>>> fc9b728... update12
 	COLOR_TONE_1 = 40,
 	COLOR_TONE_2,
 	COLOR_TONE_3,
 	COLOR_TONE_MAX
+<<<<<<< HEAD
+=======
+};
+
+enum SCENARIO_DMB {
+	DMB_NORMAL_MODE = 20,
+	DMB_MODE_MAX
+};
+
+enum OUTDOOR {
+	OUTDOOR_OFF,
+	OUTDOOR_ON,
+	OUTDOOR_MAX,
+>>>>>>> fc9b728... update12
 };
 
 enum SCENARIO_DMB {
@@ -72,11 +97,26 @@ enum ACCESSIBILITY {
 	ACCESSIBILITY_MAX
 };
 
+<<<<<<< HEAD
 struct mdnie_tuning_info {
 	const char *name;
 	unsigned short *sequence;
 };
 
+=======
+enum ACCESSIBILITY {
+	ACCESSIBILITY_OFF,
+	NEGATIVE,
+	COLOR_BLIND,
+	ACCESSIBILITY_MAX
+};
+
+struct mdnie_tuning_info {
+	const char *name;
+	unsigned short *sequence;
+};
+
+>>>>>>> fc9b728... update12
 struct mdnie_backlight_value {
 	const unsigned int max;
 	const unsigned int mid;
@@ -102,6 +142,10 @@ struct mdnie_info {
 	enum MODE mode;
 	enum CABC cabc;
 	unsigned int tuning;
+<<<<<<< HEAD
+=======
+	unsigned int negative;
+>>>>>>> fc9b728... update12
 	unsigned int accessibility;
 	unsigned int color_correction;
 	char path[50];
@@ -112,6 +156,7 @@ struct mdnie_info {
 
 extern struct mdnie_info *g_mdnie;
 
+int mdnie_send_sequence(struct mdnie_info *mdnie, unsigned short *seq);
 #if defined(CONFIG_FB_MDNIE_PWM)
 extern void set_mdnie_pwm_value(struct mdnie_info *mdnie, int value);
 #endif

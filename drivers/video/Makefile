@@ -184,4 +184,8 @@ obj-$(CONFIG_FB_VIRTUAL)          += vfb.o
 obj-$(CONFIG_VIDEO_OUTPUT_CONTROL) += output.o
 
 ifeq ($(CONFIG_VITHAR),y)
+<<<<<<< HEAD
+=======
+    EXTRA_CFLAGS += -Idrivers/gpu/vithar
+>>>>>>> fc9b728... update12
 endif

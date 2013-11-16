@@ -624,9 +624,17 @@ static int sensor_probe(struct platform_device *pdev)
 err:
 	if (data != NULL) {
 		if (input_data != NULL) {
+<<<<<<< HEAD
 			if (sysfs_created)
 				sysfs_remove_group(&input_data->dev.kobj,
 						   &sensor_attribute_group);
+=======
+#ifdef YAS_SENSOR_KERNEL_DEVFILE_INTERFACE
+			if (sysfs_created)
+				sysfs_remove_group(&input_data->dev.kobj,
+						   &sensor_attribute_group);
+#endif
+>>>>>>> fc9b728... update12
 			if (input_registered)
 				input_unregister_device(input_data);
 			else

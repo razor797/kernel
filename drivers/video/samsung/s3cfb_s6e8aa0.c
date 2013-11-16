@@ -914,6 +914,13 @@ static int update_brightness(struct lcd_info *lcd, u8 force)
 		dev_info(&lcd->ld->dev, "brightness=%d, bl=%d, candela=%d\n", brightness, lcd->bl, candela_table[lcd->bl]);
 	}
 
+<<<<<<< HEAD
+=======
+#ifdef CONFIG_FB_S5P_MDNIE_CONTROL
+  mdnie_update_brightness(brightness, lcd->auto_brightness, false);
+#endif
+
+>>>>>>> fc9b728... update12
 	mutex_unlock(&lcd->bl_lock);
 
 	return 0;
@@ -1083,7 +1090,11 @@ static int s6e8ax0_check_fb(struct lcd_device *ld, struct fb_info *fb)
 {
 	struct lcd_info *lcd = lcd_get_data(ld);
 
+<<<<<<< HEAD
 	dev_dbg(&lcd->ld->dev, "%s, fb%d\n", __func__, fb->node);
+=======
+	dev_info(&lcd->ld->dev, "%s, fb%d\n", __func__, fb->node);
+>>>>>>> fc9b728... update12
 
 	return 0;
 }

@@ -38,9 +38,15 @@
 /* #define CONFIG_DEBUG_NO_FRAME */
 
 /** Debuging Feature **/
+<<<<<<< HEAD
 // #define CONFIG_CAM_DEBUG */
 // #define CONFIG_CAM_TRACE *//* Enable it with CONFIG_CAM_DEBUG */
 // #define CONFIG_CAM_AF_DEBUG *//* Enable it with CONFIG_CAM_DEBUG */
+=======
+/* #define CONFIG_CAM_DEBUG */
+/* #define CONFIG_CAM_TRACE *//* Enable it with CONFIG_CAM_DEBUG */
+/* #define CONFIG_CAM_AF_DEBUG *//* Enable it with CONFIG_CAM_DEBUG */
+>>>>>>> fc9b728... update12
 #define DEBUG_WRITE_REGS
 /***********************************/
 
@@ -174,6 +180,10 @@ enum sr130pc20_preview_frame_size {
 	PREVIEW_SZ_320x240,	/* 320x240 */
 	PREVIEW_SZ_CIF,		/* 352x288 */
 	PREVIEW_SZ_528x432,	/* 528x432 */
+<<<<<<< HEAD
+=======
+	PREVIEW_SZ_640x360,	/* 640x360, 16:9 */
+>>>>>>> fc9b728... update12
 	PREVIEW_SZ_VGA,		/* 640x480 */
 	PREVIEW_SZ_D1,		/* 720x480 */
 	PREVIEW_SZ_880x720,	/* 880x720 */
@@ -206,6 +216,10 @@ enum sr130pc20_capture_frame_size {
 	/*CAPTURE_SZ_VGA = 0,*/	/* 640x480 */
 	/*CAPTURE_SZ_960_720,*/
 	CAPTURE_SZ_1MP,/* 1280x960 */
+<<<<<<< HEAD
+=======
+	CAPTURE_SZ_1280x720,/* 1280x720 */
+>>>>>>> fc9b728... update12
 	CAPTURE_SZ_MAX,
 };
 
@@ -547,6 +561,10 @@ struct sr130pc20_state {
 	s32 vt_mode;
 	s32 req_fps;
 	s32 fps;
+<<<<<<< HEAD
+=======
+	s32 write_fps;
+>>>>>>> fc9b728... update12
 	s32 freq;		/* MCLK in Hz */
 	u32 one_frame_delay_ms;
 	u32 light_level;	/* light level */
@@ -638,9 +656,24 @@ extern int sr130pc20_create_file(struct class *cls);
 #include <linux/slab.h>
 #include <linux/uaccess.h>
 
+<<<<<<< HEAD
 #define TUNING_FILE_PATH "/mnt/sdcard/sr130pc20_regs.h"
 #endif /* CONFIG_LOAD_FILE*/
 
 #include "sr130pc20_regs.h"
+=======
+#ifdef CONFIG_MACH_KONA
+#define TUNING_FILE_PATH "/mnt/sdcard/sr130pc20_regs_kona.h"
+#else
+#define TUNING_FILE_PATH "/mnt/sdcard/sr130pc20_regs.h"
+#endif /* CONFIG_MACH_KONA */
+#endif /* CONFIG_LOAD_FILE*/
+
+#ifdef CONFIG_MACH_KONA
+#include "sr130pc20_regs_kona.h"
+#else
+#include "sr130pc20_regs.h"
+#endif
+>>>>>>> fc9b728... update12
 
 #endif /* __SR130PC20_H__ */

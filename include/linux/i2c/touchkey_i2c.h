@@ -30,7 +30,13 @@
 	|| defined(CONFIG_MACH_M0)\
 	|| defined(CONFIG_MACH_C1)\
 	|| defined(CONFIG_MACH_M3)\
+<<<<<<< HEAD
 	|| defined(CONFIG_MACH_T0)
+=======
+	|| defined(CONFIG_MACH_T0)\
+	|| defined(CONFIG_MACH_SUPERIOR_KOR_SKT)\
+	|| defined(CONFIG_MACH_ZEST)
+>>>>>>> fc9b728... update12
 #define TK_CMD_LED_ON		0x10
 #define TK_CMD_LED_OFF		0x20
 #else
@@ -59,6 +65,18 @@
 #elif defined(CONFIG_MACH_T0)
 #define TK_FIRMWARE_VER	 0x11
 #define TK_MODULE_VER    0x08
+<<<<<<< HEAD
+=======
+#elif defined(CONFIG_MACH_SUPERIOR_KOR_SKT)
+#define TK_FIRMWARE_VER	 0x03
+#define TK_MODULE_VER    0x04
+#elif defined(CONFIG_MACH_U1_KOR_LGT)
+#define TK_FIRMWARE_VER	 0x09
+#define TK_MODULE_VER    0x00
+#elif defined(CONFIG_MACH_ZEST)
+#define TK_FIRMWARE_VER  0x03
+#define TK_MODULE_VER    0x03
+>>>>>>> fc9b728... update12
 #else
 #define TK_FIRMWARE_VER	 0x04
 #define TK_MODULE_VER    0x00
@@ -68,7 +86,13 @@
 #if defined(CONFIG_MACH_M0)\
 	|| defined(CONFIG_MACH_C1)\
 	|| defined(CONFIG_MACH_M3)\
+<<<<<<< HEAD
 	|| defined(CONFIG_MACH_T0)
+=======
+	|| defined(CONFIG_MACH_T0)\
+	|| defined(CONFIG_MACH_SUPERIOR_KOR_SKT)\
+	|| defined(CONFIG_MACH_ZEST)
+>>>>>>> fc9b728... update12
 #define	TK_REGULATOR_NAME	"touchkey"
 #else
 #define	TK_REGULATOR_NAME	"touch"
@@ -80,7 +104,13 @@
 	|| defined(CONFIG_MACH_C1_KOR_KT)\
 	|| defined(CONFIG_MACH_M3)\
 	|| defined(CONFIG_MACH_C1)\
+<<<<<<< HEAD
 	|| defined(CONFIG_MACH_T0)
+=======
+	|| defined(CONFIG_MACH_T0)\
+	|| defined(CONFIG_MACH_SUPERIOR_KOR_SKT)\
+	|| defined(CONFIG_MACH_ZEST)
+>>>>>>> fc9b728... update12
 #define LED_LDO_WITH_EN_PIN
 #else
 #define LED_LDO_WITH_REGULATOR
@@ -94,7 +124,13 @@
 	|| defined(CONFIG_MACH_M0)\
 	|| defined(CONFIG_MACH_C1)\
 	|| defined(CONFIG_MACH_M3)\
+<<<<<<< HEAD
 	|| defined(CONFIG_MACH_T0)
+=======
+	|| defined(CONFIG_MACH_T0)\
+	|| defined(CONFIG_MACH_SUPERIOR_KOR_SKT)\
+	|| defined(CONFIG_MACH_ZEST)
+>>>>>>> fc9b728... update12
 #define TK_HAS_AUTOCAL
 #endif
 
@@ -102,7 +138,13 @@
 #if defined(CONFIG_MACH_M0)\
 	|| defined(CONFIG_MACH_M3)\
 	|| defined(CONFIG_MACH_C1)\
+<<<<<<< HEAD
 	|| defined(CONFIG_MACH_T0)
+=======
+	|| defined(CONFIG_MACH_T0)\
+	|| defined(CONFIG_MACH_SUPERIOR_KOR_SKT)\
+	|| defined(CONFIG_MACH_ZEST)
+>>>>>>> fc9b728... update12
 #define TK_USE_GENERAL_SMBUS
 #endif
 
@@ -113,7 +155,13 @@
 	|| defined(CONFIG_MACH_M0)\
 	|| defined(CONFIG_MACH_C1)\
 	|| defined(CONFIG_MACH_M3)\
+<<<<<<< HEAD
 	|| defined(CONFIG_MACH_T0)
+=======
+	|| defined(CONFIG_MACH_T0)\
+	|| defined(CONFIG_MACH_SUPERIOR_KOR_SKT)\
+	|| defined(CONFIG_MACH_ZEST)
+>>>>>>> fc9b728... update12
 #define TK_HAS_FIRMWARE_UPDATE
 #endif
 

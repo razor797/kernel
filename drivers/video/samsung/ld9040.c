@@ -71,14 +71,6 @@
 #define ELVSS_LIMIT		0x29
 #endif
 
-#define MIN_GAMMA_ADJUST -50
-#define MAX_GAMMA_ADJUST  50
-#define GAMMA_DATA_SIZE   (48*sizeof(unsigned short))
-
-extern struct ld9040_panel_data u1_panel_data;
-extern struct ld9040_panel_data u1_panel_data_a2;
-extern struct ld9040_panel_data u1_panel_data_m2;
-
 struct lcd_info  {
 	struct device			*dev;
 	struct spi_device		*spi;
@@ -90,10 +82,14 @@ struct lcd_info  {
 	unsigned int			auto_brightness;
 	unsigned int			ldi_enable;
 	unsigned int			acl_enable;
+<<<<<<< HEAD
 	unsigned int			cur_acl;
 	unsigned int			user_lcdtype;
 	signed int			user_gamma_adjust;
 	signed int			current_user_gamma_adjust;
+=======
+	unsigned int			current_acl;
+>>>>>>> fc9b728... update12
 	struct mutex			lock;
 	struct mutex			bl_lock;
 	struct lcd_device		*ld;
@@ -112,8 +108,6 @@ static const unsigned int candela_table[GAMMA_MAX] = {
 	160, 170, 180, 190, 200, 210, 220, 230, 240, 250,
 	300
 };
-
-static signed short gamma_adjust_map[] = { 3, 3, 3, 3, 0, 1, 0, 1, 5, 2, 4, 0, 1, 0, 3, 3, 3, 2, 0, 1 };
 
 static int ld9040_spi_write_byte(struct lcd_info *lcd, int addr, int data)
 {
@@ -402,9 +396,8 @@ static struct miscdevice brightness_curve_device = {
 
 static int ld9040_gamma_ctl(struct lcd_info *lcd)
 {
-	int ret = 0, i;
+	int ret = 0;
 	const unsigned short *gamma;
-	unsigned short gamma_adjust[100];
 	struct ld9040_panel_data *pdata = lcd->lcd_pd->pdata;
 
 	if (lcd->gamma_mode)
@@ -412,6 +405,7 @@ static int ld9040_gamma_ctl(struct lcd_info *lcd)
 	else
 		gamma = pdata->gamma22_table[lcd->bl];
 
+<<<<<<< HEAD
 	if (lcd->user_gamma_adjust != 0) {
 		//printk("*** : debug gamma size=%d, *gamma_adjust_map size=%d\n", GAMMA_DATA_SIZE, ARRAY_SIZE(gamma_adjust_map));
 		memcpy(gamma_adjust, gamma, GAMMA_DATA_SIZE);
@@ -429,6 +423,9 @@ static int ld9040_gamma_ctl(struct lcd_info *lcd)
 		ret = ld9040_panel_send_sequence(lcd, gamma);
 	}
 
+=======
+	ret = ld9040_panel_send_sequence(lcd, gamma);
+>>>>>>> fc9b728... update12
 	if (ret) {
 		ret = -EPERM;
 		goto gamma_err;
@@ -1010,6 +1007,7 @@ static ssize_t auto_brightness_store(struct device *dev,
 
 static DEVICE_ATTR(auto_brightness, 0644, auto_brightness_show, auto_brightness_store);
 
+<<<<<<< HEAD
 static ssize_t ld9040_sysfs_show_user_lcdtype(struct device *dev,
 				      struct device_attribute *attr, char *buf)
 {
@@ -1187,6 +1185,8 @@ static ssize_t ld9040_sysfs_store_user_gamma_adjust_table(struct device *dev,
 static DEVICE_ATTR(user_gamma_adjust_table, 0664,
 		ld9040_sysfs_show_user_gamma_adjust_table, ld9040_sysfs_store_user_gamma_adjust_table);
 
+=======
+>>>>>>> fc9b728... update12
 #if defined(CONFIG_PM)
 #ifdef CONFIG_HAS_EARLYSUSPEND
 void ld9040_early_suspend(struct early_suspend *h)
@@ -1274,9 +1274,7 @@ static int ld9040_probe(struct spi_device *spi)
 	lcd->current_bl = lcd->bl;
 	lcd->gamma_mode = 0;
 	lcd->current_gamma_mode = 0;
-	lcd->user_gamma_adjust = 0;
-	lcd->current_user_gamma_adjust = 0;
-	lcd->user_lcdtype = pdata->lcdtype;
+
 	lcd->acl_enable = 0;
 	lcd->cur_acl = 0;
 
@@ -1305,18 +1303,6 @@ static int ld9040_probe(struct spi_device *spi)
 	ret = device_create_file(&lcd->bd->dev, &dev_attr_auto_brightness);
 	if (ret < 0)
 		dev_err(&lcd->ld->dev, "failed to add sysfs entries\n");
-
-	ret = device_create_file(&lcd->ld->dev, &dev_attr_user_lcdtype);
-	if (ret < 0)
-		dev_err(&(spi->dev), "failed to add sysfs entries\n");
-
-	ret = device_create_file(&lcd->ld->dev, &dev_attr_user_gamma_adjust);
-	if (ret < 0)
-		dev_err(&(spi->dev), "failed to add sysfs entries\n");
-
-	ret = device_create_file(&lcd->ld->dev, &dev_attr_user_gamma_adjust_table);
-	if (ret < 0)
-		dev_err(&(spi->dev), "failed to add sysfs entries\n");
 
 	mutex_init(&lcd->lock);
 	mutex_init(&lcd->bl_lock);

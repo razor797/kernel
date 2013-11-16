@@ -9,7 +9,11 @@
 
 #define DEFAULT_PIX_FMT		V4L2_PIX_FMT_UYVY	/* YUV422 */
 #define DEFAULT_MCLK		24000000
+<<<<<<< HEAD
 #define SR130PC20_STREAMOFF_DELAY	50
+=======
+#define SR130PC20_STREAMOFF_DELAY	150
+>>>>>>> fc9b728... update12
 
 
 enum {

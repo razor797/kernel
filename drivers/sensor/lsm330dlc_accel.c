@@ -1049,6 +1049,10 @@ static int lsm330dlc_accel_probe(struct i2c_client *client,
 	int probe_retry_max = 3;
 
 	accel_dbgmsg("is started\n");
+<<<<<<< HEAD
+=======
+
+>>>>>>> fc9b728... update12
 probe_retry:
 	for (retry = 0; retry < 5; retry++) {
 		if (!i2c_check_functionality(client->adapter,

@@ -331,7 +331,10 @@ struct sec_bat_info {
 	unsigned int batt_temp_radc;
 #endif
 	unsigned int batt_current_adc;
+<<<<<<< HEAD
     int batt_chg_current;
+=======
+>>>>>>> fc9b728... update12
 #if defined(CONFIG_TARGET_LOCALE_NAATT) || \
 	defined(CONFIG_TARGET_LOCALE_NAATT_TEMP)
 	int batt_vf_adc;

@@ -26,6 +26,7 @@
 #define DEVICE_CTRL		0x01
 #define EEPROM_START		0xA0
 #define EEPROM_END		0xA7
+<<<<<<< HEAD
 #define EPROM_START		0xA0
 #define EPROM_END		0xAF
 
@@ -34,6 +35,11 @@
 #define EEPROM_CFG5	0xA5
 #endif
 
+=======
+#define EPROM_START		0x98
+#define EPROM_END		0xAF
+
+>>>>>>> fc9b728... update12
 #define BUF_SIZE		20
 #define DEFAULT_BL_NAME		"lcd-backlight"
 #define MAX_BRIGHTNESS		255
@@ -290,6 +296,7 @@ static int lp855x_set_power(struct lp855x *lp, int on)
 	return 0;
 }
 
+<<<<<<< HEAD
 #if defined(CONFIG_MACH_KONA)
 static int lp855x_config(struct lp855x *lp)
 {
@@ -321,6 +328,8 @@ static int lp855x_config(struct lp855x *lp)
 }
 #endif
 
+=======
+>>>>>>> fc9b728... update12
 #ifdef CONFIG_HAS_EARLYSUSPEND
 static void lp855x_early_suspend(struct early_suspend *h)
 {
@@ -337,10 +346,13 @@ static void lp855x_late_resume(struct early_suspend *h)
 
 	lp855x_set_power(lp, 1);
 	backlight_update_status(lp->bl);
+<<<<<<< HEAD
 #if defined(CONFIG_MACH_KONA)
 	lp855x_config(lp);
 #endif
 
+=======
+>>>>>>> fc9b728... update12
 }
 #endif
 
@@ -405,10 +417,13 @@ static int lp855x_probe(struct i2c_client *cl, const struct i2c_device_id *id)
 
 	backlight_update_status(lp->bl);
 
+<<<<<<< HEAD
 #if defined(CONFIG_MACH_KONA)
 	lp855x_config(lp);
 #endif
 
+=======
+>>>>>>> fc9b728... update12
 	return 0;
 
 err_sysfs:

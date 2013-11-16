@@ -18,6 +18,12 @@
 #include <linux/device.h>
 #include <linux/backlight.h>
 #include <linux/platform_device.h>
+<<<<<<< HEAD
+=======
+#ifdef CONFIG_FB_S5P_MDNIE_CONTROL
+#include <linux/miscdevice.h>
+#endif
+>>>>>>> fc9b728... update12
 #include <linux/delay.h>
 #include <linux/lcd.h>
 #include <linux/mdnie.h>
@@ -48,7 +54,11 @@
 #if defined(CONFIG_FB_S5P_S6E8AA0) && defined(CONFIG_S6E8AA0_AMS465XX)
 #include "mdnie_table_superior.h"
 #elif defined(CONFIG_FB_S5P_S6E8AA0)
+<<<<<<< HEAD
 #include "mdnie_table_m0.h"
+=======
+#include "mdnie_table_m0_perseus.h"
+>>>>>>> fc9b728... update12
 #elif defined(CONFIG_FB_S5P_EA8061) || defined(CONFIG_FB_S5P_S6EVR02)
 #include "mdnie_table_t0.h"
 #elif defined(CONFIG_FB_S5P_S6E63M0)
@@ -124,6 +134,12 @@
 
 static struct class *mdnie_class;
 struct mdnie_info *g_mdnie;
+<<<<<<< HEAD
+=======
+
+extern unsigned short mdnie_reg_hook(unsigned short reg, unsigned short value);
+extern unsigned short *mdnie_sequence_hook(struct mdnie_info *pmdnie, unsigned short *seq);
+>>>>>>> fc9b728... update12
 
 static int mdnie_send_sequence(struct mdnie_info *mdnie, const unsigned short *seq)
 {
@@ -142,7 +158,11 @@ static int mdnie_send_sequence(struct mdnie_info *mdnie, const unsigned short *s
 	mdnie_mask();
 
 	while (wbuf[i] != END_SEQ) {
+<<<<<<< HEAD
 		ret += mdnie_write(wbuf[i], wbuf[i+1]);
+=======
+		ret += mdnie_write(wbuf[i], mdnie_reg_hook(wbuf[i], wbuf[i+1]));
+>>>>>>> fc9b728... update12
 		i += 2;
 	}
 
@@ -153,6 +173,144 @@ static int mdnie_send_sequence(struct mdnie_info *mdnie, const unsigned short *s
 	return ret;
 }
 
+static struct mdnie_tuning_info *mdnie_request_table(struct mdnie_info *mdnie)
+{
+<<<<<<< HEAD
+	struct mdnie_tuning_info *table = NULL;
+
+	mutex_lock(&mdnie->lock);
+
+	if (ACCESSIBILITY_IS_VALID(mdnie->accessibility)) {
+		table = &accessibility_table[mdnie->cabc][mdnie->accessibility];
+		goto exit;
+	} else if (SCENARIO_IS_DMB(mdnie->scenario)) {
+#if defined(CONFIG_TDMB)
+		table = &tune_dmb[mdnie->mode];
+#endif
+		goto exit;
+	} else if (SCENARIO_IS_COLOR(mdnie->scenario)) {
+		table = &color_tone_table[mdnie->scenario % COLOR_TONE_1];
+		goto exit;
+	} else if (mdnie->scenario < SCENARIO_MAX) {
+		table = &tuning_table[mdnie->cabc][mdnie->mode][mdnie->scenario];
+		goto exit;
+=======
+	u8 idx;
+
+	if ((!mdnie->enable) && (!force)) {
+		dev_err(mdnie->dev, "mdnie states is off\n");
+		return;
+	}
+
+	if (mdnie->scenario == VIDEO_WARM_MODE)
+		mdnie->tone = TONE_WARM;
+	else if (mdnie->scenario == VIDEO_COLD_MODE)
+		mdnie->tone = TONE_COLD;
+	else
+		mdnie->tone = TONE_NORMAL;
+
+	if (mdnie->tuning) {
+		dev_info(mdnie->dev, "mdnie tuning mode is enabled\n");
+		return;
+	}
+
+	mutex_lock(&mdnie->lock);
+
+	if (mdnie->negative == NEGATIVE_ON) {
+		dev_info(mdnie->dev, "NEGATIVE_ON\n");
+		mdnie_send_sequence(mdnie, negative_table[mdnie->cabc].sequence);
+		goto exit;
+	}
+
+#if defined(CONFIG_TDMB) || defined(CONFIG_TARGET_LOCALE_NTT)
+	if (SCENARIO_IS_DMB(mdnie->scenario)) {
+		idx = mdnie->scenario - DMB_NORMAL_MODE;
+		mdnie->tone = idx;
+
+		mdnie_send_sequence(mdnie, tune_dmb[mdnie->mode].sequence);
+		dev_info(mdnie->dev, "mode=%d, scenario=%d, outdoor=%d, cabc=%d, %s\n",
+			mdnie->mode, mdnie->scenario, mdnie->outdoor,
+			mdnie->cabc, tune_dmb[mdnie->mode].name);
+		goto etc;
+	}
+#endif
+
+	if (SCENARIO_IS_COLOR(mdnie->scenario)) {
+		idx = mdnie->scenario - COLOR_TONE_1;
+		mdnie_send_sequence(mdnie, color_tone_table[idx].sequence);
+		dev_info(mdnie->dev, "mode=%d, scenario=%d, outdoor=%d, cabc=%d, %s\n",
+			mdnie->mode, mdnie->scenario, mdnie->outdoor, mdnie->cabc,
+			color_tone_table[idx].name);
+
+		goto exit;
+	} else if (mdnie->scenario == CAMERA_MODE) {
+		mdnie_send_sequence(mdnie, camera_table[mdnie->outdoor].sequence);
+		dev_info(mdnie->dev, "%s\n", camera_table[mdnie->outdoor].name);
+
+		goto exit;
+	} else {
+		mdnie_send_sequence(mdnie, tuning_table[mdnie->cabc][mdnie->mode][mdnie->scenario].sequence);
+		dev_info(mdnie->dev, "mode=%d, scenario=%d, outdoor=%d, cabc=%d, %s\n",
+			mdnie->mode, mdnie->scenario, mdnie->outdoor, mdnie->cabc,
+			tuning_table[mdnie->cabc][mdnie->mode][mdnie->scenario].name);
+	}
+
+#if defined(CONFIG_TDMB) || defined(CONFIG_TARGET_LOCALE_NTT)
+etc:
+#endif
+	if (!IS_ERR_OR_NULL(etc_table[mdnie->cabc][mdnie->outdoor][mdnie->tone].sequence)) {
+		mdnie_send_sequence(mdnie, etc_table[mdnie->cabc][mdnie->outdoor][mdnie->tone].sequence);
+		dev_info(mdnie->dev, "%s\n", etc_table[mdnie->cabc][mdnie->outdoor][mdnie->tone].name);
+>>>>>>> fc9b728... update12
+	}
+
+exit:
+	mutex_unlock(&mdnie->lock);
+
+	return table;
+}
+
+<<<<<<< HEAD
+static void mdnie_update_sequence(struct mdnie_info *mdnie, struct mdnie_tuning_info *table)
+{
+	unsigned short *wbuf = NULL;
+	int ret;
+
+	if (unlikely(mdnie->tuning)) {
+		ret = mdnie_request_firmware(mdnie->path, &wbuf, table->name);
+		if (ret < 0 && IS_ERR_OR_NULL(wbuf))
+			goto exit;
+		mdnie_send_sequence(mdnie, wbuf);
+		kfree(wbuf);
+	} else
+		mdnie_send_sequence(mdnie, table->sequence);
+
+exit:
+	return;
+}
+
+static void mdnie_update(struct mdnie_info *mdnie)
+{
+	struct mdnie_tuning_info *table = NULL;
+
+	if (!mdnie->enable) {
+		dev_err(mdnie->dev, "mdnie state is off\n");
+		return;
+	}
+
+	table = mdnie_request_table(mdnie);
+	if (!IS_ERR_OR_NULL(table) && !IS_ERR_OR_NULL(table->sequence)) {
+		mdnie_update_sequence(mdnie, table);
+		dev_info(mdnie->dev, "%s\n", table->name);
+	}
+
+	return;
+}
+
+#if defined(CONFIG_FB_MDNIE_PWM)
+static int get_backlight_level_from_brightness(struct mdnie_info *mdnie, unsigned int brightness)
+{
+=======
 static struct mdnie_tuning_info *mdnie_request_table(struct mdnie_info *mdnie)
 {
 	struct mdnie_tuning_info *table = NULL;
@@ -220,6 +378,7 @@ static void mdnie_update(struct mdnie_info *mdnie)
 #if defined(CONFIG_FB_MDNIE_PWM)
 static int get_backlight_level_from_brightness(struct mdnie_info *mdnie, unsigned int brightness)
 {
+>>>>>>> fc9b728... update12
 	unsigned int value;
 	struct mdnie_backlight_value *pwm = mdnie->backlight;
 
@@ -650,6 +809,7 @@ static ssize_t tuning_show(struct device *dev,
 	struct mdnie_tuning_info *table;
 	int ret, i;
 	unsigned short *wbuf;
+<<<<<<< HEAD
 
 	pos += sprintf(pos, "++ %s: %s\n", __func__, mdnie->path);
 
@@ -663,6 +823,21 @@ static ssize_t tuning_show(struct device *dev,
 		goto exit;
 	}
 
+=======
+
+	pos += sprintf(pos, "++ %s: %s\n", __func__, mdnie->path);
+
+	if (!mdnie->tuning) {
+		pos += sprintf(pos, "tuning mode is off\n");
+		goto exit;
+	}
+
+	if (strncmp(mdnie->path, MDNIE_SYSFS_PREFIX, sizeof(MDNIE_SYSFS_PREFIX) - 1)) {
+		pos += sprintf(pos, "file path is invalid, %s\n", mdnie->path);
+		goto exit;
+	}
+
+>>>>>>> fc9b728... update12
 	table = mdnie_request_table(mdnie);
 	if (!IS_ERR_OR_NULL(table)) {
 		ret = mdnie_request_firmware(mdnie->path, &wbuf, table->name);
@@ -887,6 +1062,150 @@ static void mdnie_late_resume(struct early_suspend *h)
 #endif
 #endif
 
+<<<<<<< HEAD
+=======
+#ifdef CONFIG_FB_S5P_MDNIE_CONTROL
+#define MDNIE_STORE(name) \
+static ssize_t show_##name(struct device *dev, \
+		struct device_attribute *attr, \
+		char *buf) \
+{ \
+	int i; \
+	for (i = 2; i <= sizeof(name); i+=2) \
+	{ \
+		if(name[i] == END_SEQ) break; \
+		sprintf(buf, "%s0x%X 0x%X\n", buf, name[i], name[i+1]); \
+	} \
+	return sprintf(buf, "%s", buf); \
+} \
+static ssize_t store_##name(struct device *dev, \
+				  struct device_attribute *attr, \
+				  const char *buf, size_t size) \
+{ \
+	short unsigned int reg = 0; \
+	short unsigned int val = 0; \
+	int unsigned bytes_read = 0; \
+	int i; \
+	while (sscanf(buf, "%hx %hx%n", &reg, &val, &bytes_read) == 2) { \
+		buf += bytes_read; \
+		for(i = 2; i<= sizeof(name); i+=2) { \
+			if(name[i] == END_SEQ) break; \
+			if(name[i] == reg) { \
+				name[i+1] = val; \
+				set_mdnie_value(g_mdnie, 1); \
+				break; \
+			} \
+		} \
+	} \
+	return size; \
+} \
+static DEVICE_ATTR(name, S_IRUGO | S_IWUGO, show_##name, store_##name);
+
+
+MDNIE_STORE(tune_dynamic_gallery);
+MDNIE_STORE(tune_dynamic_ui);
+MDNIE_STORE(tune_dynamic_video);
+MDNIE_STORE(tune_dynamic_vt);
+MDNIE_STORE(tune_movie_gallery);
+MDNIE_STORE(tune_movie_ui);
+MDNIE_STORE(tune_movie_video);
+MDNIE_STORE(tune_movie_vt);
+MDNIE_STORE(tune_standard_gallery);
+MDNIE_STORE(tune_standard_ui);
+MDNIE_STORE(tune_standard_video);
+MDNIE_STORE(tune_standard_vt);
+MDNIE_STORE(tune_natural_gallery);
+MDNIE_STORE(tune_natural_ui);
+MDNIE_STORE(tune_natural_video);
+MDNIE_STORE(tune_natural_vt);
+MDNIE_STORE(tune_camera);
+MDNIE_STORE(tune_camera_outdoor);
+MDNIE_STORE(tune_cold);
+MDNIE_STORE(tune_cold_outdoor);
+MDNIE_STORE(tune_normal_outdoor);
+MDNIE_STORE(tune_warm);
+MDNIE_STORE(tune_warm_outdoor);
+
+MDNIE_STORE(tune_negative);
+#ifdef CONFIG_FB_MDNIE_PWM
+MDNIE_STORE(tune_negative_cabc);
+#endif
+MDNIE_STORE(tune_color_tone_1);
+MDNIE_STORE(tune_color_tone_2);
+MDNIE_STORE(tune_color_tone_3);
+
+#define MDNIE_ATTR(name) &dev_attr_##name.attr,
+
+static struct attribute *mdniesysfs_attributes[] = {
+MDNIE_ATTR(tune_dynamic_gallery)
+MDNIE_ATTR(tune_dynamic_ui)
+MDNIE_ATTR(tune_dynamic_video)
+MDNIE_ATTR(tune_dynamic_vt)
+MDNIE_ATTR(tune_movie_gallery)
+MDNIE_ATTR(tune_movie_ui)
+MDNIE_ATTR(tune_movie_video)
+MDNIE_ATTR(tune_movie_vt)
+MDNIE_ATTR(tune_standard_gallery)
+MDNIE_ATTR(tune_standard_ui)
+MDNIE_ATTR(tune_standard_video)
+MDNIE_ATTR(tune_standard_vt)
+MDNIE_ATTR(tune_natural_gallery)
+MDNIE_ATTR(tune_natural_ui)
+MDNIE_ATTR(tune_natural_video)
+MDNIE_ATTR(tune_natural_vt)
+MDNIE_ATTR(tune_camera)
+MDNIE_ATTR(tune_camera_outdoor)
+MDNIE_ATTR(tune_cold)
+MDNIE_ATTR(tune_cold_outdoor)
+MDNIE_ATTR(tune_normal_outdoor)
+MDNIE_ATTR(tune_warm)
+MDNIE_ATTR(tune_warm_outdoor)
+
+MDNIE_ATTR(tune_negative)
+#ifdef CONFIG_FB_MDNIE_PWM
+MDNIE_ATTR(tune_negative_cabc)
+#endif
+MDNIE_ATTR(tune_color_tone_1)
+MDNIE_ATTR(tune_color_tone_2)
+MDNIE_ATTR(tune_color_tone_3)
+	NULL
+};
+
+static struct attribute_group mdnie_group = {
+	.attrs = mdniesysfs_attributes,
+};
+
+static struct miscdevice mdnie_device = {
+	.minor = MISC_DYNAMIC_MINOR,
+	.name = "mdnie",
+};
+
+extern void init_intercept_control(struct kobject *kobj);
+
+static int mdniemod_create_sysfs(void)
+{
+	int ret;
+	struct kobject *kobj;
+
+	ret = misc_register(&mdnie_device);
+	if (ret) {
+	    pr_err("%s misc_register(%s) fail\n", __FUNCTION__, mdnie_device.name);
+	    return 1;
+	}
+
+	kobj = kobject_create_and_add("scenario_control", &mdnie_device.this_device->kobj);
+
+	init_intercept_control(&mdnie_device.this_device->kobj);
+
+	if (sysfs_create_group(kobj, &mdnie_group) < 0) {
+	    pr_err("%s sysfs_create_group fail\n", __FUNCTION__);
+	    pr_err("Failed to create sysfs group for device (%s)!\n", mdnie_device.name);
+	}
+	return 0;
+}
+#endif
+
+>>>>>>> fc9b728... update12
 static int mdnie_probe(struct platform_device *pdev)
 {
 #if defined(CONFIG_FB_MDNIE_PWM)
