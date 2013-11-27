@@ -810,7 +810,7 @@ static void bfqio_destroy(struct cgroup_subsys *subsys, struct cgroup *cgroup)
 	kfree(bgrp);
 }
 
-struct cgroup_subsys bfqio_subsys = {
+struct cgroup_subsys bfqio_subsys_id = {
 	.name = "bfqio",
 	.create = bfqio_create,
 	.can_attach = bfqio_can_attach,
