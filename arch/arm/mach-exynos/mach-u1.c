@@ -3095,7 +3095,7 @@ REGULATOR_INIT(ldo17, "VTF_2.8V", 2800000, 2800000, 0,
 REGULATOR_INIT(ldo18, "TOUCH_LED_3.3V", 3300000, 3300000, 0,
 		REGULATOR_CHANGE_STATUS, 1);
 #else
-REGULATOR_INIT(ldo18, "TOUCH_LED_3.3V", 3000000, 3300000, 0,
+REGULATOR_INIT(ldo18, "TOUCH_LED_3.3V", 2500000, 3300000, 0,
 	REGULATOR_CHANGE_STATUS | REGULATOR_CHANGE_VOLTAGE, 1);
 #endif
 REGULATOR_INIT(ldo21, "VDDQ_M1M2_1.2V", 1200000, 1200000, 1,
@@ -3143,7 +3143,7 @@ static struct regulator_init_data buck2_init_data = {
 static struct regulator_init_data buck3_init_data = {
 	.constraints	= {
 		.name		= "G3D_1.1V",
-		.min_uV		= 900000,
+		.min_uV		= 800000,
 		.max_uV		= 1200000,
 		.always_on	= 0,
 		.boot_on	= 0,
