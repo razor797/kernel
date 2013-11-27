@@ -1,10 +1,10 @@
 find -name '*.ko' -exec cp -av {} /home/gustavo/modules/ \;
 chmod 644 /home/gustavo/modules/*
 /home/gustavo/toolchain/bin/arm-linux-androideabi-strip --strip-unneeded /home/gustavo/modules/*
-cp /home/gustavo/modules/* /home/gustavo/zip_omni/system/lib/modules/
-cp /home/gustavo/kernel/arch/arm/boot/zImage /home/gustavo/zip_omni/
+cp /home/gustavo/modules/* /home/gustavo/zip/system/lib/modules/
+cp /home/gustavo/kernel/arch/arm/boot/zImage /home/gustavo/zip/
 
 CURRENTDATE=$(date +"%d-%m")
-cd /home/gustavo/zip_omni
+cd /home/gustavo/zip
 rm *.zip
-zip -r omni-4.4-kernel-$CURRENTDATE.zip ./
+zip -r cm-11-kernel-$CURRENTDATE.zip ./
