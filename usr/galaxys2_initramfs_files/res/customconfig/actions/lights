@@ -1,0 +1,20 @@
+#!/system/bin/sh
+
+if [ "a$2" != "a" ];then
+  lights=$2
+fi
+
+mount -o remount,rw /
+
+case "${lights}" in
+  0)
+    echo "0" > /sys/devices/virtual/sec/sec_touchkey/force_disable
+    ;;
+  1)
+    echo "1" > /sys/devices/virtual/sec/sec_touchkey/force_disable
+    ;;
+esac;
+
+mount -o remount,ro /
+
+echo $lights
