@@ -1,3 +1,4 @@
+// filename: main.c
 #include "issp_revision.h"
 #ifdef PROJECT_REV_304
 /* Copyright 2006-2007, Cypress Semiconductor Corporation.
@@ -282,8 +283,7 @@ date      revision  author  description
  must be changed). The TARGET pins cannot be changed, these are fixed function
  pins on the PSoC.
  The PWR pin is used to provide power to the target device if power cycle
- programming mode is used.
- The compiler directive RESET_MODE in ISSP_directives.h
+ programming mode is used. The compiler directive RESET_MODE in ISSP_directives.h
  is used to select the programming mode. This pin could control the enable on
  a voltage regulator, or could control the gate of a FET that is used to turn
  the power to the PSoC on.
@@ -344,9 +344,17 @@ date      revision  author  description
  break points in the PSoC ICE Debugger should be used to verify the timing of
  the programming.  The Application Note, "Host-Sourced Serial Programming"
  explains how to do these measurements and should be consulted for the expected
- timing of the erase and program pulses.*/
+ timing of the erase and program pulses.
 
-/*C main line*/
+   ############################################################################
+   ############################################################################
+
+(((((((((((((((((((((((((((((((((((((()))))))))))))))))))))))))))))))))))))) */
+
+/*----------------------------------------------------------------------------
+//                               C main line
+//----------------------------------------------------------------------------
+*/
 #include <linux/module.h>
 
 #include <linux/init.h>
@@ -359,28 +367,31 @@ date      revision  author  description
 #include <linux/proc_fs.h>
 #include <linux/delay.h>
 #include <linux/input.h>
-#include <linux/gpio.h>
-#include <linux/uaccess.h>
-#include <linux/io.h>
-/*
-#include <m8c.h>        part specific constants and macros
-#include "PSoCAPI.h"    PSoC API definitions for all User Modules
- ------ Declarations Associated with ISSP Files & Routines -------
-     Add these to your project as needed.
-*/
+#include <mach/regs-gpio.h>
+#include <plat/gpio-cfg.h>
+#include <asm/gpio.h>
+#include <asm/uaccess.h>
+#include <asm/io.h>
+//#include <m8c.h>        // part specific constants and macros
+//#include "PSoCAPI.h"    // PSoC API definitions for all User Modules
+// ------ Declarations Associated with ISSP Files & Routines -------
+//     Add these to your project as needed.
 #include "issp_extern.h"
 #include "issp_directives.h"
 #include "issp_defs.h"
 #include "issp_errors.h"
-#include <linux/i2c/touchkey_i2c.h>
+#include "u1-cypress-gpio.h"
+/* ------------------------------------------------------------------------- */
 
-struct touchkey_i2c *issp_tkey_i2c;
+/* enable ldo11 */
+extern int touchkey_ldo_on(bool on);
 
 unsigned char bBankCounter;
 unsigned int iBlockCounter;
 unsigned int iChecksumData;
 unsigned int iChecksumTarget;
 
+//update version "eclair/vendor/samsung/apps/Lcdtest/src/com/sec/android/app/lcdtest/touch_firmware.java"
 #if defined(CONFIG_MACH_Q1_BD)
 #include "touchkey_fw_Q1.h"
 #elif defined(CONFIG_ARIES_NTT)
@@ -389,65 +400,60 @@ unsigned int iChecksumTarget;
 #include "touchkey_fw_NA.h"
 #elif defined(CONFIG_TARGET_LOCALE_NAATT)
 #include "touchkey_fw_NAATT.h"
-#elif defined(CONFIG_MACH_M0) || defined(CONFIG_MACH_C1) || \
-	defined(CONFIG_MACH_M3)
-#include "touchkey_fw_M0.h"
-#elif defined(CONFIG_MACH_T0)
-#include "touchkey_fw_T0.h"
 #else
 #include "touchkey_fw_U1.h"
 #endif
 
-#define EXT_I2C_SCL_HIGH\
-	do {\
-		int delay_count;\
-		gpio_direction_output(issp_tkey_i2c->pdata->gpio_scl, 1);\
-		gpio_direction_input(issp_tkey_i2c->pdata->gpio_scl);\
-		delay_count = 100000;\
-		while (delay_count--) {\
-			if (gpio_get_value(issp_tkey_i2c->pdata->gpio_scl))\
-				break;\
-			udelay(1);\
-		} \
-	} while (0);
-#define EXT_I2C_SCL_LOW gpio_direction_output(\
-			issp_tkey_i2c->pdata->gpio_scl, 0);
-#define EXT_I2C_SDA_HIGH gpio_direction_output(\
-			issp_tkey_i2c->pdata->gpio_sda, 1);
-#define EXT_I2C_SDA_LOW	gpio_direction_output(\
-			issp_tkey_i2c->pdata->gpio_sda, 0);
+//////I2C
+
+#define EXT_I2C_SCL_HIGH	\
+	do {								\
+		int delay_count;					\
+		gpio_direction_output(_3_TOUCH_SCL_28V, 1);		\
+		gpio_direction_input(_3_TOUCH_SCL_28V);			\
+		delay_count = 100000;					\
+		while(delay_count--)					\
+		{							\
+			if(gpio_get_value(_3_TOUCH_SCL_28V))		\
+				break;					\
+			udelay(1);					\
+		}							\
+	} while(0);
+#define EXT_I2C_SCL_LOW	gpio_direction_output(_3_TOUCH_SCL_28V, 0);
+#define EXT_I2C_SDA_HIGH	gpio_direction_output(_3_TOUCH_SDA_28V, 1);
+#define EXT_I2C_SDA_LOW	gpio_direction_output(_3_TOUCH_SDA_28V, 0);
 #define TRUE 1
 #define FALSE 0
 
 static void EXT_I2C_LOW(u32 delay)
 {
 	EXT_I2C_SDA_LOW;
-	/*udelay(delay); */
+	//udelay(delay);
 	EXT_I2C_SCL_HIGH;
-	/*udelay(delay); */
+	//udelay(delay);
 	EXT_I2C_SCL_LOW;
-	/*udelay(delay); */
+	//udelay(delay);
 }
 
 static void EXT_I2C_HIGH(u32 delay)
 {
 	EXT_I2C_SDA_HIGH;
-	/*udelay(delay); */
+	//udelay(delay);
 	EXT_I2C_SCL_HIGH;
-	/*udelay(delay); */
+	//udelay(delay);
 	EXT_I2C_SCL_LOW;
-	/*udelay(delay); */
+	//udelay(delay);
 }
 
 static void EXT_I2C_START(u32 delay)
 {
 	EXT_I2C_SDA_HIGH;
 	EXT_I2C_SCL_HIGH;
-	/*udelay(delay); */
+	//udelay(delay);
 	EXT_I2C_SDA_LOW;
-	/*udelay(delay); */
+	//udelay(delay);
 	EXT_I2C_SCL_LOW;
-	/*udelay(delay); */
+	//udelay(delay);
 
 }
 
@@ -455,7 +461,7 @@ static void EXT_I2C_END(u32 delay)
 {
 	EXT_I2C_SDA_LOW;
 	EXT_I2C_SCL_HIGH;
-	/*udelay(delay); */
+	//udelay(delay);
 	EXT_I2C_SDA_HIGH;
 }
 
@@ -464,16 +470,16 @@ static int EXT_I2C_ACK(u32 delay)
 	u32 ack;
 
 	/* SDA -> Input */
-	gpio_direction_input(issp_tkey_i2c->pdata->gpio_sda);
+	gpio_direction_input(_3_TOUCH_SDA_28V);
 
 	udelay(delay);
 	EXT_I2C_SCL_HIGH;
-	/*udelay(delay); */
-	ack = gpio_get_value(issp_tkey_i2c->pdata->gpio_sda);
+	//udelay(delay);
+	ack = gpio_get_value(_3_TOUCH_SDA_28V);
 	EXT_I2C_SCL_LOW;
-	/*udelay(delay); */
+	//udelay(delay);
 	if (ack)
-		printk(KERN_DEBUG"EXT_I2C No ACK\n");
+		printk("EXT_I2C No ACK\n");
 
 	return ack;
 }
@@ -482,54 +488,54 @@ static void EXT_I2C_NACK(u32 delay)
 {
 	EXT_I2C_SDA_HIGH;
 	EXT_I2C_SCL_HIGH;
-	/*udelay(delay); */
+	//udelay(delay);
 	EXT_I2C_SCL_LOW;
-	/*udelay(delay); */
+	//udelay(delay);
 }
 
 static void EXT_I2C_SEND_ACK(u32 delay)
 {
-	gpio_direction_output(issp_tkey_i2c->pdata->gpio_sda, 0);
+	gpio_direction_output(_3_TOUCH_SDA_28V, 0);
 	EXT_I2C_SCL_HIGH;
-	/*udelay(delay); */
+	//udelay(delay);
 	EXT_I2C_SCL_LOW;
-	/*udelay(delay); */
+	//udelay(delay);
 
 }
 
 #define EXT_I2C_DELAY	1
-/*============================================================
+//============================================================
+//
+//      Porting section 6.      I2C function calling
+//
+//      Connect baseband i2c function
+//
+//      Warning 1. !!!!  Burst mode is not supported. Transfer 1 byte Only.
+//
+//              Every i2c packet has to
+//                      " START > Slave address > One byte > STOP " at download mode.
+//
+//      Warning 2. !!!!  Check return value of i2c function.
+//
+//              _i2c_read_(), _i2c_write_() must return
+//                      TRUE (1) if success,
+//                      FALSE(0) if failed.
+//
+//              If baseband i2c function returns different value, convert return value.
+//                      ex> baseband_return = baseband_i2c_read( slave_addr, pData, cLength );
+//                              return ( baseband_return == BASEBAND_RETURN_VALUE_SUCCESS );
+//
+//
+//      Warning 3. !!!!  Check Slave address
+//
+//              Slave address is '0x7F' at download mode. ( Diffrent with Normal touch working mode )
+//              '0x7F' is original address,
+//                      If shift << 1 bit, It becomes '0xFE'
+//
+//============================================================
 
-Porting section 6.      I2C function calling
-
-Connect baseband i2c function
-
-Warning 1. !!!!  Burst mode is not supported. Transfer 1 byte Only.
-
-Every i2c packet has to
-" START > Slave address > One byte > STOP " at download mode.
-
-Warning 2. !!!!  Check return value of i2c function.
-
-_i2c_read_(), _i2c_write_() must return
-TRUE (1) if success,
-FALSE(0) if failed.
-
-If baseband i2c function returns different value, convert return value.
-ex> baseband_return = baseband_i2c_read( slave_addr, pData, cLength );
-return ( baseband_return == BASEBAND_RETURN_VALUE_SUCCESS );
-
-Warning 3. !!!!  Check Slave address
-
-Slave address is '0x7F' at download mode.
-( Diffrent with Normal touch working mode )
-'0x7F' is original address,
-If shift << 1 bit, It becomes '0xFE'
-
-============================================================*/
-
-static int _i2c_read_(unsigned char SlaveAddr,
-	unsigned char *pData, unsigned char cLength)
+static int
+_i2c_read_(unsigned char SlaveAddr, unsigned char *pData, unsigned char cLength)
 {
 	unsigned int i;
 	int delay_count = 10000;
@@ -544,7 +550,7 @@ static int _i2c_read_(unsigned char SlaveAddr,
 			EXT_I2C_LOW(EXT_I2C_DELAY);
 	}
 
-	EXT_I2C_HIGH(EXT_I2C_DELAY);
+	EXT_I2C_HIGH(EXT_I2C_DELAY);	//readwrite
 
 	if (EXT_I2C_ACK(EXT_I2C_DELAY)) {
 		EXT_I2C_END(EXT_I2C_DELAY);
@@ -552,37 +558,35 @@ static int _i2c_read_(unsigned char SlaveAddr,
 	}
 
 	udelay(10);
-	gpio_direction_input(issp_tkey_i2c->pdata->gpio_scl);
+	gpio_direction_input(_3_TOUCH_SCL_28V);
 	delay_count = 100000;
 	while (delay_count--) {
-		if (gpio_get_value(issp_tkey_i2c->pdata->gpio_scl))
+		if (gpio_get_value(_3_TOUCH_SCL_28V))
 			break;
 		udelay(1);
 	}
 	while (cLength--) {
 		*pData = 0;
 		for (i = 8; i > 0; i--) {
-			/*udelay(EXT_I2C_DELAY); */
+			//udelay(EXT_I2C_DELAY);
 			EXT_I2C_SCL_HIGH;
-			/*udelay(EXT_I2C_DELAY); */
+			//udelay(EXT_I2C_DELAY);
 			*pData |=
-			    (!!(gpio_get_value(issp_tkey_i2c->pdata->gpio_sda))
-			     << (i - 1));
-			/*udelay(EXT_I2C_DELAY); */
+			    (!!(gpio_get_value(_3_TOUCH_SDA_28V)) << (i - 1));
+			//udelay(EXT_I2C_DELAY);
 			EXT_I2C_SCL_LOW;
-			/*udelay(EXT_I2C_DELAY); */
+			//udelay(EXT_I2C_DELAY);
 		}
 
 		if (cLength) {
 			EXT_I2C_SEND_ACK(EXT_I2C_DELAY);
 			udelay(10);
 			pData++;
-			gpio_direction_input(issp_tkey_i2c->pdata->gpio_sda);
-			gpio_direction_input(issp_tkey_i2c->pdata->gpio_scl);
+			gpio_direction_input(_3_TOUCH_SDA_28V);
+			gpio_direction_input(_3_TOUCH_SCL_28V);
 			delay_count = 100000;
 			while (delay_count--) {
-				if (gpio_get_value
-				    (issp_tkey_i2c->pdata->gpio_scl))
+				if (gpio_get_value(_3_TOUCH_SCL_28V))
 					break;
 				udelay(1);
 			}
@@ -592,7 +596,7 @@ static int _i2c_read_(unsigned char SlaveAddr,
 
 	EXT_I2C_END(EXT_I2C_DELAY);
 
-	return TRUE;
+	return (TRUE);
 
 }
 
@@ -606,33 +610,33 @@ int get_touchkey_firmware(char *version)
 			return 0;
 
 	}
-	return -1;
-	/*printk(KERN_DEBUG
-			"%s F/W version: 0x%x, Module version:0x%x\n",
-			__FUNCTION__, version[1],version[2]); */
+	return (-1);
+	//printk("%s F/W version: 0x%x, Module version:0x%x\n",__FUNCTION__, version[1],version[2]);
 }
 
-/* ErrorTrap()
- Return is not valid from main for PSOC, so this ErrorTrap routine is used.
- For some systems returning an error code will work best. For those, the
- calls to ErrorTrap() should be replaced with a return(bErrorNumber). For
- other systems another method of reporting an error could be added to this
- function -- such as reporting over a communcations port.*/
+/* ========================================================================= */
+// ErrorTrap()
+// Return is not valid from main for PSOC, so this ErrorTrap routine is used.
+// For some systems returning an error code will work best. For those, the
+// calls to ErrorTrap() should be replaced with a return(bErrorNumber). For
+// other systems another method of reporting an error could be added to this
+// function -- such as reporting over a communcations port.
+/* ========================================================================= */
 void ErrorTrap(unsigned char bErrorNumber)
 {
 #ifndef RESET_MODE
-	/* Set all pins to highZ to avoid back
-	powering the PSoC through the GPIO
-	   protection diodes. */
+	// Set all pins to highZ to avoid back powering the PSoC through the GPIO
+	// protection diodes.
 	SetSCLKHiZ();
 	SetSDATAHiZ();
-	/* If Power Cycle programming, turn off the target */
+	// If Power Cycle programming, turn off the target
 	RemoveTargetVDD();
 #endif
-	printk(KERN_DEBUG"\r\nErrorTrap: errorNumber: %d\n",
-		bErrorNumber);
+	printk("\r\nErrorTrap: errorNumber: %d\n", bErrorNumber);
 
+	// TODO: write retry code or some processing.
 	return;
+//    while (1);
 }
 
 /* ========================================================================= */
@@ -672,291 +676,257 @@ RAM Load, FLASHBlock Program, and Target Checksum Verification.*/
 		dog_kick();
 	}
 
-	/* Initialize the Host & Target for ISSP operations */
-	printk(KERN_DEBUG"fXRESInitializeTargetForISSP Start\n");
+	// Initialize the Host & Target for ISSP operations
+	printk("fXRESInitializeTargetForISSP Start\n");
 
-	/*INTLOCK(); */
+	//INTLOCK();
 	local_save_flags(flags);
 	local_irq_disable();
-	fIsError = fXRESInitializeTargetForISSP();
-	if (fIsError) {
+	if (fIsError = fXRESInitializeTargetForISSP()) {
 		ErrorTrap(fIsError);
 		return fIsError;
 	}
-	/*INTFREE(); */
+	//INTFREE();
 #else
-	/*INTLOCK(); */
-	/*local_irq_save(flags);*/
-	/* Initialize the Host & Target for ISSP operations */
-	fIsError = fPowerCycleInitializeTargetForISSP();
-	if (fIsError) {
+	//INTLOCK();
+	local_irq_save(flags);
+	// Initialize the Host & Target for ISSP operations
+	if ((fIsError = fPowerCycleInitializeTargetForISSP())) {
 		ErrorTrap(fIsError);
 		return fIsError;
 	}
-	/*INTFREE(); */
+	//INTFREE();    
 #endif				/* RESET_MODE */
 
-#if 0				/* issp_test_2010 block */
-	printk(KERN_DEBUG"fXRESInitializeTargetForISSP END\n");
+#if 0				// issp_test_2010 block
+	printk("fXRESInitializeTargetForISSP END\n");
 
-	/* Run the SiliconID Verification, and proceed according to result. */
-	printk(KERN_DEBUG"fVerifySiliconID START\n");
+	// Run the SiliconID Verification, and proceed according to result.
+	printk("fVerifySiliconID START\n");
 #endif
 
-	/*INTLOCK(); */
-	/* issp_test_20100709 unblock */
-	fVerifySiliconID();
+	//INTLOCK();
+	fVerifySiliconID();	// .. error // issp_test_20100709 unblock
 #if 0
-	fIsError = fVerifySiliconID();
-	if (fIsError) {
+	if (fIsError = fVerifySiliconID()) {
 		ErrorTrap(fIsError);
 		return fIsError;
 	}
 #endif
 
-	/*INTFREE(); */
-	/*local_irq_restore(flags);*/
-	/*printk(KERN_DEBUG"fVerifySiliconID END\n"); */
+	//INTFREE();
+	local_irq_restore(flags);
+	//printk("fVerifySiliconID END\n"); // issp_test_2010 block
 
-	/* Bulk-Erase the Device. */
-	/*printk(KERN_DEBUG"fEraseTarget START\n"); */
-	/*INTLOCK(); */
-	fIsError = fEraseTarget();
-	/*local_irq_save(flags);*/
-	if (fIsError) {
+	// Bulk-Erase the Device.
+	//printk("fEraseTarget START\n"); // issp_test_2010 block
+	//INTLOCK();
+	local_irq_save(flags);
+	if ((fIsError = fEraseTarget())) {
 		ErrorTrap(fIsError);
 		return fIsError;
 	}
-	/*INTFREE(); */
-	/*local_irq_restore(flags);*/
-	/*printk(KERN_DEBUG"fEraseTarget END\n"); */
+	//INTFREE();
+	local_irq_restore(flags);
+	//printk("fEraseTarget END\n"); // issp_test_2010 block
 
-/*==============================================================
-Program Flash blocks with predetermined data.
-In the final application
-this data should come from the HEX output of PSoC Designer.*/
-	/*printk(KERN_DEBUG"Program Flash Blocks Start\n");*/
+	//==============================================================//
+	// Program Flash blocks with predetermined data. In the final application
+	// this data should come from the HEX output of PSoC Designer.
+	//printk("Program Flash Blocks Start\n");
 
-	/* Calculte the device checksum as you go*/
-	iChecksumData = 0;
-	/*PTJ: NUM_BANKS should be 1 for Krypton*/
-	for (bBankCounter = 0; bBankCounter < NUM_BANKS; bBankCounter++) {
-		/*local_irq_save(flags);*/
+	iChecksumData = 0;	// Calculte the device checksum as you go
+	for (bBankCounter = 0; bBankCounter < NUM_BANKS; bBankCounter++)	//PTJ: NUM_BANKS should be 1 for Krypton
+	{
+		local_irq_save(flags);
 		for (iBlockCounter = 0; iBlockCounter < BLOCKS_PER_BANK;
 		     iBlockCounter++) {
-			/*printk(KERN_DEBUG
-				"Program Loop : iBlockCounter %d\n",
-				iBlockCounter); */
-			/*INTLOCK(); */
-			/* local_irq_save(flags); */
+			//printk("Program Loop : iBlockCounter %d \n",iBlockCounter);
+			//INTLOCK();
+			// local_irq_save(flags);
 
-			/*PTJ: READ-WRITE-SETUP used here
-			to select SRAM Bank 1, and TSYNC Enable */
+			//PTJ: READ-WRITE-SETUP used here to select SRAM Bank 1, and TSYNC Enable
 #ifdef CY8C20x66
-			fIsError = fSyncEnable();
-			if (fIsError) {
+			if ((fIsError = fSyncEnable())) {
 				ErrorTrap(fIsError);
 				return fIsError;
 			}
-			fIsError = fReadWriteSetup();
-			if (fIsError) {
+			if ((fIsError = fReadWriteSetup())) {	// send write command - swanhan
 				ErrorTrap(fIsError);
 				return fIsError;
 			}
 #endif
-			/*firmware read.
-			   LoadProgramData(bBankCounter,
-			   (unsigned char)iBlockCounter);
-			   PTJ: this loads the Hydra with test data,
-			   not the krypton */
-			LoadProgramData((unsigned char)iBlockCounter,
-					bBankCounter);
-			iChecksumData += iLoadTarget();
+			//firmware read.
+			//LoadProgramData(bBankCounter, (unsigned char)iBlockCounter);                      //PTJ: this loads the Hydra with test data, not the krypton
+			LoadProgramData((unsigned char)iBlockCounter, bBankCounter);	//PTJ: this loads the Hydra with test data, not the krypton
+			iChecksumData += iLoadTarget();	//PTJ: this loads the Krypton
 
-			/*dog_kick(); */
-			fIsError = fProgramTargetBlock(bBankCounter,
-				(unsigned char)iBlockCounter);
-			if (fIsError) {
+			//dog_kick();
+			if ((fIsError =
+			    fProgramTargetBlock(bBankCounter,
+						(unsigned char)iBlockCounter))) {
 				ErrorTrap(fIsError);
 				return fIsError;
 			}
-			/*PTJ: READ-STATUS after PROGRAM-AND-VERIFY */
-#ifdef CY8C20x66
-			fIsError = fReadStatus();
-			if (fIsError) {
+#ifdef CY8C20x66		//PTJ: READ-STATUS after PROGRAM-AND-VERIFY
+			if ((fIsError = fReadStatus())) {
 				ErrorTrap(fIsError);
 				return fIsError;
 			}
 #endif
-			/*INTFREE(); */
-			/*local_irq_restore(flags);*/
+			//INTFREE();
+			//local_irq_restore(flags);
 		}
-		/*local_irq_restore(flags);*/
+		local_irq_restore(flags);
 	}
 
-	/*printk(KERN_DEBUG"\r\n Program Flash Blocks End\n"); */
+	//printk("\r\n Program Flash Blocks End\n");
 
-#if 0				/* verify check pass or check. */
-	printk(KERN_DEBUG"\r\n Verify Start", 0, 0, 0);
-	/*=======================================================
-	PTJ: Doing Verify
-	PTJ: this code isnt needed in the program flow
-	because we use PROGRAM-AND-VERIFY (ProgramAndVerify SROM Func)
-	PTJ: which has Verify built into it.
-	Verify included for completeness in case host desires
-	to do a stand-alone verify at a later date.*/
+#if 0				// verify check pass or check.
+	printk("\r\n Verify Start", 0, 0, 0);
+	//=======================================================//
+	//PTJ: Doing Verify
+	//PTJ: this code isnt needed in the program flow because we use PROGRAM-AND-VERIFY (ProgramAndVerify SROM Func)
+	//PTJ: which has Verify built into it.
+	// Verify included for completeness in case host desires to do a stand-alone verify at a later date.
 	for (bBankCounter = 0; bBankCounter < NUM_BANKS; bBankCounter++) {
 		for (iBlockCounter = 0; iBlockCounter < BLOCKS_PER_BANK;
 		     iBlockCounter++) {
-			printk(KERN_DEBUG"Verify Loop: iBlockCounter %d",
-				iBlockCounter, 0, 0);
+			printk("Verify Loop: iBlockCounter %d", iBlockCounter,
+			       0, 0);
 			INTLOCK();
 			LoadProgramData(bBankCounter,
 					(unsigned char)iBlockCounter);
 
-			/*PTJ: READ-WRITE-SETUP used here
-			to select SRAM Bank 1, and TSYNC Enable */
+			//PTJ: READ-WRITE-SETUP used here to select SRAM Bank 1, and TSYNC Enable
 #ifdef CY8C20x66
-			fIsError = fReadWriteSetup();
-			if (fIsError)
+			if (fIsError = fReadWriteSetup()) {
 				ErrorTrap(fIsError);
+			}
 #endif
 
 			dog_kick();
 
-			fIsError =
-				fVerifySetup(bBankCounter,
-				(unsigned char)iBlockCounter);
-			if (fIsError)
+			if (fIsError =
+			    fVerifySetup(bBankCounter,
+					 (unsigned char)iBlockCounter)) {
 				ErrorTrap(fIsError);
-#ifdef CY8C20x66		/*PTJ: READ-STATUS after VERIFY-SETUP */
-			/*PTJ: 307, added for tsync enable testing */
-			fIsError = fSyncEnable();
-			if (fIsError)
+			}
+#ifdef CY8C20x66		//PTJ: READ-STATUS after VERIFY-SETUP
+			if (fIsError = fSyncEnable()) {	//PTJ: 307, added for tsync enable testing
 				ErrorTrap(fIsError);
-			fIsError = fReadStatus();
-			if (fIsError)
+			}
+			if (fIsError = fReadStatus()) {
 				ErrorTrap(fIsError);
-			/*PTJ: READ-WRITE-SETUP used here
-			to select SRAM Bank 1, and TSYNC Enable */
-			fIsError = fReadWriteSetup();
-			if (fIsError)
+			}
+			//PTJ: READ-WRITE-SETUP used here to select SRAM Bank 1, and TSYNC Enable
+			if (fIsError = fReadWriteSetup()) {
 				ErrorTrap(fIsError);
-			/*PTJ: 307, added for tsync enable testing */
-			fIsError = fSyncDisable();
-			if (fIsError)
+			}
+			if (fIsError = fSyncDisable()) {	//PTJ: 307, added for tsync enable testing
 				ErrorTrap(fIsError);
+			}
 #endif
 			INTFREE();
 		}
 	}
-	printk(KERN_DEBUG"Verify End", 0, 0, 0);
+	printk("Verify End", 0, 0, 0);
 #endif				/* #if 1 */
 #if 1				/* security start */
-	/*=======================================================
-	 program security data into target psoc.
-	 in the final application this data should
-	 come from the hex output of psoc designer.
-	printk(KERN_DEBUG"program security data start\n");*/
-	/*INTLOCK(); */
-	/*local_irq_save(flags);*/
+	//=======================================================//
+	// Program security data into target PSoC. In the final application this
+	// data should come from the HEX output of PSoC Designer.
+	//printk("Program security data START\n");
+	//INTLOCK();
+	local_irq_save(flags);
 	for (bBankCounter = 0; bBankCounter < NUM_BANKS; bBankCounter++) {
-		/*PTJ: READ-WRITE-SETUP used here to select SRAM Bank 1 */
+		//PTJ: READ-WRITE-SETUP used here to select SRAM Bank 1
 #ifdef CY8C20x66
-		/*PTJ: 307, added for tsync enable testing */
-		fIsError = fSyncEnable();
-		if (fIsError) {
+		if ((fIsError = fSyncEnable())) {	//PTJ: 307, added for tsync enable testing.
 			ErrorTrap(fIsError);
 			return fIsError;
 		}
-		fIsError = fReadWriteSetup();
-		if (fIsError) {
+		if ((fIsError = fReadWriteSetup())) {
 			ErrorTrap(fIsError);
 			return fIsError;
 		}
 #endif
-		/* Load one bank of security data from hex file into buffer */
-		fIsError = fLoadSecurityData(bBankCounter);
-		if (fIsError) {
+		// Load one bank of security data from hex file into buffer
+		if ((fIsError = fLoadSecurityData(bBankCounter))) {
 			ErrorTrap(fIsError);
 			return fIsError;
 		}
-		/* Secure one bank of the target flash */
-		fIsError = fSecureTargetFlash();
-		if (fIsError) {
+		// Secure one bank of the target flash
+		if ((fIsError = fSecureTargetFlash())) {
 			ErrorTrap(fIsError);
 			return fIsError;
 		}
 	}
-	/*INTFREE(); */
-	/*local_irq_restore(flags);*/
+	//INTFREE();
+	local_irq_restore(flags);
 
-	/*printk(KERN_DEBUG"Program security data END\n"); */
+	//printk("Program security data END\n");
 
-	/*==============================================================
-	PTJ: Do READ-SECURITY after SECURE
-	Load one bank of security data from hex file into buffer
-	loads abTargetDataOUT[] with security data
-	that was used in secure bit stream*/
-	/*INTLOCK(); */
-	/*local_irq_save(flags);*/
-	fIsError = fLoadSecurityData(bBankCounter);
-	if (fIsError) {
+	//==============================================================//
+	//PTJ: Do READ-SECURITY after SECURE
+
+	//Load one bank of security data from hex file into buffer
+	//loads abTargetDataOUT[] with security data that was used in secure bit stream
+	//INTLOCK();
+	local_irq_save(flags);
+	if ((fIsError = fLoadSecurityData(bBankCounter))) {
 		ErrorTrap(fIsError);
 		return fIsError;
 	}
 #ifdef CY8C20x66
-	fIsError = fReadSecurity();
-	if (fIsError) {
+	if ((fIsError = fReadSecurity())) {
 		ErrorTrap(fIsError);
 		return fIsError;
 	}
 #endif
-	/*INTFREE(); */
-	/*local_irq_restore(flags);*/
-	/*printk(KERN_DEBUG"Load security data END\n"); */
+	//INTFREE();
+	local_irq_restore(flags);
+	//printk("Load security data END\n");
 #endif				/* security end */
 
-	/*=======================================================
-	PTJ: Doing Checksum after READ-SECURITY*/
-	/*INTLOCK(); */
-	/*local_irq_save(flags);*/
+	//=======================================================//
+	//PTJ: Doing Checksum after READ-SECURITY
+	//INTLOCK();
+	local_irq_save(flags);
 	iChecksumTarget = 0;
 	for (bBankCounter = 0; bBankCounter < NUM_BANKS; bBankCounter++) {
-		fIsError = fAccTargetBankChecksum(&iChecksumTarget);
-		if (fIsError) {
+		if ((fIsError = fAccTargetBankChecksum(&iChecksumTarget))) {
 			ErrorTrap(fIsError);
 			return fIsError;
 		}
 	}
 
-	/*INTFREE(); */
-	/*local_irq_restore(flags);*/
+	//INTFREE();
+	local_irq_restore(flags);
 
-	/*printk(KERN_DEBUG"Checksum : iChecksumTarget (0x%X)\n",
-	(unsigned char)iChecksumTarget);
-	   printk  ("Checksum : iChecksumData (0x%X)\n",
-	   (unsigned char)iChecksumData); */
+	//printk("Checksum : iChecksumTarget (0x%X)\n", (unsigned char)iChecksumTarget);
+	//printk  ("Checksum : iChecksumData (0x%X)\n", (unsigned char)iChecksumData);
 
 	if ((unsigned short)(iChecksumTarget & 0xffff) !=
 	    (unsigned short)(iChecksumData & 0xffff)) {
 		ErrorTrap(VERIFY_ERROR);
 		return fIsError;
 	}
-	/*printk(KERN_DEBUG"Doing Checksum END\n");*/
+	//printk("Doing Checksum END\n");
 
-	 /**** SUCCESS ***
-	 At this point, the Target has been successfully Initialize,
-	 ID-Checked,	 Bulk-Erased, Block-Loaded,
-	 Block-Programmed, Block-Verified,
-	 and Device- Checksum Verified.*/
+	// *** SUCCESS ***
+	// At this point, the Target has been successfully Initialize, ID-Checked,
+	// Bulk-Erased, Block-Loaded, Block-Programmed, Block-Verified, and Device-
+	// Checksum Verified.
 
-	/* You may want to restart Your Target PSoC Here. */
-	ReStartTarget();
+	// You may want to restart Your Target PSoC Here.
+	ReStartTarget();	//Touch IC Reset.
 
-	/*printk(KERN_DEBUG"ReStartTarget\n"); */
+	//printk("ReStartTarget\n");
 
 	return 0;
 }
 
-#endif				/*(PROJECT_REV_) end of file main.c */
+// end of main()
+
+#endif				//(PROJECT_REV_) end of file main.c
