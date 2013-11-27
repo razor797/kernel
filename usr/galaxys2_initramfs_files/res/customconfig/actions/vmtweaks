@@ -16,6 +16,9 @@ if [ "$2" ]; then
 	    sysctl -w vm.dirty_writeback_centisecs=2000
 	    sysctl -w vm.dirty_expire_centisecs=1000
 	    sysctl -w vm.min_free_kbytes=4096
+	    sysctl -w kernel.sched_min_granularity_ns=300000 > /dev/null
+        sysctl -w kernel.sched_latency_ns=500000 > /dev/null
+        sysctl -w kernel.sched_wakeup_granularity_ns=200000 > /dev/null
 	    ;;
 	default)
 	    [ -f /data/config.txt ] && sed -i -e "s/^VM_TWEAKS=.*/VM_TWEAKS=2/g" /data/config.txt
