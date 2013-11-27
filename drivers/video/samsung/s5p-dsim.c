@@ -832,6 +832,8 @@ static int s5p_dsim_late_resume_init_dsim(struct dsim_global *dsim)
 
 	return 0;
 }
+#endif
+#endif
 
 #if 0
 static int s5p_dsim_init_dsim(struct dsim_global *dsim)

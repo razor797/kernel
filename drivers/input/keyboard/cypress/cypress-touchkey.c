@@ -346,12 +346,13 @@ void set_touch_constraints(bool blnstatus)
 
 int update_touchkey_brightness(int level)
 {
-	if(dyn_brightness)
+	if (dyn_brightness)
 	{
 		printk("Changing touchkey brightness %d\n", level);
 		touchkey_voltage = 2700 + ((level * 24) / 500)*50;
 		change_touch_key_led_voltage(touchkey_voltage);
 	}
+	return 0;
 }
 
 static ssize_t brightness_control_read( struct device *dev, struct device_attribute *attr, char *buf ){
@@ -880,7 +881,6 @@ void touchkey_work_func(struct work_struct *p)
 	int retry = 10;
 	int keycode_type = 0;
 	int pressed;
-	int status;
 
 	set_touchkey_debug('a');
 
@@ -1366,11 +1366,12 @@ static ssize_t led_timeout_write_ms( struct device *dev, struct device_attribute
 	sscanf(buf,"%d\n", &i);
 	if(i < 0) return size;
 	led_timeout = i;
-	if(!led_disabled)
+	if(!led_disabled) {
 	if(led_timeout == 0)
 	{
 		del_timer(&led_timer);
 	}
+}
 	else mod_timer(&led_timer, jiffies + msecs_to_jiffies(led_timeout));
 	return size;
 }
@@ -1379,12 +1380,13 @@ static ssize_t led_timeout_write( struct device *dev, struct device_attribute *a
 {
 	sscanf(buf,"%d\n", &led_timeout);
 	led_timeout = led_timeout * 1000;
-	if(!led_disabled)
+	if(!led_disabled) {
 	if(led_timeout == 0)
 	{
 		del_timer(&led_timer);
 		schedule_work(&led_fadein_work);
 	}
+}
 	else mod_timer(&led_timer, jiffies + msecs_to_jiffies(led_timeout));
 	return size;
 }

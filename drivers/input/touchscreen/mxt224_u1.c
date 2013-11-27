@@ -1495,6 +1495,7 @@ static int freq_hop_err_setting(int state)
 	return 0;
 }
 
+#if 0
 #ifdef CLEAR_MEDIAN_FILTER_ERROR
 static int Check_Err_Condition(void)
 {
@@ -1508,7 +1509,9 @@ static int Check_Err_Condition(void)
 	}
 	return rtn;
 }
+#endif
 
+#if 0
 static void median_err_setting(void)
 {
 	u16 obj_address;
@@ -1704,6 +1707,7 @@ static void median_err_setting(void)
 	copy_data->noise_median.mferr_setting = true;
 }
 #endif
+#endif
 
 static irqreturn_t mxt224_irq_thread(int irq, void *ptr)
 {
@@ -1711,10 +1715,6 @@ static irqreturn_t mxt224_irq_thread(int irq, void *ptr)
 	int id;
 	u8 msg[data->msg_object_size];
 	u8 touch_message_flag = 0;
-	u8 value, ret;
-	u16 size_one;
-	u16 obj_address = 0;
-	int ta_status_check;
 
 	if ((copy_data->palm_chk_flag == 2) && (copy_data->family_id == 0x80))
 		palm_recovery();

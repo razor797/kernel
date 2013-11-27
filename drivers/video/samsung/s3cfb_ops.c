@@ -1668,6 +1668,7 @@ static inline u32 blendeq(enum s3c_fb_blending blending, u8 transp_length)
 			BLENDEQ_Q_FUNC(BLENDEQ_COEF_ZERO);
 }
 
+#if 0
 static bool s3c_fb_validate_x_alignment(struct s3cfb_global *fbdev, int x, u32 w,
 		u32 bits_per_pixel)
 {
@@ -1686,6 +1687,7 @@ static bool s3c_fb_validate_x_alignment(struct s3cfb_global *fbdev, int x, u32 w
 
 	return 1;
 }
+#endif
 
 #if defined(CONFIG_CPU_EXYNOS4212) || defined(CONFIG_CPU_EXYNOS4412)
 static int s3c_fb_set_win_buffer(struct s3cfb_global *fbdev,

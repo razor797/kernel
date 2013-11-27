@@ -752,7 +752,7 @@ int fimc_mmap_own_mem(struct file *filp, struct vm_area_struct *vma)
 	struct fimc_control *ctrl = prv_data->ctrl;
 	u32 start_phy_addr = 0;
 	u32 size = vma->vm_end - vma->vm_start;
-	u32 pfn, idx = vma->vm_pgoff;
+	u32 pfn = vma->vm_pgoff;
 	u32 buf_length = 0;
 
 	buf_length = ctrl->mem.size;
@@ -868,9 +868,7 @@ static inline int fimc_mmap_out(struct file *filp, struct vm_area_struct *vma)
 	struct fimc_prv_data *prv_data =
 				(struct fimc_prv_data *)filp->private_data;
 	struct fimc_control *ctrl = prv_data->ctrl;
-	int ctx_id = prv_data->ctx_id;
 
-	int idx = ctrl->out->ctx[ctx_id].overlay.req_idx;
 	int ret = -1;
 
 #if 0

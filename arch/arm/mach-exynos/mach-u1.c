@@ -826,9 +826,6 @@ static int m5mo_flash_power(int enable)
 		if (regulator_is_enabled(movie))
 			regulator_disable(movie);
 	}
-torch_exit:
-	regulator_put(flash);
-	regulator_put(movie);
 
 	return 0;
 }
@@ -3871,7 +3868,11 @@ static struct platform_device bcm4330_bluetooth_device = {
 #endif
 
 #ifdef CONFIG_SND_SOC_U1_MC1N2
+#ifndef CONFIG_MACH_Q1_BD
 static DEFINE_SPINLOCK(mic_bias_lock);
+#endif
+
+#ifndef CONFIG_MACH_Q1_BD
 static bool mc1n2_mainmic_bias;
 static bool mc1n2_submic_bias;
 
@@ -3884,6 +3885,7 @@ static void set_shared_mic_bias(void)
 		gpio_set_value(GPIO_EAR_MIC_BIAS_EN, mc1n2_mainmic_bias
 			       || mc1n2_submic_bias);
 }
+#endif
 
 void sec_set_sub_mic_bias(bool on)
 {
@@ -4821,6 +4823,7 @@ static unsigned int sec_bat_get_lpcharging_state(void)
 	return val;
 }
 
+#if 0
 static void sec_bat_initial_check(void)
 {
 	pr_info("%s: connected_cable_type:%d\n",
@@ -4828,6 +4831,7 @@ static void sec_bat_initial_check(void)
 	if (connected_cable_type != CABLE_TYPE_NONE)
 		max8997_muic_charger_cb(connected_cable_type);
 }
+#endif
 
 static struct sec_bat_platform_data sec_bat_pdata = {
 	.fuel_gauge_name	= "fuelgauge",
@@ -6119,7 +6123,6 @@ struct mxt540e_platform_data mxt540e_data = {
 
 #ifdef CONFIG_EPEN_WACOM_G5SP
 static int p6_wacom_init_hw(void);
-static int p6_wacom_exit_hw(void);
 static int p6_wacom_suspend_hw(void);
 static int p6_wacom_resume_hw(void);
 static int p6_wacom_early_suspend_hw(void);
