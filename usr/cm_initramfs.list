@@ -33,7 +33,6 @@ file /res/customconfig/customconfig-helper /home/gustavo/kernel/usr/galaxys2_ini
 file /res/customconfig/default.profile /home/gustavo/kernel/usr/galaxys2_initramfs_files/res/customconfig/default.profile 755 0 0
 dir /res/customconfig/actions 755 0 0
 file /res/customconfig/actions/bln_effect /home/gustavo/kernel/usr/galaxys2_initramfs_files/res/customconfig/actions/bln_effect 755 0 0
-file /res/customconfig/actions/cfs-tweaks /home/gustavo/kernel/usr/galaxys2_initramfs_files/res/customconfig/actions/cfs-tweaks 755 0 0
 file /res/customconfig/actions/lights /home/gustavo/kernel/usr/galaxys2_initramfs_files/res/customconfig/actions/lights 755 0 0
 file /res/customconfig/actions/selinux /home/gustavo/kernel/usr/galaxys2_initramfs_files/res/customconfig/actions/selinux 755 0 0
 file /res/customconfig/actions/chargecurrent /home/gustavo/kernel/usr/galaxys2_initramfs_files/res/customconfig/actions/chargecurrent 755 0 0

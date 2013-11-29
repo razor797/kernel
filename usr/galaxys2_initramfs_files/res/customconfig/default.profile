@@ -11,7 +11,6 @@ CPUVOLT5=975
 CPUVOLT6=950
 GENTLE_FAIR_SLEEPERS=off
 ARCH_POWER=on
-cfs_tweaks=1
 selinux=0
 scrollcache=on
 navigationbar=off
