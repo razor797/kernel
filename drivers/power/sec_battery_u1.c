@@ -221,7 +221,7 @@
 #endif
 
 #ifdef CONFIG_TARGET_LOCALE_NA
-#define FULL_CHARGE_COND_VOLTAGE    (4000 * 1000)	/* 4.00 V */
+#define FULL_CHARGE_COND_VOLTAGE    (4150 * 1000)  /* 4.15 V */
 #else
 #define FULL_CHARGE_COND_VOLTAGE    (4150 * 1000)	/* 4.15 V */
 #endif
