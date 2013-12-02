@@ -309,6 +309,9 @@ config CPU_FREQ_GOV_HYPER
 
 config CPU_FREQ_GOV_NEOX
   tristate "'neox' cpufreq policy governor"
+  
+config CPU_FREQ_GOV_NIGHTMARE
+  tristate "'neox' cpufreq policy governor"
  
 config CPU_FREQ_GOV_INTELLIDEMAND
   tristate "'intellidemand' cpufreq governor"

@@ -7,6 +7,8 @@
              <spinnerItem name="zzmoove" value="zzmoove"/>
              <spinnerItem name="HYPER" value="HYPER"/>
              <spinnerItem name="Intellidemand" value="intellidemand"/>
+             <spinnerItem name="Nightmare" value="nightmare"/>
+             <spinnerItem name="NeoX" value="neox"/>
              <spinnerItem name="conservative" value="conservative"/> 
              <spinnerItem name="userspace" value="userspace"/> 
              <spinnerItem name="ondemand" value="ondemand"/> 
