@@ -4,7 +4,9 @@
 		name="CPU Scaling Settings">
        <spinner description="This will set the default CPU governor. Default CPU governor will only be set during early stages of booting (before init.d execution) and can be overriden by later scripts or apps." name="Default CPU Governor" action="generic /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor">
              <spinnerItem name="pegasusq" value="pegasusq"/> 
-             <spinnerItem name="zzmoove" value="zzmoove"/> 
+             <spinnerItem name="zzmoove" value="zzmoove"/>
+             <spinnerItem name="HYPER" value="HYPER"/>
+             <spinnerItem name="Intellidemand" value="intellidemand"/>
              <spinnerItem name="conservative" value="conservative"/> 
              <spinnerItem name="userspace" value="userspace"/> 
              <spinnerItem name="ondemand" value="ondemand"/> 
@@ -17,7 +19,8 @@
                 name="scaling_min_freq" action="generic /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq" unit=" kHz" min="200000" reversed="false" step="300000" max="500000"/>
 <spinner description="This will set the default I/O scheduler. Default I/O scheduler will only be set during early stages of booting (before init.d execution) and can be overriden by later scripts or apps." name="Default I/O Scheduler" action="generic /sys/block/mmcblk0/queue/scheduler">
              <spinnerItem name="row" value="row"/> 
-             <spinnerItem name="sio" value="sio"/> 
+             <spinnerItem name="sio" value="sio"/>
+             <spinnerItem name="zen" value="zen"/> 
              <spinnerItem name="noop" value="noop"/> 
              <spinnerItem name="deadline" value="deadline"/> 
              <spinnerItem name="cfq" value="cfq"/> 
