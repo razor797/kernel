@@ -430,5 +430,6 @@ void cpufreq_frequency_table_get_attr(struct cpufreq_frequency_table *table,
 
 void cpufreq_frequency_table_put_attr(unsigned int cpu);
 
+extern struct atomic_notifier_head migration_notifier_head;
 
 #endif /* _LINUX_CPUFREQ_H */
