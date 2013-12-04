@@ -48,8 +48,6 @@
 #include <linux/cma.h>
 #endif
 #ifdef CONFIG_ION_EXYNOS
-#include <linux/dma-buf.h>
-#include <linux/exynos_ion.h>
 #include <linux/ion.h>
 #endif
 

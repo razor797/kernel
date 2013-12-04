@@ -26,34 +26,3 @@ config ION_EXYNOS_CONTIGHEAP_DEBUG
 	bool "Debug message for allocation, free of CONTIGHEAP"
 	depends on ION_EXYNOS && CMA
 	default n
-
-config ION_EXYNOS_DRM_MFC_SH
-	bool "ION Heap for drm mfc sh"
-	depends on EXYNOS_CONTENT_PATH_PROTECTION
-
-config ION_EXYNOS_DRM_VIDEO
-	bool "ION Heap for drm video"
-	depends on EXYNOS_CONTENT_PATH_PROTECTION
-
-config ION_EXYNOS_DRM_MFC_FW
-	bool "ION Heap for drm fw"
-	depends on EXYNOS_CONTENT_PATH_PROTECTION
-
-config ION_EXYNOS_DRM_SECTBL
-	bool "ION Heap for drm sectbl"
-	depends on EXYNOS_CONTENT_PATH_PROTECTION
-
-config ION_EXYNOS_DRM_MEMSIZE_FIMD_VIDEO
-	int "Reserved memsize in kilobytes for FIMD video"
-	depends on ION_EXYNOS_DRM_VIDEO
-	default 32768
-
-config ION_EXYNOS_DRM_MEMSIZE_GSC
-	int "Reserved memsize in kilobytes for GSC"
-	depends on ION_EXYNOS_DRM_VIDEO
-	default 33792
-
-config ION_EXYNOS_DRM_MEMSIZE_MFC_SECURE
-	int "Reserved memsize in kilobytes for MFC secure"
-	depends on ION_EXYNOS_DRM_VIDEO
-	default 30720

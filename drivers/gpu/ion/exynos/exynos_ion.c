@@ -16,7 +16,6 @@
 
 #include <linux/err.h>
 #include <linux/ion.h>
-#include <linux/exynos_ion.h>
 #include <linux/platform_device.h>
 #include <linux/mm.h>
 #include <linux/cma.h>
@@ -279,10 +278,10 @@ static void ion_exynos_heap_free(struct ion_buffer *buffer)
 	kfree(sgtable);
 }
 
-static struct sg_table *ion_exynos_heap_map_dma(struct ion_heap *heap,
-						struct ion_buffer *buffer)
+static struct scatterlist *ion_exynos_heap_map_dma(struct ion_heap *heap,
+					    struct ion_buffer *buffer)
 {
-	return buffer->priv_virt;
+	return ((struct sg_table *)buffer->priv_virt)->sgl;
 }
 
 static void ion_exynos_heap_unmap_dma(struct ion_heap *heap,
@@ -415,24 +414,7 @@ static int ion_exynos_contig_heap_allocate(struct ion_heap *heap,
 					   unsigned long align,
 					   unsigned long flags)
 {
-	char *type = NULL;
-
-	if (flags & ION_EXYNOS_MFC_SH_MASK)
-		type = "mfc_sh";
-	else if (flags & ION_EXYNOS_MSGBOX_SH_MASK)
-		type = "msgbox_sh";
-	else if (flags & ION_EXYNOS_FIMD_VIDEO_MASK)
-		type = "fimd_video";
-	else if (flags & ION_EXYNOS_MFC_OUTPUT_MASK)
-		type = "mfc_output";
-	else if (flags & ION_EXYNOS_MFC_INPUT_MASK)
-		type = "mfc_input";
-	else if (flags & ION_EXYNOS_MFC_FW_MASK)
-		type = "mfc_fw";
-	else if (flags & ION_EXYNOS_SECTBL_MASK)
-		type = "sectbl";
-
-	buffer->priv_phys = cma_alloc(exynos_ion_dev, type, len, align);
+	buffer->priv_phys = cma_alloc(exynos_ion_dev, NULL, len, align);
 
 #ifdef CONFIG_ION_EXYNOS_CONTIGHEAP_DEBUG
 	if (1) {
@@ -505,10 +487,8 @@ static int ion_exynos_contig_heap_allocate(struct ion_heap *heap,
 	}
 
 	buffer->flags = flags;
-#ifdef CONFIG_ION_EXYNOS_CONTIGHEAP_DEBUG
 	printk(KERN_INFO "[ION] alloc: 0x%x\n",
 		(unsigned int)buffer->priv_phys);
-#endif
 
 	return 0;
 }
@@ -523,10 +503,8 @@ static void ion_exynos_contig_heap_free(struct ion_buffer *buffer)
 #endif
 
 	ret = cma_free(buffer->priv_phys);
-#ifdef CONFIG_ION_EXYNOS_CONTIGHEAP_DEBUG
 	printk(KERN_INFO "[ION] free: 0x%x, [0x%x]\n",
 		(unsigned int)buffer->priv_phys, ret);
-#endif
 }
 
 static int ion_exynos_contig_heap_phys(struct ion_heap *heap,
@@ -538,28 +516,23 @@ static int ion_exynos_contig_heap_phys(struct ion_heap *heap,
 	return 0;
 }
 
-static struct sg_table *ion_exynos_contig_heap_map_dma(struct ion_heap *heap,
+static struct scatterlist *ion_exynos_contig_heap_map_dma(struct ion_heap *heap,
 						   struct ion_buffer *buffer)
 {
-	struct sg_table *table;
-	int ret;
+	struct scatterlist *sglist;
 
-	table = kzalloc(sizeof(struct sg_table), GFP_KERNEL);
-	if (!table)
+	sglist = vmalloc(sizeof(struct scatterlist));
+	if (!sglist)
 		return ERR_PTR(-ENOMEM);
-	ret = sg_alloc_table(table, 1, GFP_KERNEL);
-	if (ret)
-		return ERR_PTR(ret);
-	sg_init_one(table->sgl, phys_to_virt(buffer->priv_phys), buffer->size);
-	return table;
+	sg_init_table(sglist, 1);
+	sg_set_page(sglist, phys_to_page(buffer->priv_phys), buffer->size, 0);
+	return sglist;
 }
 
 static void ion_exynos_contig_heap_unmap_dma(struct ion_heap *heap,
-					     struct ion_buffer *buffer)
+			       struct ion_buffer *buffer)
 {
-	if (buffer->sg_table)
-		sg_free_table(buffer->sg_table);
-		kfree(buffer->sg_table);
+	vfree(buffer->sglist);
 }
 
 static int ion_exynos_contig_heap_map_user(struct ion_heap *heap,
@@ -745,7 +718,7 @@ static int ion_exynos_user_heap_allocate(struct ion_heap *heap,
 	privdata = kmalloc(sizeof(*privdata), GFP_KERNEL);
 	if (!privdata) {
 		ret = -ENOMEM;
-		goto finish;
+		goto err_privdata;
 	}
 
 	buffer->priv_virt = privdata;
@@ -755,13 +728,15 @@ static int ion_exynos_user_heap_allocate(struct ion_heap *heap,
 				flags & ION_EXYNOS_WRITE_MASK, pages);
 
 	if (ret < 0) {
+		kfree(pages);
+
 		ret = pfnmap_digger(&privdata->sgt, start, nr_pages);
 		if (ret)
 			goto err_pfnmap;
 
 		privdata->is_pfnmap = true;
 
-		goto finish;
+		return 0;
 	}
 
 	if (ret != nr_pages) {
@@ -801,7 +776,7 @@ err_alloc_sg:
 		put_page(pages[i]);
 err_pfnmap:
 	kfree(privdata);
-finish:
+err_privdata:
 	kfree(pages);
 	return ret;
 }
@@ -830,28 +805,9 @@ static void ion_exynos_user_heap_free(struct ion_buffer *buffer)
 	kfree(privdata);
 }
 
-static int ion_exynos_user_heap_phys(struct ion_heap *heap,
-				       struct ion_buffer *buffer,
-				       ion_phys_addr_t *addr, size_t *len)
-{
-	struct exynos_user_heap_data *privdata = buffer->priv_virt;
-
-	if (privdata->sgt.orig_nents != 1)
-		return -EINVAL;
-
-	if (addr)
-		*addr = sg_phys(privdata->sgt.sgl);
-
-	if (len)
-		*len = sg_dma_len(privdata->sgt.sgl);
-
-	return 0;
-}
-
 static struct ion_heap_ops user_heap_ops = {
 	.allocate = ion_exynos_user_heap_allocate,
 	.free = ion_exynos_user_heap_free,
-	.phys = ion_exynos_user_heap_phys,
 	.map_dma = ion_exynos_heap_map_dma,
 	.unmap_dma = ion_exynos_heap_unmap_dma,
 	.map_kernel = ion_exynos_heap_map_kernel,
@@ -876,7 +832,6 @@ static void ion_exynos_user_heap_destroy(struct ion_heap *heap)
 	kfree(heap);
 }
 
-#if 0
 enum ION_MSYNC_TYPE {
 	IMSYNC_DEV_TO_READ = 0,
 	IMSYNC_DEV_TO_WRITE = 1,
@@ -1086,7 +1041,6 @@ static long exynos_heap_ioctl(struct ion_client *client, unsigned int cmd,
 
 	return ret;
 }
-#endif
 
 static struct ion_heap *__ion_heap_create(struct ion_platform_heap *heap_data)
 {
@@ -1154,7 +1108,7 @@ static int exynos_ion_probe(struct platform_device *pdev)
 	if (!heaps)
 		return -ENOMEM;
 
-	ion_exynos = ion_device_create(NULL);
+	ion_exynos = ion_device_create(&exynos_heap_ioctl);
 	if (IS_ERR_OR_NULL(ion_exynos)) {
 		kfree(heaps);
 		return PTR_ERR(ion_exynos);

@@ -11,7 +11,6 @@
 #include <linux/dma-mapping.h>
 #include <linux/platform_device.h>
 #include <linux/ion.h>
-#include <linux/exynos_ion.h>
 #include <linux/slab.h>
 #include <mach/exynos-ion.h>
 

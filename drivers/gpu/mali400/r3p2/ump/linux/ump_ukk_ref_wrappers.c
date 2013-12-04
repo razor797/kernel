@@ -103,8 +103,8 @@ int ump_ion_import_wrapper(u32 __user * argument, struct ump_session_data  * ses
 	ump_dd_physical_block * blocks;
 	unsigned long num_blocks;
 	struct ion_handle *ion_hnd;
-	struct sg_table *sg_ion;
-	struct scatterlist *sgl;
+	struct scatterlist *sg;
+	struct scatterlist *sg_ion;
 	unsigned long i = 0;
 
 	ump_session_memory_list_element * session_memory_element = NULL;
@@ -138,18 +138,18 @@ int ump_ion_import_wrapper(u32 __user * argument, struct ump_session_data  * ses
 		return -ENOMEM;
 	}
 
-	sgl = sg_ion->sgl;
+	sg = sg_ion;
 	do {
-		blocks[i].addr = sg_phys(sgl);
-		blocks[i].size = sg_dma_len(sgl);
+		blocks[i].addr = sg_phys(sg);
+		blocks[i].size = sg_dma_len(sg);
 		i++;
 		if (i>=1024) {
 			_mali_osk_free(blocks);
 			MSG_ERR(("ion_import fail() in ump_ioctl_allocate()\n"));
 			return -EFAULT;
 		}
-		sgl = sg_next(sgl);
-	} while(sgl);
+		sg = sg_next(sg);
+	} while(sg);
 
 	num_blocks = i;
 
