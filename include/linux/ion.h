@@ -35,25 +35,12 @@ enum ion_heap_type {
 	ION_HEAP_TYPE_CARVEOUT,
 	ION_HEAP_TYPE_CUSTOM, /* must be last so device specific heaps always
 				 are at the end of this enum */
-#ifdef CONFIG_ION_EXYNOS
-	ION_HEAP_TYPE_EXYNOS_CONTIG,
-	ION_HEAP_TYPE_EXYNOS,
-	ION_HEAP_TYPE_EXYNOS_USER,
-#endif
 	ION_NUM_HEAPS = 16,
 };
 
 #define ION_HEAP_SYSTEM_MASK		(1 << ION_HEAP_TYPE_SYSTEM)
 #define ION_HEAP_SYSTEM_CONTIG_MASK	(1 << ION_HEAP_TYPE_SYSTEM_CONTIG)
 #define ION_HEAP_CARVEOUT_MASK		(1 << ION_HEAP_TYPE_CARVEOUT)
-
-#ifdef CONFIG_ION_EXYNOS
-#define ION_HEAP_EXYNOS_MASK		(1 << ION_HEAP_TYPE_EXYNOS)
-#define ION_HEAP_EXYNOS_CONTIG_MASK	(1 << ION_HEAP_TYPE_EXYNOS_CONTIG)
-#define ION_HEAP_EXYNOS_USER_MASK	(1 << ION_HEAP_TYPE_EXYNOS_USER)
-#define ION_EXYNOS_NONCACHE_MASK	(1 << (BITS_PER_LONG - 2))
-#define ION_EXYNOS_WRITE_MASK		(1 << (BITS_PER_LONG - 1))
-#endif
 
 #ifdef __KERNEL__
 struct ion_device;
@@ -98,6 +85,17 @@ struct ion_platform_data {
 	int nr;
 	struct ion_platform_heap heaps[];
 };
+
+/**
+ * ion_reserve() - reserve memory for ion heaps if applicable
+ * @data:	platform data specifying starting physical address and
+ *		size
+ *
+ * Calls memblock reserve to set aside memory for heaps that are
+ * located at specific memory addresses or of specfic sizes not
+ * managed by the kernel
+ */
+void ion_reserve(struct ion_platform_data *data);
 
 /**
  * ion_client_create() -  allocate a client and returns it
@@ -203,10 +201,10 @@ void ion_unmap_kernel(struct ion_client *client, struct ion_handle *handle);
  * @client:	the client
  * @handle:	handle to map
  *
- * Return an sglist describing the given handle
+ * Return an sg_table describing the given handle
  */
-struct scatterlist *ion_map_dma(struct ion_client *client,
-				struct ion_handle *handle);
+struct sg_table *ion_map_dma(struct ion_client *client,
+			     struct ion_handle *handle);
 
 /**
  * ion_unmap_dma() - destroy a dma mapping for a handle
