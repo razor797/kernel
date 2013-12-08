@@ -88,5 +88,9 @@ echo "1" > /sys/kernel/dyn_fsync/Dyn_fsync_active
 
 echo "1" > /proc/sys/net/core/bpf_jit_enable
 
+# disable hotplug on sleep for zzmoove
+
+echo "1" > /sys/devices/system/cpu/cpufreq/zzmoove/disable_hotplug_sleep
+
 ##### init scripts #####
 /system/bin/sh sh /sbin/ext/run-init-scripts.sh
