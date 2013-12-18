@@ -304,6 +304,7 @@ static void zram_write(struct zram *zram, struct bio *bio)
 	int i;
 	u32 index;
 	struct bio_vec *bvec;
+	int ret = 0;
 
 	zram_stat64_inc(zram, &zram->stats.num_writes);
 	index = bio->bi_sector >> SECTORS_PER_PAGE_SHIFT;
@@ -334,6 +335,7 @@ static void zram_write(struct zram *zram, struct bio *bio)
 			mutex_unlock(&zram->lock);
 			zram_stat_inc(&zram->stats.pages_zero);
 			zram_set_flag(zram, index, ZRAM_ZERO);
+			ret = 0;
 			index++;
 			continue;
 		}

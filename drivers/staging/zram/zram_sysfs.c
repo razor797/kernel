@@ -80,7 +80,7 @@ static ssize_t initstate_show(struct device *dev,
 	return sprintf(buf, "%u\n", zram->init_done);
 }
 
-#ifdef CONFIG_ZRAM_FOR_ANDROID
+#if 0
 extern int swapon(const char*specialfile, int swap_flags);
 
 static ssize_t initstate_store(struct device *dev,
@@ -106,14 +106,13 @@ static ssize_t initstate_store(struct device *dev,
 	swapon("/dev/block/zram0", 0);
 	return len;
 }
-#else
+#endif
 static inline ssize_t initstate_store(struct device *dev,
 				      struct device_attribute *attr,
 				      const char *buf, size_t len)
 {
 	return 0;
 }
-#endif /* CONFIG_ZRAM_FOR_ANDROID */
 
 
 static ssize_t reset_store(struct device *dev,
