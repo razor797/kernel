@@ -81,6 +81,10 @@ chown root.root /system/lib/hw/lights.exynos4.so
 chmod 0664 /system/lib/hw/lights.exynos4.so
 mount -o remount,ro /system
 
+# google dns
+setprop net.dns1 8.8.8.8
+setprop net.dns2 8.8.8.8
+
 # make sure dynamic fsync is active
 echo "1" > /sys/kernel/dyn_fsync/Dyn_fsync_active
 
