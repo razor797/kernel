@@ -1883,7 +1883,7 @@ static int s3c_fb_set_win_config(struct s3cfb_global *fbdev,
 
 	mutex_lock(&fbdev->output_lock);
 
-	if (unlikely(fbdev->system_state == POWER_OFF)) {
+	//if (unlikely(fbdev->system_state == POWER_OFF)) {
 		if (fbdev->support_fence == FENCE_NOT_SUPPORT) {
 			win_data->fence = -1;
 		} else {
