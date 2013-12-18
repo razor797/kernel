@@ -14,7 +14,6 @@ ARCH_POWER=on
 selinux=0
 scrollcache=on
 navigationbar=off
-vmtweaks=disable
 min_bl=80
 min_gamma=0
 max_gamma=20

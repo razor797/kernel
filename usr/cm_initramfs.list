@@ -51,7 +51,6 @@ file /res/customconfig/actions/scrollcache /home/gustavo/kernel/usr/galaxys2_ini
 file /res/customconfig/actions/sound_volume /home/gustavo/kernel/usr/galaxys2_initramfs_files/res/customconfig/actions/sound_volume 755 0 0
 file /res/customconfig/actions/test-bln /home/gustavo/kernel/usr/galaxys2_initramfs_files/res/customconfig/actions/test-bln 755 0 0
 file /res/customconfig/actions/usb-mode /home/gustavo/kernel/usr/galaxys2_initramfs_files/res/customconfig/actions/usb-mode 755 0 0
-file /res/customconfig/actions/vmtweaks /home/gustavo/kernel/usr/galaxys2_initramfs_files/res/customconfig/actions/vmtweaks 755 0 0
 dir /sbin 755 0 0
 dir /sbin/ext 755 0 0
 file /sbin/ext/efs-backup.sh /home/gustavo/kernel/usr/galaxys2_initramfs_files/sbin/ext/efs-backup.sh 755 0 0
