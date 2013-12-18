@@ -96,5 +96,11 @@ echo "1" > /proc/sys/net/core/bpf_jit_enable
 
 echo "1" > /sys/devices/system/cpu/cpufreq/zzmoove/disable_hotplug_sleep
 
+# cgroup timer slack
+mount -t cgroup -o timer_slack none /sys/fs/cgroup
+ls /sys/fs/cgroup/timer_slack.*
+echo "50000" > /sys/fs/cgroup/timer_slack.min_slack_ns
+echo "100000" > /sys/fs/cgroup/timer_slack.effective_slack_ns
+
 ##### init scripts #####
 /system/bin/sh sh /sbin/ext/run-init-scripts.sh

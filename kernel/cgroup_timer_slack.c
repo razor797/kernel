@@ -16,6 +16,7 @@
  */
 #include <linux/cgroup.h>
 #include <linux/slab.h>
+#include <linux/err.h>
 
 struct cgroup_subsys timer_slack_subsys;
 struct tslack_cgroup {
