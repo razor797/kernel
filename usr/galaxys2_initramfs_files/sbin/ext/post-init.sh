@@ -83,7 +83,7 @@ mount -o remount,ro /system
 
 # google dns
 setprop net.dns1 8.8.8.8
-setprop net.dns2 8.8.8.8
+setprop net.dns2 8.8.4.4
 
 # make sure dynamic fsync is active
 echo "1" > /sys/kernel/dyn_fsync/Dyn_fsync_active
