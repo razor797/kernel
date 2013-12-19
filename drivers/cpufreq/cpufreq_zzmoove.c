@@ -330,6 +330,15 @@
 #define DEF_FREQ_STEP				  (5)	// ZZ: default for freq step at awake
 #define DEF_FREQ_STEP_SLEEP			  (5)	// ZZ: default for freq step at early suspend
 
+// ZZ: LCDFreq Scaling default values
+#ifdef CONFIG_CPU_FREQ_LCD_FREQ_DFS
+#define LCD_FREQ_KICK_IN_DOWN_DELAY		(20)	// ZZ: default for kick in down delay
+#define LCD_FREQ_KICK_IN_UP_DELAY		(50)	// ZZ: default for kick in up delay
+#define LCD_FREQ_KICK_IN_FREQ			(500000)// ZZ: default kick in frequency
+#define LCD_FREQ_KICK_IN_CORES			(0)	// ZZ: number of cores which should be online before kicking in
+extern int _lcdfreq_lock(int lock);			// ZZ: external lcdfreq lock function
+#endif
+
 /*
  * The polling frequency of this governor depends on the capability of
  * the processor. Default polling frequency is 1000 times the transition
@@ -390,11 +399,17 @@ static int hotplug_thresholds_freq[2][8]={
 */
 static int hotplug_thresholds_tuneable[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 
-// ZZ: support for 2 cores (this will enable/disable hotplug threshold tuneables)
+// ZZ: support for 2,4 or 8 cores (this will enable/disable hotplug threshold tuneables)
 #define MAX_CORES		(2)
 
 // raise sampling rate to SR*multiplier and adjust sampling rate/thresholds/hotplug/scaling/freq limit/freq step on blank screen
 
+// ZZ: LCDFreq scaling
+#ifdef CONFIG_CPU_FREQ_LCD_FREQ_DFS
+static int lcdfreq_lock_current = 0;			// ZZ: LCDFreq scaling lock switch
+static int prev_lcdfreq_lock_current;			// ZZ: for saving previously set lock state
+static int prev_lcdfreq_enable;				// ZZ: for saving previously set enabled state
+#endif
 static unsigned int sampling_rate_awake;
 static unsigned int up_threshold_awake;
 static unsigned int down_threshold_awake;
@@ -404,6 +419,16 @@ static unsigned int fast_scaling_awake;			// ZZ: for saving fast scaling awake v
 static unsigned int freq_step_awake;			// ZZ: for saving frequency step awake value
 static unsigned int disable_hotplug_awake;		// ZZ: for daving hotplug switch
 static unsigned int hotplug1_awake;			// ZZ: for saving hotplug1 threshold awake value
+#if (MAX_CORES == 4 || MAX_CORES == 8)
+static unsigned int hotplug2_awake;			// ZZ: for saving hotplug2 threshold awake value
+static unsigned int hotplug3_awake;			// ZZ: for saving hotplug3 threshold awake value
+#endif
+#if (MAX_CORES == 8)
+static unsigned int hotplug4_awake;			// ZZ: for saving hotplug4 threshold awake value
+static unsigned int hotplug5_awake;			// ZZ: for saving hotplug5 threshold awake value
+static unsigned int hotplug6_awake;			// ZZ: for saving hotplug6 threshold awake value
+static unsigned int hotplug7_awake;			// ZZ: for saving hotplug7 threshold awake value
+#endif
 static unsigned int sampling_rate_asleep;		// ZZ: for setting sampling rate value on early suspend
 static unsigned int up_threshold_asleep;		// ZZ: for setting up threshold value on early suspend
 static unsigned int down_threshold_asleep;		// ZZ: for setting down threshold value on early suspend
@@ -504,10 +529,42 @@ static struct dbs_tuners {
 	unsigned int up_threshold;
 	unsigned int up_threshold_hotplug1;		// ZZ: added tuneable up_threshold_hotplug1 for core1
 	unsigned int up_threshold_hotplug_freq1;	// Yank: added tuneable up_threshold_hotplug_freq1 for core1
+#if (MAX_CORES == 4 || MAX_CORES == 8)
+	unsigned int up_threshold_hotplug2;		// ZZ: added tuneable up_threshold_hotplug2 for core2
+	unsigned int up_threshold_hotplug_freq2;	// Yank: added tuneable up_threshold_hotplug_freq1 for core2
+	unsigned int up_threshold_hotplug3;		// ZZ: added tuneable up_threshold_hotplug3 for core3
+	unsigned int up_threshold_hotplug_freq3;	// Yank: added tuneable up_threshold_hotplug_freq1 for core3
+#endif
+#if (MAX_CORES == 8)
+	unsigned int up_threshold_hotplug4;		// ZZ: added tuneable up_threshold_hotplug4 for core4
+	unsigned int up_threshold_hotplug_freq4;	// Yank: added tuneable up_threshold_hotplug_freq1 for core4
+	unsigned int up_threshold_hotplug5;		// ZZ: added tuneable up_threshold_hotplug5 for core5
+	unsigned int up_threshold_hotplug_freq5;	// Yank: added tuneable up_threshold_hotplug_freq1 for core5
+	unsigned int up_threshold_hotplug6;		// ZZ: added tuneable up_threshold_hotplug6 for core6
+	unsigned int up_threshold_hotplug_freq6;	// Yank: added tuneable up_threshold_hotplug_freq1 for core6
+	unsigned int up_threshold_hotplug7;		// ZZ: added tuneable up_threshold_hotplug7 for core7
+	unsigned int up_threshold_hotplug_freq7;	// Yank: added tuneable up_threshold_hotplug_freq1 for core7
+#endif
 	unsigned int up_threshold_sleep;		// ZZ: added tuneable up_threshold_sleep for early suspend
 	unsigned int down_threshold;
 	unsigned int down_threshold_hotplug1;		// ZZ: added tuneable down_threshold_hotplug1 for core1
 	unsigned int down_threshold_hotplug_freq1;	// Yank: added tuneable down_threshold_hotplug_freq1 for core1
+#if (MAX_CORES == 4 || MAX_CORES == 8)
+	unsigned int down_threshold_hotplug2;		// ZZ: added tuneable down_threshold_hotplug2 for core2
+	unsigned int down_threshold_hotplug_freq2;	// Yank: added tuneable down_threshold_hotplug_freq1 for core2
+	unsigned int down_threshold_hotplug3;		// ZZ: added tuneable down_threshold_hotplug3 for core3
+	unsigned int down_threshold_hotplug_freq3;	// Yank: added tuneable down_threshold_hotplug_freq1 for core3
+#endif
+#if (MAX_CORES == 8)
+	unsigned int down_threshold_hotplug4;		// ZZ: added tuneable down_threshold_hotplug4 for core4
+	unsigned int down_threshold_hotplug_freq4;	// Yank: added tuneable down_threshold_hotplug_freq1 for core4
+	unsigned int down_threshold_hotplug5;		// ZZ: added tuneable down_threshold_hotplug5 for core5
+	unsigned int down_threshold_hotplug_freq5;	// Yank: added tuneable down_threshold_hotplug_freq1 for core5
+	unsigned int down_threshold_hotplug6;		// ZZ: added tuneable down_threshold_hotplug6 for core6
+	unsigned int down_threshold_hotplug_freq6;	// Yank: added tuneable down_threshold_hotplug_freq1 for core6
+	unsigned int down_threshold_hotplug7;		// ZZ: added tuneable down_threshold_hotplug7 for core7
+	unsigned int down_threshold_hotplug_freq7;	// Yank: added tuneable down_threshold_hotplug_freq1 for core7
+#endif
 	unsigned int down_threshold_sleep;		// ZZ: added tuneable down_threshold_sleep for early suspend
 	unsigned int ignore_nice;
 	unsigned int freq_step;
@@ -525,15 +582,59 @@ static struct dbs_tuners {
 	unsigned int disable_hotplug_sleep;		// ZZ: Hotplug switch for sleep
 	unsigned int hotplug_block_cycles;		// ZZ: Hotplug block cycles
 	unsigned int hotplug_idle_threshold;		// ZZ: Hotplug idle threshold
+#ifdef ENABLE_LEGACY_MODE
+	unsigned int legacy_mode;			// ZZ: Legacy Mode
+#endif
+#ifdef CONFIG_CPU_FREQ_LCD_FREQ_DFS
+	int lcdfreq_enable;				// ZZ: LCDFreq Scaling switch
+	unsigned int lcdfreq_kick_in_down_delay;	// ZZ: LCDFreq Scaling kick in down delay counter
+	unsigned int lcdfreq_kick_in_down_left;		// ZZ: LCDFreq Scaling kick in down left counter
+	unsigned int lcdfreq_kick_in_up_delay;		// ZZ: LCDFreq Scaling kick in up delay counter
+	unsigned int lcdfreq_kick_in_up_left;		// ZZ: LCDFreq Scaling kick in up left counter
+	unsigned int lcdfreq_kick_in_freq;		// ZZ: LCDFreq Scaling kick in frequency
+	unsigned int lcdfreq_kick_in_cores;		// ZZ: LCDFreq Scaling kick in cores
+#endif
 
 } dbs_tuners_ins = {
 	.up_threshold = DEF_FREQUENCY_UP_THRESHOLD,
 	.up_threshold_hotplug1 = DEF_FREQUENCY_UP_THRESHOLD_HOTPLUG,			// ZZ: set default value for new tuneable
 	.up_threshold_hotplug_freq1 = DEF_FREQUENCY_UP_THRESHOLD_HOTPLUG_FREQ,		// Yank: set default value for new tuneable
+#if (MAX_CORES == 4 || MAX_CORES == 8)
+	.up_threshold_hotplug2 = DEF_FREQUENCY_UP_THRESHOLD_HOTPLUG,			// ZZ: set default value for new tuneable
+	.up_threshold_hotplug_freq2 = DEF_FREQUENCY_UP_THRESHOLD_HOTPLUG_FREQ,		// Yank: set default value for new tuneable
+	.up_threshold_hotplug3 = DEF_FREQUENCY_UP_THRESHOLD_HOTPLUG,			// ZZ: set default value for new tuneable
+	.up_threshold_hotplug_freq3 = DEF_FREQUENCY_UP_THRESHOLD_HOTPLUG_FREQ,		// Yank: set default value for new tuneable
+#endif
+#if (MAX_CORES == 8)
+	.up_threshold_hotplug4 = DEF_FREQUENCY_UP_THRESHOLD_HOTPLUG,			// ZZ: set default value for new tuneable
+	.up_threshold_hotplug_freq4 = DEF_FREQUENCY_UP_THRESHOLD_HOTPLUG_FREQ,		// Yank: set default value for new tuneable
+	.up_threshold_hotplug5 = DEF_FREQUENCY_UP_THRESHOLD_HOTPLUG,			// ZZ: set default value for new tuneable
+	.up_threshold_hotplug_freq5 = DEF_FREQUENCY_UP_THRESHOLD_HOTPLUG_FREQ,		// Yank: set default value for new tuneable
+	.up_threshold_hotplug6 = DEF_FREQUENCY_UP_THRESHOLD_HOTPLUG,			// ZZ: set default value for new tuneable
+	.up_threshold_hotplug_freq6 = DEF_FREQUENCY_UP_THRESHOLD_HOTPLUG_FREQ,		// Yank: set default value for new tuneable
+	.up_threshold_hotplug7 = DEF_FREQUENCY_UP_THRESHOLD_HOTPLUG,			// ZZ: set default value for new tuneable
+	.up_threshold_hotplug_freq7 = DEF_FREQUENCY_UP_THRESHOLD_HOTPLUG_FREQ,		// Yank: set default value for new tuneable
+#endif
 	.up_threshold_sleep = DEF_UP_THRESHOLD_SLEEP,					// ZZ: set default value for new tuneable
 	.down_threshold = DEF_FREQUENCY_DOWN_THRESHOLD,
 	.down_threshold_hotplug1 = DEF_FREQUENCY_DOWN_THRESHOLD_HOTPLUG,		// ZZ: set default value for new tuneable
 	.down_threshold_hotplug_freq1 = DEF_FREQUENCY_DOWN_THRESHOLD_HOTPLUG_FREQ,	// Yank: set default value for new tuneable
+#if (MAX_CORES == 4 || MAX_CORES == 8)
+	.down_threshold_hotplug2 = DEF_FREQUENCY_DOWN_THRESHOLD_HOTPLUG,		// ZZ: set default value for new tuneable
+	.down_threshold_hotplug_freq2 = DEF_FREQUENCY_DOWN_THRESHOLD_HOTPLUG_FREQ,	// Yank: set default value for new tuneable
+	.down_threshold_hotplug3 = DEF_FREQUENCY_DOWN_THRESHOLD_HOTPLUG,		// ZZ: set default value for new tuneable
+	.down_threshold_hotplug_freq3 = DEF_FREQUENCY_DOWN_THRESHOLD_HOTPLUG_FREQ,	// Yank: set default value for new tuneable
+#endif
+#if (MAX_CORES == 8)
+	.down_threshold_hotplug4 = DEF_FREQUENCY_DOWN_THRESHOLD_HOTPLUG,		// ZZ: set default value for new tuneable
+	.down_threshold_hotplug_freq4 = DEF_FREQUENCY_DOWN_THRESHOLD_HOTPLUG_FREQ,	// Yank: set default value for new tuneable
+	.down_threshold_hotplug5 = DEF_FREQUENCY_DOWN_THRESHOLD_HOTPLUG,		// ZZ: set default value for new tuneable
+	.down_threshold_hotplug_freq5 = DEF_FREQUENCY_DOWN_THRESHOLD_HOTPLUG_FREQ,	// Yank: set default value for new tuneable
+	.down_threshold_hotplug6 = DEF_FREQUENCY_DOWN_THRESHOLD_HOTPLUG,		// ZZ: set default value for new tuneable
+	.down_threshold_hotplug_freq6 = DEF_FREQUENCY_DOWN_THRESHOLD_HOTPLUG_FREQ,	// Yank: set default value for new tuneable
+	.down_threshold_hotplug7 = DEF_FREQUENCY_DOWN_THRESHOLD_HOTPLUG,		// ZZ: set default value for new tuneable
+	.down_threshold_hotplug_freq7 = DEF_FREQUENCY_DOWN_THRESHOLD_HOTPLUG_FREQ,	// Yank: set default value for new tuneable
+#endif
 	.down_threshold_sleep = DEF_DOWN_THRESHOLD_SLEEP,				// ZZ: set default value for new tuneable
 	.sampling_down_factor = DEF_SAMPLING_DOWN_FACTOR,				// ZZ: sampling down reactivated but disabled by default
 	.sampling_down_momentum = DEF_SAMPLING_DOWN_MOMENTUM,				// ZZ: Sampling down momentum initial disabled
@@ -556,6 +657,18 @@ static struct dbs_tuners {
 	.disable_hotplug_sleep = false,							// ZZ: Hotplug switch for sleep default off (=hotplugging on)
 	.hotplug_block_cycles = DEF_HOTPLUG_BLOCK_CYCLES,				// ZZ: Hotplug block cycles default
 	.hotplug_idle_threshold = DEF_HOTPLUG_IDLE_THRESHOLD,				// ZZ: Hotplug idle threshold default
+#ifdef ENABLE_LEGACY_MODE
+	.legacy_mode = false,								// ZZ: Legacy Mode default off
+#endif
+#ifdef CONFIG_CPU_FREQ_LCD_FREQ_DFS
+	.lcdfreq_enable = false,							// ZZ: LCDFreq Scaling default off
+	.lcdfreq_kick_in_down_delay = LCD_FREQ_KICK_IN_DOWN_DELAY,			// ZZ: LCDFreq Scaling default for down delay
+	.lcdfreq_kick_in_down_left = LCD_FREQ_KICK_IN_DOWN_DELAY,			// ZZ: LCDFreq Scaling default for down left
+	.lcdfreq_kick_in_up_delay = LCD_FREQ_KICK_IN_UP_DELAY,				// ZZ: LCDFreq Scaling default for up delay
+	.lcdfreq_kick_in_up_left = LCD_FREQ_KICK_IN_UP_DELAY,				// ZZ: LCDFreq Scaling default for up left
+	.lcdfreq_kick_in_freq = LCD_FREQ_KICK_IN_FREQ,					// ZZ: LCDFreq Scaling default for kick in freq
+	.lcdfreq_kick_in_cores = LCD_FREQ_KICK_IN_CORES,				// ZZ: LCDFreq Scaling default for kick in cores
+#endif
 	};
 
 unsigned int freq_table_size = 0;							// Yank : upper index limit of freq. table
@@ -584,6 +697,11 @@ int freq_table_order = 1;								// Yank : 1 for descending order, -1 for ascend
 #define SCALE_FREQ_UP 1
 #define SCALE_FREQ_DOWN 2
 
+#ifdef ENABLE_LEGACY_MODE
+// ZZ: Legacy Mode
+#define LEG_FREQ 0
+#endif
+
 /*
  * Table modified for use with Samsung I9300 by ZaneZam November 2012
  * zzmoove v0.3		- table modified to reach overclocking frequencies up to 1600mhz
@@ -602,6 +720,65 @@ int freq_table_order = 1;								// Yank : 1 for descending order, -1 for ascend
  * zzmoove v0.7c	- frequency search optimisation now fully compatible with ascending ordered system frequency tables
  *
  */
+
+#ifdef ENABLE_LEGACY_MODE
+/*
+ * ZZ: Legacy Mode:
+ *     Frequency table from version 0.5 extended with fast scaling frequencies
+ *     Scaling logic base taken from version 0.4 enhanced with some optimizations
+*/
+
+static int leg_freqs[17][7]={
+    {1800000,1800000,1700000,1800000,1700000,1800000,1500000},
+    {1700000,1800000,1600000,1800000,1600000,1800000,1400000},
+    {1600000,1700000,1500000,1800000,1500000,1800000,1300000},
+    {1500000,1600000,1400000,1700000,1400000,1600000,1200000},
+    {1400000,1500000,1300000,1600000,1300000,1600000,1100000},
+    {1300000,1400000,1200000,1500000,1200000,1400000,1000000},
+    {1200000,1300000,1100000,1400000,1100000,1400000, 900000},
+    {1100000,1200000,1000000,1300000,1000000,1200000, 800000},
+    {1000000,1100000, 900000,1200000, 900000,1200000, 700000},
+    { 900000,1000000, 800000,1100000, 800000,1000000, 600000},
+    { 800000, 900000, 700000,1000000, 700000,1000000, 500000},
+    { 700000, 800000, 600000, 900000, 600000, 800000, 400000},
+    { 600000, 700000, 400000, 800000, 500000, 800000, 300000},
+    { 500000, 600000, 300000, 700000, 400000, 600000, 200000},
+    { 400000, 500000, 200000, 600000, 300000, 600000, 200000},
+    { 300000, 400000, 200000, 500000, 200000, 400000, 200000},
+    { 200000, 300000, 200000, 400000, 200000, 400000, 200000}
+};
+
+// ZZ: Legacy Mode scaling
+static int leg_get_next_freq(unsigned int curfreq, unsigned int updown, unsigned int load) {
+    int i=0;
+
+if (load < dbs_tuners_ins.smooth_up)
+    {
+	for(i = 0; i < 17 ; i++)
+	{
+	    if(unlikely(curfreq == leg_freqs[i][LEG_FREQ])) {
+	    if(dbs_tuners_ins.fast_scaling != 0)
+		return leg_freqs[i][updown+4]; // updown 5|6 - fast scaling colums
+	    else
+		return leg_freqs[i][updown];   // updown 1|2 - normal colums
+	    }
+	}
+    }
+    else
+    {
+	for(i = 0; i < 17; i++)
+	{
+	    if(unlikely(curfreq == leg_freqs[i][LEG_FREQ])){
+	    if(dbs_tuners_ins.fast_scaling != 0)
+		return leg_freqs[i][updown+4]; // updown 5|6 - fast scaling colums
+	    else
+		return leg_freqs[i][updown+2]; // updown 3|4 - power colums
+	    }
+	}
+    }
+return (curfreq); // not found
+}
+#endif
 
 // Yank : Return a valid value between min and max
 static int validate_min_max(int val, int min, int max) {
@@ -742,10 +919,42 @@ show_one(up_threshold, up_threshold);
 show_one(up_threshold_sleep, up_threshold_sleep);				// ZZ: added up_threshold_sleep tuneable for early suspend
 show_one(up_threshold_hotplug1, up_threshold_hotplug1);				// ZZ: added up_threshold_hotplug1 tuneable for cpu1
 show_one(up_threshold_hotplug_freq1, up_threshold_hotplug_freq1);		// Yank: added up_threshold_hotplug_freq1 tuneable for cpu1
+#if (MAX_CORES == 4 || MAX_CORES == 8)
+show_one(up_threshold_hotplug2, up_threshold_hotplug2);				// ZZ: added up_threshold_hotplug2 tuneable for cpu2
+show_one(up_threshold_hotplug_freq2, up_threshold_hotplug_freq2);		// Yank: added up_threshold_hotplug_freq2 tuneable for cpu2
+show_one(up_threshold_hotplug3, up_threshold_hotplug3);				// ZZ: added up_threshold_hotplug3 tuneable for cpu3
+show_one(up_threshold_hotplug_freq3, up_threshold_hotplug_freq3);		// Yank: added up_threshold_hotplug_freq3 tuneable for cpu3
+#endif
+#if (MAX_CORES == 8)
+show_one(up_threshold_hotplug4, up_threshold_hotplug4);				// ZZ: added up_threshold_hotplug4 tuneable for cpu4
+show_one(up_threshold_hotplug_freq4, up_threshold_hotplug_freq4);		// Yank: added up_threshold_hotplug_freq4 tuneable for cpu4
+show_one(up_threshold_hotplug5, up_threshold_hotplug5);				// ZZ: added up_threshold_hotplug5 tuneable for cpu5
+show_one(up_threshold_hotplug_freq5, up_threshold_hotplug_freq5);		// Yank: added up_threshold_hotplug_freq5 tuneable for cpu5
+show_one(up_threshold_hotplug6, up_threshold_hotplug6);				// ZZ: added up_threshold_hotplug6 tuneable for cpu6
+show_one(up_threshold_hotplug_freq6, up_threshold_hotplug_freq6);		// Yank: added up_threshold_hotplug_freq6 tuneable for cpu6
+show_one(up_threshold_hotplug7, up_threshold_hotplug7);				// ZZ: added up_threshold_hotplug7 tuneable for cpu7
+show_one(up_threshold_hotplug_freq7, up_threshold_hotplug_freq7);		// Yank: added up_threshold_hotplug_freq7 tuneable for cpu7
+#endif
 show_one(down_threshold, down_threshold);
 show_one(down_threshold_sleep, down_threshold_sleep);				// ZZ: added down_threshold_sleep tuneable for early suspend
 show_one(down_threshold_hotplug1, down_threshold_hotplug1);			// ZZ: added down_threshold_hotplug1 tuneable for cpu1
 show_one(down_threshold_hotplug_freq1, down_threshold_hotplug_freq1);		// Yank: added down_threshold_hotplug_freq1 tuneable for cpu1
+#if (MAX_CORES == 4 || MAX_CORES == 8)
+show_one(down_threshold_hotplug2, down_threshold_hotplug2);			// ZZ: added down_threshold_hotplug2 tuneable for cpu2
+show_one(down_threshold_hotplug_freq2, down_threshold_hotplug_freq2);		// Yank: added down_threshold_hotplug_freq2 tuneable for cpu2
+show_one(down_threshold_hotplug3, down_threshold_hotplug3);			// ZZ: added down_threshold_hotplug3 tuneable for cpu3
+show_one(down_threshold_hotplug_freq3, down_threshold_hotplug_freq3);		// Yank: added down_threshold_hotplug_freq3 tuneable for cpu3
+#endif
+#if (MAX_CORES == 8)
+show_one(down_threshold_hotplug4, down_threshold_hotplug4);			// ZZ: added down_threshold_hotplug4 tuneable for cpu4
+show_one(down_threshold_hotplug_freq4, down_threshold_hotplug_freq4);		// Yank: added down_threshold_hotplug_freq4 tuneable for cpu4
+show_one(down_threshold_hotplug5, down_threshold_hotplug5);			// ZZ: added down_threshold_hotplug5 tuneable for cpu5
+show_one(down_threshold_hotplug_freq5, down_threshold_hotplug_freq5);		// Yank: added down_threshold_hotplug_freq5 tuneable for cpu5
+show_one(down_threshold_hotplug6, down_threshold_hotplug6);			// ZZ: added down_threshold_hotplug6 tuneable for cpu6
+show_one(down_threshold_hotplug_freq6, down_threshold_hotplug_freq6);		// Yank: added down_threshold_hotplug_freq6 tuneable for cpu6
+show_one(down_threshold_hotplug7, down_threshold_hotplug7);			// ZZ: added down_threshold_hotplug7 tuneable for cpu7
+show_one(down_threshold_hotplug_freq7, down_threshold_hotplug_freq7);		// Yank: added down_threshold_hotplug_freq7 tuneable for cpu7
+#endif
 show_one(ignore_nice_load, ignore_nice);
 show_one(freq_step, freq_step);
 show_one(freq_step_sleep, freq_step_sleep);					// ZZ: added freq_step_sleep tuneable for early suspend
@@ -762,6 +971,16 @@ show_one(disable_hotplug, disable_hotplug);					// ZZ: added Hotplug switch
 show_one(disable_hotplug_sleep, disable_hotplug_sleep);				// ZZ: added Hotplug switch for sleep
 show_one(hotplug_block_cycles, hotplug_block_cycles);				// ZZ: added Hotplug block cycles
 show_one(hotplug_idle_threshold, hotplug_idle_threshold);			// ZZ: added Hotplug idle threshold
+#ifdef ENABLE_LEGACY_MODE
+show_one(legacy_mode, legacy_mode);						// ZZ: Legacy Mode switch
+#endif
+#ifdef CONFIG_CPU_FREQ_LCD_FREQ_DFS
+show_one(lcdfreq_enable, lcdfreq_enable);					// ZZ: added LCDFreq Scaling tuneable master switch
+show_one(lcdfreq_kick_in_down_delay, lcdfreq_kick_in_down_delay);		// ZZ: added LCDFreq Scaling tuneable kick in down delay
+show_one(lcdfreq_kick_in_up_delay, lcdfreq_kick_in_up_delay);			// ZZ: added LCDFreq Scaling tuneable kick in up delay
+show_one(lcdfreq_kick_in_freq, lcdfreq_kick_in_freq);				// ZZ: added LCDFreq Scaling tuneable kick in freq
+show_one(lcdfreq_kick_in_cores, lcdfreq_kick_in_cores);				// ZZ: added LCDFreq Scaling tuneable kick in cores
+#endif
 
 // ZZ: added tuneable for Sampling down momentum -> possible values: 0 (disable) to MAX_SAMPLING_DOWN_FACTOR, if not set default is 0
 static ssize_t store_sampling_down_max_momentum(struct kobject *a,
@@ -959,6 +1178,22 @@ static ssize_t store_down_threshold_hotplug##name						\
 // ZZ: added tuneable -> possible values: 0 to disable core, range from down_threshold up to 100, if not set default is 68
 store_up_threshold_hotplug(1,0);
 store_down_threshold_hotplug(1,0);
+#if (MAX_CORES == 4 || MAX_CORES == 8)
+store_up_threshold_hotplug(2,1);
+store_down_threshold_hotplug(2,1);
+store_up_threshold_hotplug(3,2);
+store_down_threshold_hotplug(3,2);
+#endif
+#if (MAX_CORES == 8)
+store_up_threshold_hotplug(4,3);
+store_down_threshold_hotplug(4,3);
+store_up_threshold_hotplug(5,4);
+store_down_threshold_hotplug(5,4);
+store_up_threshold_hotplug(6,5);
+store_down_threshold_hotplug(6,5);
+store_up_threshold_hotplug(7,6);
+store_down_threshold_hotplug(7,6);
+#endif
 
 static ssize_t store_down_threshold(struct kobject *a, struct attribute *b,
 				    const char *buf, size_t count)
@@ -1250,6 +1485,110 @@ static ssize_t store_fast_scaling_sleep(struct kobject *a,
 }
 
 // ZZ: LCDFreq Scaling - added tuneable (Master Switch) -> possible values: 0 to disable, any value above 0 to enable, if not set default is 0
+#ifdef CONFIG_CPU_FREQ_LCD_FREQ_DFS
+static ssize_t store_lcdfreq_enable(struct kobject *a, struct attribute *b,
+					    const char *buf, size_t count)
+{
+	unsigned int input;
+	int ret;
+
+	ret = sscanf(buf, "%u", &input);
+	if (ret != 1)
+	return -EINVAL;
+
+	if (input > 0) {
+		dbs_tuners_ins.lcdfreq_enable = true;
+	}
+	else {
+		dbs_tuners_ins.lcdfreq_enable = false;
+		// Set screen to 60Hz when stopping to switch
+		lcdfreq_lock_current = 0;
+		_lcdfreq_lock(lcdfreq_lock_current);
+	}
+	return count;
+}
+
+// ZZ: LCDFreq Scaling - added tuneable (Down Delay) -> number of samples to wait till switching to 40hz, possible range not specified, if not set default is 20
+static ssize_t store_lcdfreq_kick_in_down_delay(struct kobject *a, struct attribute *b,
+							const char *buf, size_t count)
+{
+	unsigned int input;
+	int ret;
+
+	ret = sscanf(buf, "%u", &input);
+	if (ret != 1 && input < 0)
+	return -EINVAL;
+
+	dbs_tuners_ins.lcdfreq_kick_in_down_delay = input;
+	dbs_tuners_ins.lcdfreq_kick_in_down_left =
+	dbs_tuners_ins.lcdfreq_kick_in_down_delay;
+	return count;
+}
+
+// ZZ: LCDFreq Scaling - added tuneable (Up Delay) -> number of samples to wait till switching to 40hz, possible range not specified, if not set default is 50
+static ssize_t store_lcdfreq_kick_in_up_delay(struct kobject *a, struct attribute *b,
+							const char *buf, size_t count)
+{
+	unsigned int input;
+	int ret;
+
+	ret = sscanf(buf, "%u", &input);
+	if (ret != 1 && input < 0)
+	return -EINVAL;
+
+	dbs_tuners_ins.lcdfreq_kick_in_up_delay = input;
+	dbs_tuners_ins.lcdfreq_kick_in_up_left =
+	dbs_tuners_ins.lcdfreq_kick_in_up_delay;
+	return count;
+}
+
+// ZZ: LCDFreq Scaling - added tuneable (Frequency Threshold) -> frequency from where to start switching LCDFreq, possible values are all valid frequencies up to actual scaling limit, if not set default is 500000
+// Yank: updated : possible values now depend on the system frequency table only
+static ssize_t store_lcdfreq_kick_in_freq(struct kobject *a, struct attribute *b,
+						    const char *buf, size_t count)
+{
+	unsigned int input;
+	struct cpufreq_frequency_table *table;	// Yank : Use system frequency table
+	int ret;
+	int i=0;
+
+	ret = sscanf(buf, "%u", &input);
+	if (ret != 1)
+		return -EINVAL;
+
+	table = cpufreq_frequency_get_table(0);	// Yank : Get system frequency table
+
+	if (!table) {
+		return -EINVAL;
+	} else if (input > table[max_scaling_freq_hard].frequency) {	 // Yank : Allow only frequencies below or equal to hard max
+		return -EINVAL;
+	} else {
+		for (i = 0; (table[i].frequency != CPUFREQ_TABLE_END); i++)
+			if (table[i].frequency == input) {
+				dbs_tuners_ins.lcdfreq_kick_in_freq = input;
+				return count;
+			}
+	}
+
+	return -EINVAL;
+}
+
+// ZZ: LCDFreq Scaling - added tuneable (Online Cores Threshold) -> amount of cores which have to be online before switching LCDFreq (useable in combination with Freq Threshold), possible values 0-4, if not set default is 0
+static ssize_t store_lcdfreq_kick_in_cores(struct kobject *a, struct attribute *b,
+						    const char *buf, size_t count)
+{
+	unsigned int input;
+	int ret;
+
+	ret = sscanf(buf, "%u", &input);
+
+	if (ret != 1 || input > num_possible_cpus() || (input < 0 && input != 0))
+	return -EINVAL;
+
+	dbs_tuners_ins.lcdfreq_kick_in_cores = input;
+	return count;
+}
+#endif
 
 // ZZ: Early demand - added tuneable grad up threshold -> possible values: from 11 to 100, if not set default is 50
 static ssize_t store_grad_up_threshold(struct kobject *a, struct attribute *b,
@@ -1342,6 +1681,25 @@ static ssize_t store_hotplug_block_cycles(struct kobject *a, struct attribute *b
 	return count;
 }
 
+#ifdef ENABLE_LEGACY_MODE
+// ZZ: added tuneable for Legacy Mode -> possible values: 0 to disable, any value above 0 to enable, if not set default is 0
+static ssize_t store_legacy_mode(struct kobject *a, struct attribute *b,
+					    const char *buf, size_t count)
+{
+	unsigned int input;
+	int ret;
+
+	ret = sscanf(buf, "%u", &input);
+	if (ret != 1)
+	return -EINVAL;
+
+	if (input > 0)
+		dbs_tuners_ins.legacy_mode = true;
+	 else
+		dbs_tuners_ins.legacy_mode = false;
+	return count;
+}
+#endif
 
 // ZZ: added tuneable hotplug idle threshold -> possible values: range from 0 disabled to 100, if not set default is 0
 static ssize_t store_hotplug_idle_threshold(struct kobject *a, struct attribute *b,
@@ -1444,6 +1802,22 @@ static ssize_t store_down_threshold_hotplug_freq##name						\
 
 store_up_threshold_hotplug_freq(1,0);
 store_down_threshold_hotplug_freq(1,0);
+#if (MAX_CORES == 4 || MAX_CORES == 8)
+store_up_threshold_hotplug_freq(2,1);
+store_down_threshold_hotplug_freq(2,1);
+store_up_threshold_hotplug_freq(3,2);
+store_down_threshold_hotplug_freq(3,2);
+#endif
+#if (MAX_CORES == 8)
+store_up_threshold_hotplug_freq(4,3);
+store_down_threshold_hotplug_freq(4,3);
+store_up_threshold_hotplug_freq(5,4);
+store_down_threshold_hotplug_freq(5,4);
+store_up_threshold_hotplug_freq(6,5);
+store_down_threshold_hotplug_freq(6,5);
+store_up_threshold_hotplug_freq(7,6);
+store_down_threshold_hotplug_freq(7,6);
+#endif
 
 define_one_global_rw(sampling_rate);
 define_one_global_rw(sampling_rate_sleep_multiplier);		// ZZ: added tuneable
@@ -1454,10 +1828,42 @@ define_one_global_rw(up_threshold);
 define_one_global_rw(up_threshold_sleep);			// ZZ: added tuneable
 define_one_global_rw(up_threshold_hotplug1);			// ZZ: added tuneable
 define_one_global_rw(up_threshold_hotplug_freq1);		// Yank: added tuneable
+#if (MAX_CORES == 4 || MAX_CORES == 8)
+define_one_global_rw(up_threshold_hotplug2);			// ZZ: added tuneable
+define_one_global_rw(up_threshold_hotplug_freq2);		// Yank: added tuneable
+define_one_global_rw(up_threshold_hotplug3);			// ZZ: added tuneable
+define_one_global_rw(up_threshold_hotplug_freq3);		// Yank: added tuneable
+#endif
+#if (MAX_CORES == 8)
+define_one_global_rw(up_threshold_hotplug4);			// ZZ: added tuneable
+define_one_global_rw(up_threshold_hotplug_freq4);		// Yank: added tuneable
+define_one_global_rw(up_threshold_hotplug5);			// ZZ: added tuneable
+define_one_global_rw(up_threshold_hotplug_freq5);		// Yank: added tuneable
+define_one_global_rw(up_threshold_hotplug6);			// ZZ: added tuneable
+define_one_global_rw(up_threshold_hotplug_freq6);		// Yank: added tuneable
+define_one_global_rw(up_threshold_hotplug7);			// ZZ: added tuneable
+define_one_global_rw(up_threshold_hotplug_freq7);		// Yank: added tuneable
+#endif
 define_one_global_rw(down_threshold);
 define_one_global_rw(down_threshold_sleep);			// ZZ: added tuneable
 define_one_global_rw(down_threshold_hotplug1);			// ZZ: added tuneable
 define_one_global_rw(down_threshold_hotplug_freq1);		// Yank: added tuneable
+#if (MAX_CORES == 4 || MAX_CORES == 8)
+define_one_global_rw(down_threshold_hotplug2);			// ZZ: added tuneable
+define_one_global_rw(down_threshold_hotplug_freq2);		// Yank: added tuneable
+define_one_global_rw(down_threshold_hotplug3);			// ZZ: added tuneable
+define_one_global_rw(down_threshold_hotplug_freq3);		// Yank: added tuneable
+#endif
+#if (MAX_CORES == 8)
+define_one_global_rw(down_threshold_hotplug4);			// ZZ: added tuneable
+define_one_global_rw(down_threshold_hotplug_freq4);		// Yank: added tuneable
+define_one_global_rw(down_threshold_hotplug5);			// ZZ: added tuneable
+define_one_global_rw(down_threshold_hotplug_freq5);		// Yank: added tuneable
+define_one_global_rw(down_threshold_hotplug6);			// ZZ: added tuneable
+define_one_global_rw(down_threshold_hotplug_freq6);		// Yank: added tuneable
+define_one_global_rw(down_threshold_hotplug7);			// ZZ: added tuneable
+define_one_global_rw(down_threshold_hotplug_freq7);		// Yank: added tuneable
+#endif
 define_one_global_rw(ignore_nice_load);
 define_one_global_rw(freq_step);
 define_one_global_rw(freq_step_sleep);				// ZZ: added tuneable
@@ -1474,6 +1880,16 @@ define_one_global_rw(disable_hotplug);				// ZZ: Hotplug switch
 define_one_global_rw(disable_hotplug_sleep);			// ZZ: Hotplug switch for sleep
 define_one_global_rw(hotplug_block_cycles);			// ZZ: Hotplug block cycles
 define_one_global_rw(hotplug_idle_threshold);			// ZZ: Hotplug idle threshold
+#ifdef ENABLE_LEGACY_MODE
+define_one_global_rw(legacy_mode);				// ZZ: Legacy Mode switch
+#endif
+#ifdef CONFIG_CPU_FREQ_LCD_FREQ_DFS
+define_one_global_rw(lcdfreq_enable);				// ZZ: LCDFreq Scaling tuneable
+define_one_global_rw(lcdfreq_kick_in_down_delay);		// ZZ: LCDFreq Scaling tuneable
+define_one_global_rw(lcdfreq_kick_in_up_delay);			// ZZ: LCDFreq Scaling tuneable
+define_one_global_rw(lcdfreq_kick_in_freq);			// ZZ: LCDFreq Scaling tuneable
+define_one_global_rw(lcdfreq_kick_in_cores);			// ZZ: LCDFreq Scaling tuneable
+#endif
 
 // Yank: add version info tunable
 static ssize_t show_version(struct device *dev, struct device_attribute *attr, char *buf) {
@@ -1493,10 +1909,42 @@ static struct attribute *dbs_attributes[] = {
 	&sampling_down_momentum_sensitivity.attr,		// ZZ: Sampling down momentum tuneable
 	&up_threshold_hotplug1.attr,				// ZZ: added tuneable
 	&up_threshold_hotplug_freq1.attr,			// Yank: added tuneable
+#if (MAX_CORES == 4 || MAX_CORES == 8)
+	&up_threshold_hotplug2.attr,				// ZZ: added tuneable
+	&up_threshold_hotplug_freq2.attr,			// Yank: added tuneable
+	&up_threshold_hotplug3.attr,				// ZZ: added tuneable
+	&up_threshold_hotplug_freq3.attr,			// Yank: added tuneable
+#endif
+#if (MAX_CORES == 8)
+	&up_threshold_hotplug4.attr,				// ZZ: added tuneable
+	&up_threshold_hotplug_freq4.attr,			// Yank: added tuneable
+	&up_threshold_hotplug5.attr,				// ZZ: added tuneable
+	&up_threshold_hotplug_freq5.attr,			// Yank: added tuneable
+	&up_threshold_hotplug6.attr,				// ZZ: added tuneable
+	&up_threshold_hotplug_freq6.attr,			// Yank: added tuneable
+	&up_threshold_hotplug7.attr,				// ZZ: added tuneable
+	&up_threshold_hotplug_freq7.attr,			// Yank: added tuneable
+#endif
 	&down_threshold.attr,
 	&down_threshold_sleep.attr,				// ZZ: added tuneable
 	&down_threshold_hotplug1.attr,				// ZZ: added tuneable
 	&down_threshold_hotplug_freq1.attr,			// Yank: added tuneable
+#if (MAX_CORES == 4 || MAX_CORES == 8)
+	&down_threshold_hotplug2.attr,				// ZZ: added tuneable
+	&down_threshold_hotplug_freq2.attr,			// Yank: added tuneable
+	&down_threshold_hotplug3.attr,				// ZZ: added tuneable
+	&down_threshold_hotplug_freq3.attr,			// Yank: added tuneable
+#endif
+#if (MAX_CORES == 8)
+	&down_threshold_hotplug4.attr,				// ZZ: added tuneable
+	&down_threshold_hotplug_freq4.attr,			// Yank: added tuneable
+	&down_threshold_hotplug5.attr,				// ZZ: added tuneable
+	&down_threshold_hotplug_freq5.attr,			// Yank: added tuneable
+	&down_threshold_hotplug6.attr,				// ZZ: added tuneable
+	&down_threshold_hotplug_freq6.attr,			// Yank: added tuneable
+	&down_threshold_hotplug7.attr,				// ZZ: added tuneable
+	&down_threshold_hotplug_freq7.attr,			// Yank: added tuneable
+#endif
 	&ignore_nice_load.attr,
 	&freq_step.attr,
 	&freq_step_sleep.attr,					// ZZ: added tuneable
@@ -1515,6 +1963,16 @@ static struct attribute *dbs_attributes[] = {
 	&disable_hotplug_sleep.attr,				// ZZ: Hotplug switch sleep
 	&hotplug_block_cycles.attr,				// ZZ: Hotplug block cycles
 	&hotplug_idle_threshold.attr,				// ZZ: Hotplug idle threshold
+#ifdef ENABLE_LEGACY_MODE
+	&legacy_mode.attr,					// ZZ: Legacy Mode switch
+#endif
+#ifdef CONFIG_CPU_FREQ_LCD_FREQ_DFS
+	&lcdfreq_enable.attr,					// ZZ: LCD Freq Scaling tuneable
+	&lcdfreq_kick_in_down_delay.attr,			// ZZ: LCD Freq Scaling tuneable
+	&lcdfreq_kick_in_up_delay.attr,				// ZZ: LCD Freq Scaling tuneable
+	&lcdfreq_kick_in_freq.attr,				// ZZ: LCD Freq Scaling tuneable
+	&lcdfreq_kick_in_cores.attr,				// ZZ: LCD Freq Scaling tuneable
+#endif
 	&dev_attr_version.attr,					// Yank: zzmoove version
 	NULL
 };
@@ -1726,6 +2184,12 @@ static void dbs_check_cpu(struct cpu_dbs_info_s *this_dbs_info)
 	    /* ZZ: Frequency Limit: but let it scale up as normal if the freqencies are lower freq_limit */
 	    } else if (dbs_tuners_ins.freq_limit != 0 && policy->cur < dbs_tuners_ins.freq_limit) {
 
+#ifdef ENABLE_LEGACY_MODE
+			// ZZ: Legacy Mode
+			if (unlikely(dbs_tuners_ins.legacy_mode == true))
+				this_dbs_info->requested_freq = leg_get_next_freq(policy->cur, SCALE_FREQ_UP, max_load);
+			else
+#endif
 				this_dbs_info->requested_freq = mn_get_next_freq(policy->cur, SCALE_FREQ_UP, max_load);
 
 		    /* ZZ: check again if we are above limit because of fast scaling */
@@ -1748,6 +2212,12 @@ static void dbs_check_cpu(struct cpu_dbs_info_s *this_dbs_info)
 		return;
 	    }
 
+#ifdef ENABLE_LEGACY_MODE
+	    // ZZ: Legacy Mode
+	    if (unlikely(dbs_tuners_ins.legacy_mode == true))
+		this_dbs_info->requested_freq = leg_get_next_freq(policy->cur, SCALE_FREQ_UP, max_load);
+	     else
+#endif
 		this_dbs_info->requested_freq = mn_get_next_freq(policy->cur, SCALE_FREQ_UP, max_load);
 
 	    /* ZZ: check if requested freq is higher than max freq if so bring it down to max freq (DerTeufel1980) */
@@ -1766,6 +2236,51 @@ static void dbs_check_cpu(struct cpu_dbs_info_s *this_dbs_info)
 	return;
 	}
 
+#ifdef CONFIG_CPU_FREQ_LCD_FREQ_DFS
+	if(dbs_tuners_ins.lcdfreq_enable) {
+
+		// ZZ: LCDFreq Scaling delays
+		if( (dbs_tuners_ins.lcdfreq_kick_in_freq  <= this_dbs_info->requested_freq &&      // No core threshold, only check freq. threshold
+		     dbs_tuners_ins.lcdfreq_kick_in_cores == 0                                ) ||
+
+		    (dbs_tuners_ins.lcdfreq_kick_in_freq  <= this_dbs_info->requested_freq &&      // Core threshold reached, check freq. threshold
+		     dbs_tuners_ins.lcdfreq_kick_in_cores != 0                             &&
+		     dbs_tuners_ins.lcdfreq_kick_in_cores == num_online_cpus()                ) ||
+
+		    (dbs_tuners_ins.lcdfreq_kick_in_cores != 0                             &&      // Core threshold passed, no need to check freq. threshold
+		     dbs_tuners_ins.lcdfreq_kick_in_cores <  num_online_cpus()                )
+		                                                                                ) {
+
+			// We are above threshold, reset down delay, decrement up delay
+			if(dbs_tuners_ins.lcdfreq_kick_in_down_left != dbs_tuners_ins.lcdfreq_kick_in_down_delay)
+				dbs_tuners_ins.lcdfreq_kick_in_down_left = dbs_tuners_ins.lcdfreq_kick_in_down_delay;
+			dbs_tuners_ins.lcdfreq_kick_in_up_left--;
+
+		} else {
+
+			// We are below threshold, reset up delay, decrement down delay
+			if(dbs_tuners_ins.lcdfreq_kick_in_up_left != dbs_tuners_ins.lcdfreq_kick_in_up_delay)
+				dbs_tuners_ins.lcdfreq_kick_in_up_left = dbs_tuners_ins.lcdfreq_kick_in_up_delay;
+			dbs_tuners_ins.lcdfreq_kick_in_down_left--;
+
+		}
+
+		// ZZ: LCDFreq Scaling set frequency if needed
+		if(dbs_tuners_ins.lcdfreq_kick_in_up_left <= 0 && lcdfreq_lock_current != 0) {
+
+			// We reached up delay, set frequency to 60Hz
+			lcdfreq_lock_current = 0;
+			_lcdfreq_lock(lcdfreq_lock_current);
+
+		} else if(dbs_tuners_ins.lcdfreq_kick_in_down_left <= 0 && lcdfreq_lock_current != 1) {
+
+			// We reached down delay, set frequency to 40Hz
+			lcdfreq_lock_current = 1;
+			_lcdfreq_lock(lcdfreq_lock_current);
+
+		}
+	}
+#endif
 
 	/*
 	 * zzmoove v0.1		- Modification by ZaneZam November 2012
@@ -1837,6 +2352,53 @@ static void dbs_check_cpu(struct cpu_dbs_info_s *this_dbs_info)
 	if (dbs_tuners_ins.freq_limit != 0 && policy->cur > dbs_tuners_ins.freq_limit) {
 		this_dbs_info->requested_freq = dbs_tuners_ins.freq_limit;
 
+#ifdef CONFIG_CPU_FREQ_LCD_FREQ_DFS
+		if(dbs_tuners_ins.lcdfreq_enable) {
+
+			// ZZ: LCDFreq Scaling delays
+			if( (dbs_tuners_ins.lcdfreq_kick_in_freq  <= this_dbs_info->requested_freq &&      // No core threshold, only check freq. threshold
+			     dbs_tuners_ins.lcdfreq_kick_in_cores == 0                                ) ||
+
+			    (dbs_tuners_ins.lcdfreq_kick_in_freq  <= this_dbs_info->requested_freq &&      // Core threshold reached, check freq. threshold
+			     dbs_tuners_ins.lcdfreq_kick_in_cores != 0                             &&
+			     dbs_tuners_ins.lcdfreq_kick_in_cores == num_online_cpus()                ) ||
+
+			    (dbs_tuners_ins.lcdfreq_kick_in_cores != 0                             &&      // Core threshold passed, no need to check freq. threshold
+			     dbs_tuners_ins.lcdfreq_kick_in_cores <  num_online_cpus()                )
+			                                                                                   ) {
+
+				// We are above threshold, reset down delay, decrement up delay
+				if(dbs_tuners_ins.lcdfreq_kick_in_down_left != dbs_tuners_ins.lcdfreq_kick_in_down_delay)
+					dbs_tuners_ins.lcdfreq_kick_in_down_left = dbs_tuners_ins.lcdfreq_kick_in_down_delay;
+				if(dbs_tuners_ins.lcdfreq_kick_in_up_left > 0)
+				dbs_tuners_ins.lcdfreq_kick_in_up_left--;
+
+			} else {
+
+				// We are below threshold, reset up delay, decrement down delay
+				if(dbs_tuners_ins.lcdfreq_kick_in_up_left != dbs_tuners_ins.lcdfreq_kick_in_up_delay)
+					dbs_tuners_ins.lcdfreq_kick_in_up_left = dbs_tuners_ins.lcdfreq_kick_in_up_delay;
+				if(dbs_tuners_ins.lcdfreq_kick_in_up_left > 0)
+				dbs_tuners_ins.lcdfreq_kick_in_down_left--;
+
+			}
+
+			// ZZ: LCDFreq Scaling set frequency if needed
+			if(dbs_tuners_ins.lcdfreq_kick_in_up_left <= 0 && lcdfreq_lock_current != 0) {
+
+				// We reached up delay, set frequency to 60Hz
+				lcdfreq_lock_current = 0;
+				_lcdfreq_lock(lcdfreq_lock_current);
+
+			} else if(dbs_tuners_ins.lcdfreq_kick_in_down_left <= 0 && lcdfreq_lock_current != 1) {
+
+				// We reached down delay, set frequency to 40Hz
+				lcdfreq_lock_current = 1;
+				_lcdfreq_lock(lcdfreq_lock_current);
+
+			}
+		}
+#endif
 		__cpufreq_driver_target(policy, this_dbs_info->requested_freq,
 					CPUFREQ_RELATION_L);
 		return;
@@ -1844,15 +2406,119 @@ static void dbs_check_cpu(struct cpu_dbs_info_s *this_dbs_info)
 	/* ZZ: Frequency Limit: else we scale down as usual */
 	} else if (dbs_tuners_ins.freq_limit != 0 && policy->cur <= dbs_tuners_ins.freq_limit) {
 
+#ifdef ENABLE_LEGACY_MODE
+		    // ZZ: Legacy Mode
+		    if (unlikely(dbs_tuners_ins.legacy_mode == true))
+			this_dbs_info->requested_freq = leg_get_next_freq(policy->cur, SCALE_FREQ_DOWN, max_load);
+		    else
+#endif
 			this_dbs_info->requested_freq = mn_get_next_freq(policy->cur, SCALE_FREQ_DOWN, max_load);
 
+#ifdef CONFIG_CPU_FREQ_LCD_FREQ_DFS
+		if(dbs_tuners_ins.lcdfreq_enable) {
+
+			// ZZ: LCDFreq Scaling delays
+			if( (dbs_tuners_ins.lcdfreq_kick_in_freq  <= this_dbs_info->requested_freq &&      // No core threshold, only check freq. threshold
+			     dbs_tuners_ins.lcdfreq_kick_in_cores == 0                                ) ||
+
+			    (dbs_tuners_ins.lcdfreq_kick_in_freq  <= this_dbs_info->requested_freq &&      // Core threshold reached, check freq. threshold
+			     dbs_tuners_ins.lcdfreq_kick_in_cores != 0                             &&
+			     dbs_tuners_ins.lcdfreq_kick_in_cores == num_online_cpus()                ) ||
+
+			    (dbs_tuners_ins.lcdfreq_kick_in_cores != 0                             &&      // Core threshold passed, no need to check freq. threshold
+			     dbs_tuners_ins.lcdfreq_kick_in_cores <  num_online_cpus()                )
+			                                                                                   ) {
+
+				// We are above threshold, reset down delay, decrement up delay
+				if(dbs_tuners_ins.lcdfreq_kick_in_down_left != dbs_tuners_ins.lcdfreq_kick_in_down_delay)
+					dbs_tuners_ins.lcdfreq_kick_in_down_left = dbs_tuners_ins.lcdfreq_kick_in_down_delay;
+				if(dbs_tuners_ins.lcdfreq_kick_in_up_left > 0)
+				dbs_tuners_ins.lcdfreq_kick_in_up_left--;
+
+			} else {
+
+				// We are below threshold, reset up delay, decrement down delay
+				if(dbs_tuners_ins.lcdfreq_kick_in_up_left != dbs_tuners_ins.lcdfreq_kick_in_up_delay)
+					dbs_tuners_ins.lcdfreq_kick_in_up_left = dbs_tuners_ins.lcdfreq_kick_in_up_delay;
+				if(dbs_tuners_ins.lcdfreq_kick_in_up_left > 0)
+				dbs_tuners_ins.lcdfreq_kick_in_down_left--;
+
+			}
+
+			// ZZ: LCDFreq Scaling set frequency if needed
+			if(dbs_tuners_ins.lcdfreq_kick_in_up_left <= 0 && lcdfreq_lock_current != 0) {
+
+				// We reached up delay, set frequency to 60Hz
+				lcdfreq_lock_current = 0;
+				_lcdfreq_lock(lcdfreq_lock_current);
+
+			} else if(dbs_tuners_ins.lcdfreq_kick_in_down_left <= 0 && lcdfreq_lock_current != 1) {
+
+				// We reached down delay, set frequency to 40Hz
+				lcdfreq_lock_current = 1;
+				_lcdfreq_lock(lcdfreq_lock_current);
+
+			}
+		}
+#endif
 		__cpufreq_driver_target(policy, this_dbs_info->requested_freq,
 					CPUFREQ_RELATION_L); // ZZ: changed to relation low
 		return;
 	}
 
+#ifdef ENABLE_LEGACY_MODE
+	    // ZZ: Legacy Mode
+	    if (unlikely(dbs_tuners_ins.legacy_mode == true))
+		this_dbs_info->requested_freq = leg_get_next_freq(policy->cur, SCALE_FREQ_DOWN, max_load);
+	    else
+#endif
 		this_dbs_info->requested_freq = mn_get_next_freq(policy->cur, SCALE_FREQ_DOWN, max_load);
 
+#ifdef CONFIG_CPU_FREQ_LCD_FREQ_DFS
+		if(dbs_tuners_ins.lcdfreq_enable) {
+
+			// ZZ: LCDFreq Scaling delays
+			if( (dbs_tuners_ins.lcdfreq_kick_in_freq  <= this_dbs_info->requested_freq &&      // No core threshold, only check freq. threshold
+			     dbs_tuners_ins.lcdfreq_kick_in_cores == 0                                ) ||
+
+			    (dbs_tuners_ins.lcdfreq_kick_in_freq  <= this_dbs_info->requested_freq &&      // Core threshold reached, check freq. threshold
+			     dbs_tuners_ins.lcdfreq_kick_in_cores != 0                             &&
+			     dbs_tuners_ins.lcdfreq_kick_in_cores == num_online_cpus()                ) ||
+
+			    (dbs_tuners_ins.lcdfreq_kick_in_cores != 0                             &&      // Core threshold passed, no need to check freq. threshold
+			     dbs_tuners_ins.lcdfreq_kick_in_cores <  num_online_cpus()                )
+			                                                                                   ) {
+
+				// We are above threshold, reset down delay, decrement up delay
+				if(dbs_tuners_ins.lcdfreq_kick_in_down_left != dbs_tuners_ins.lcdfreq_kick_in_down_delay)
+					dbs_tuners_ins.lcdfreq_kick_in_down_left = dbs_tuners_ins.lcdfreq_kick_in_down_delay;
+				dbs_tuners_ins.lcdfreq_kick_in_up_left--;
+
+			} else {
+
+				// We are below threshold, reset up delay, decrement down delay
+				if(dbs_tuners_ins.lcdfreq_kick_in_up_left != dbs_tuners_ins.lcdfreq_kick_in_up_delay)
+					dbs_tuners_ins.lcdfreq_kick_in_up_left = dbs_tuners_ins.lcdfreq_kick_in_up_delay;
+				dbs_tuners_ins.lcdfreq_kick_in_down_left--;
+
+			}
+
+			// ZZ: LCDFreq Scaling set frequency if needed
+			if(dbs_tuners_ins.lcdfreq_kick_in_up_left <= 0 && lcdfreq_lock_current != 0) {
+
+				// We reached up delay, set frequency to 60Hz
+				lcdfreq_lock_current = 0;
+				_lcdfreq_lock(lcdfreq_lock_current);
+
+			} else if(dbs_tuners_ins.lcdfreq_kick_in_down_left <= 0 && lcdfreq_lock_current != 1) {
+
+				// We reached down delay, set frequency to 40Hz
+				lcdfreq_lock_current = 1;
+				_lcdfreq_lock(lcdfreq_lock_current);
+
+			}
+		}
+#endif
 		__cpufreq_driver_target(policy, this_dbs_info->requested_freq,
 					CPUFREQ_RELATION_L); // ZZ: changed to relation low
 		return;
@@ -1864,6 +2530,34 @@ static void __cpuinit hotplug_offline_work_fn(struct work_struct *work)
 {
 	int i=0;
 
+#ifdef ENABLE_LEGACY_MODE
+// ZZ: Legacy hotplugging
+	if (unlikely(dbs_tuners_ins.legacy_mode == true && num_possible_cpus() == 4)) {
+	    if (num_online_cpus() > 3) {
+		if (cur_load < hotplug_thresholds[1][2] && skip_hotplug_flag == 0 && cpu_online(3))
+		    cpu_down(3);
+		if (cur_load < hotplug_thresholds[1][1] && skip_hotplug_flag == 0 && cpu_online(2))
+		    cpu_down(2);
+		if (cur_load < hotplug_thresholds[1][0] && skip_hotplug_flag == 0 && cpu_online(1))
+		    cpu_down(1);
+	    } else if (num_online_cpus() > 2) {
+		if (cur_load < hotplug_thresholds[1][1] && skip_hotplug_flag == 0 && cpu_online(2))
+		    cpu_down(2);
+		if (cur_load < hotplug_thresholds[1][0] && skip_hotplug_flag == 0 && cpu_online(1))
+		    cpu_down(1);
+	    } else if (num_online_cpus() > 1 && cpu_online(2)) {
+		if (cur_load < hotplug_thresholds[1][1] && skip_hotplug_flag == 0)
+		    cpu_down(2);
+	    } else if (num_online_cpus() > 1 && cpu_online(3)) {
+		if (cur_load < hotplug_thresholds[1][2] && skip_hotplug_flag == 0)
+		cpu_down(3);
+	    } else if (num_online_cpus() > 1) {
+		if (cur_load < hotplug_thresholds[1][0] && skip_hotplug_flag == 0 && cpu_online(1))
+		    cpu_down(1);
+	    }
+
+	} else {
+#endif
 // Yank: added frequency thresholds
 	    for (i = num_possible_cpus() - 1; i >= 1; i--) {
 		    if( cpu_online(i)										&&
@@ -1872,6 +2566,9 @@ static void __cpuinit hotplug_offline_work_fn(struct work_struct *work)
 			(hotplug_thresholds_freq[1][i-1] == 0 || cur_freq <= hotplug_thresholds_freq[1][i-1])       )
 			    cpu_down(i);
 	    }
+#ifdef ENABLE_LEGACY_MODE
+    }
+#endif
 }
 
 // ZZ: function for hotplug up work
@@ -1887,6 +2584,39 @@ static void __cpuinit hotplug_online_work_fn(struct work_struct *work)
 	    }
 	return;
 	}
+
+#ifdef ENABLE_LEGACY_MODE
+	// ZZ: Legacy hotplugging
+	if (unlikely(dbs_tuners_ins.legacy_mode == true && num_possible_cpus() == 4)) {
+		if (num_online_cpus() < 2) {
+		    if (hotplug_thresholds[0][0] != 0 && cur_load > hotplug_thresholds[0][0] && skip_hotplug_flag == 0 && !cpu_online(1))
+			cpu_up(1);
+		    if (hotplug_thresholds[0][1] != 0 && cur_load > hotplug_thresholds[0][1] && skip_hotplug_flag == 0 && !cpu_online(2))
+			cpu_up(2);
+		    if (hotplug_thresholds[0][2] != 0 && cur_load > hotplug_thresholds[0][2] && skip_hotplug_flag == 0 && !cpu_online(3))
+			cpu_up(3);
+		} else if (num_online_cpus() < 3 && cpu_online(3)) {
+		    if (hotplug_thresholds[0][0] != 0 && cur_load > hotplug_thresholds[0][0] && skip_hotplug_flag == 0 && !cpu_online(1))
+			cpu_up(1);
+		    if (hotplug_thresholds[0][1] != 0 && cur_load > hotplug_thresholds[0][1] && skip_hotplug_flag == 0 && !cpu_online(2))
+			cpu_up(2);
+		} else if (num_online_cpus() < 3 && cpu_online(2)) {
+		    if (hotplug_thresholds[0][0] != 0 && cur_load > hotplug_thresholds[0][0] && skip_hotplug_flag == 0 && !cpu_online(1))
+			cpu_up(1);
+		    if (hotplug_thresholds[0][2] != 0 && cur_load > hotplug_thresholds[0][2] && skip_hotplug_flag == 0 && !cpu_online(3))
+			cpu_up(3);
+		} else if (num_online_cpus() < 3) {
+		    if (hotplug_thresholds[0][1] != 0 && cur_load > hotplug_thresholds[0][1] && skip_hotplug_flag == 0 && !cpu_online(2))
+			cpu_up(2);
+		    if (hotplug_thresholds[0][2] != 0 && cur_load > hotplug_thresholds[0][2] && skip_hotplug_flag == 0 && !cpu_online(3))
+			cpu_up(3);
+		} else if (num_online_cpus() < 4) {
+		    if (hotplug_thresholds[0][2] != 0 && cur_load > hotplug_thresholds[0][2] && skip_hotplug_flag == 0 && !cpu_online(3))
+			cpu_up(3);
+		}
+
+	} else {
+#endif
 	    // Yank: added frequency thresholds
 	    for (i = 1; i < num_possible_cpus(); i++) {
 		    if( !cpu_online(i)										&&
@@ -1896,6 +2626,9 @@ static void __cpuinit hotplug_online_work_fn(struct work_struct *work)
 			(hotplug_thresholds_freq[0][i-1] == 0 || cur_freq >= hotplug_thresholds_freq[0][i-1])       )
 			    cpu_up(i);
 	    }
+#ifdef ENABLE_LEGACY_MODE
+	}
+#endif
 }
 
 static void do_dbs_timer(struct work_struct *work)
@@ -1945,6 +2678,15 @@ static void powersave_early_suspend(struct early_suspend *handler)
   table = cpufreq_frequency_get_table(0);				// Yank : Get system frequency table
 
   mutex_lock(&dbs_mutex);
+#ifdef CONFIG_CPU_FREQ_LCD_FREQ_DFS
+	prev_lcdfreq_enable = dbs_tuners_ins.lcdfreq_enable;		// ZZ: LCDFreq Scaling - store state
+	prev_lcdfreq_lock_current = lcdfreq_lock_current;		// ZZ: LCDFreq Scaling - store lock current
+	if(dbs_tuners_ins.lcdfreq_enable) {				// ZZ: LCDFreq Scaling - reset display freq. to 60Hz only if it was enabled
+		dbs_tuners_ins.lcdfreq_enable = false;
+		lcdfreq_lock_current = 0;
+		_lcdfreq_lock(lcdfreq_lock_current);
+	}
+#endif
   sampling_rate_awake = dbs_tuners_ins.sampling_rate;
   up_threshold_awake = dbs_tuners_ins.up_threshold;
   down_threshold_awake = dbs_tuners_ins.down_threshold;
@@ -1957,6 +2699,16 @@ static void powersave_early_suspend(struct early_suspend *handler)
 
   if (dbs_tuners_ins.hotplug_sleep != 0) {				// ZZ: if set to 0 do not touch hotplugging values
 	hotplug1_awake = dbs_tuners_ins.up_threshold_hotplug1;		// ZZ: save hotplug1 value for restore on awake
+#if (MAX_CORES == 4 || MAX_CORES == 8)
+	hotplug2_awake = dbs_tuners_ins.up_threshold_hotplug2;		// ZZ: save hotplug2 value for restore on awake
+	hotplug3_awake = dbs_tuners_ins.up_threshold_hotplug3;		// ZZ: save hotplug3 value for restore on awake
+#endif
+#if (MAX_CORES == 8)
+	hotplug4_awake = dbs_tuners_ins.up_threshold_hotplug4;		// ZZ: save hotplug4 value for restore on awake
+	hotplug5_awake = dbs_tuners_ins.up_threshold_hotplug5;		// ZZ: save hotplug5 value for restore on awake
+	hotplug6_awake = dbs_tuners_ins.up_threshold_hotplug6;		// ZZ: save hotplug6 value for restore on awake
+	hotplug7_awake = dbs_tuners_ins.up_threshold_hotplug7;		// ZZ: save hotplug7 value for restore on awake
+#endif
   }
 
   sampling_rate_asleep = dbs_tuners_ins.sampling_rate_sleep_multiplier; // ZZ: save sleep multiplier
@@ -2015,8 +2767,89 @@ static void powersave_early_suspend(struct early_suspend *handler)
 	if (dbs_tuners_ins.hotplug_sleep == 1) {
 	    dbs_tuners_ins.up_threshold_hotplug1 = 0;			// ZZ: set to one core
 	    hotplug_thresholds[0][0] = 0;
+#if (MAX_CORES == 4 || MAX_CORES == 8)
+	    dbs_tuners_ins.up_threshold_hotplug2 = 0;			// ZZ: set to one core
+	    hotplug_thresholds[0][1] = 0;
+	    dbs_tuners_ins.up_threshold_hotplug3 = 0;			// ZZ: set to one core
+	    hotplug_thresholds[0][2] = 0;
+#endif
+#if (MAX_CORES == 8)
+	    dbs_tuners_ins.up_threshold_hotplug4 = 0;			// ZZ: set to one core
+	    hotplug_thresholds[0][3] = 0;
+	    dbs_tuners_ins.up_threshold_hotplug5 = 0;			// ZZ: set to one core
+	    hotplug_thresholds[0][4] = 0;
+	    dbs_tuners_ins.up_threshold_hotplug6 = 0;			// ZZ: set to one core
+	    hotplug_thresholds[0][5] = 0;
+	    dbs_tuners_ins.up_threshold_hotplug7 = 0;			// ZZ: set to one core
+	    hotplug_thresholds[0][6] = 0;
+#endif
 	}
-
+#if (MAX_CORES == 4 || MAX_CORES == 8)
+	if (dbs_tuners_ins.hotplug_sleep == 2) {
+	    dbs_tuners_ins.up_threshold_hotplug2 = 0;			// ZZ: set to two cores
+	    hotplug_thresholds[0][1] = 0;
+	    dbs_tuners_ins.up_threshold_hotplug3 = 0;			// ZZ: set to two cores
+	    hotplug_thresholds[0][2] = 0;
+#endif
+#if (MAX_CORES == 8)
+	    dbs_tuners_ins.up_threshold_hotplug4 = 0;			// ZZ: set to two cores
+	    hotplug_thresholds[0][3] = 0;
+	    dbs_tuners_ins.up_threshold_hotplug5 = 0;			// ZZ: set to two cores
+	    hotplug_thresholds[0][4] = 0;
+	    dbs_tuners_ins.up_threshold_hotplug6 = 0;			// ZZ: set to two cores
+	    hotplug_thresholds[0][5] = 0;
+	    dbs_tuners_ins.up_threshold_hotplug7 = 0;			// ZZ: set to two cores
+	    hotplug_thresholds[0][6] = 0;
+#endif
+#if (MAX_CORES == 4 || MAX_CORES == 8)
+	}
+	if (dbs_tuners_ins.hotplug_sleep == 3) {
+	    dbs_tuners_ins.up_threshold_hotplug3 = 0;			// ZZ: set to three cores
+	    hotplug_thresholds[0][2] = 0;
+#endif
+#if (MAX_CORES == 8)
+	    dbs_tuners_ins.up_threshold_hotplug4 = 0;			// ZZ: set to three cores
+	    hotplug_thresholds[0][3] = 0;
+	    dbs_tuners_ins.up_threshold_hotplug5 = 0;			// ZZ: set to three cores
+	    hotplug_thresholds[0][4] = 0;
+	    dbs_tuners_ins.up_threshold_hotplug6 = 0;			// ZZ: set to three cores
+	    hotplug_thresholds[0][5] = 0;
+	    dbs_tuners_ins.up_threshold_hotplug7 = 0;			// ZZ: set to three cores
+	    hotplug_thresholds[0][6] = 0;
+#endif
+#if (MAX_CORES == 4 || MAX_CORES == 8)
+	}
+#endif
+#if (MAX_CORES == 8)
+	if (dbs_tuners_ins.hotplug_sleep == 4) {
+	    dbs_tuners_ins.up_threshold_hotplug4 = 0;			// ZZ: set to four cores
+	    hotplug_thresholds[0][3] = 0;
+	    dbs_tuners_ins.up_threshold_hotplug5 = 0;			// ZZ: set to four cores
+	    hotplug_thresholds[0][4] = 0;
+	    dbs_tuners_ins.up_threshold_hotplug6 = 0;			// ZZ: set to four cores
+	    hotplug_thresholds[0][5] = 0;
+	    dbs_tuners_ins.up_threshold_hotplug7 = 0;			// ZZ: set to four cores
+	    hotplug_thresholds[0][6] = 0;
+	}
+	if (dbs_tuners_ins.hotplug_sleep == 5) {
+	    dbs_tuners_ins.up_threshold_hotplug5 = 0;			// ZZ: set to five cores
+	    hotplug_thresholds[0][4] = 0;
+	    dbs_tuners_ins.up_threshold_hotplug6 = 0;			// ZZ: set to five cores
+	    hotplug_thresholds[0][5] = 0;
+	    dbs_tuners_ins.up_threshold_hotplug7 = 0;			// ZZ: set to five cores
+	    hotplug_thresholds[0][6] = 0;
+	}
+	if (dbs_tuners_ins.hotplug_sleep == 6) {
+	    dbs_tuners_ins.up_threshold_hotplug6 = 0;			// ZZ: set to six cores
+	    hotplug_thresholds[0][5] = 0;
+	    dbs_tuners_ins.up_threshold_hotplug7 = 0;			// ZZ: set to six cores
+	    hotplug_thresholds[0][6] = 0;
+	}
+	if (dbs_tuners_ins.hotplug_sleep == 7) {
+	    dbs_tuners_ins.up_threshold_hotplug7 = 0;			// ZZ: set to seven cores
+	    hotplug_thresholds[0][6] = 0;
+	}
+#endif
   }
 
   mutex_unlock(&dbs_mutex);
@@ -2044,10 +2877,33 @@ static void powersave_late_resume(struct early_suspend *handler)
   table = cpufreq_frequency_get_table(0);				// Yank : Get system frequency table
 
  mutex_lock(&dbs_mutex);
+#ifdef CONFIG_CPU_FREQ_LCD_FREQ_DFS
+	dbs_tuners_ins.lcdfreq_enable = prev_lcdfreq_enable;		// ZZ: LCDFreq Scaling - enable it again if it was enabled
+	if(dbs_tuners_ins.lcdfreq_enable) {				// ZZ: LCDFreq Scaling - restore display freq. only if it was enabled before suspend
+		lcdfreq_lock_current = prev_lcdfreq_lock_current;
+		_lcdfreq_lock(lcdfreq_lock_current);
+	}
+#endif
 
    if (dbs_tuners_ins.hotplug_sleep != 0) {
 	dbs_tuners_ins.up_threshold_hotplug1 = hotplug1_awake;		// ZZ: restore previous settings
 	hotplug_thresholds[0][0] = hotplug1_awake;
+#if (MAX_CORES == 4 || MAX_CORES == 8)
+	dbs_tuners_ins.up_threshold_hotplug2 = hotplug2_awake;		// ZZ: restore previous settings
+	hotplug_thresholds[0][1] = hotplug2_awake;
+	dbs_tuners_ins.up_threshold_hotplug3 = hotplug3_awake;		// ZZ: restore previous settings
+	hotplug_thresholds[0][2] = hotplug3_awake;
+#endif
+#if (MAX_CORES == 8)
+	dbs_tuners_ins.up_threshold_hotplug4 = hotplug4_awake;		// ZZ: restore previous settings
+	hotplug_thresholds[0][3] = hotplug4_awake;
+	dbs_tuners_ins.up_threshold_hotplug5 = hotplug5_awake;		// ZZ: restore previous settings
+	hotplug_thresholds[0][4] = hotplug5_awake;
+	dbs_tuners_ins.up_threshold_hotplug6 = hotplug6_awake;		// ZZ: restore previous settings
+	hotplug_thresholds[0][5] = hotplug6_awake;
+	dbs_tuners_ins.up_threshold_hotplug7 = hotplug7_awake;		// ZZ: restore previous settings
+	hotplug_thresholds[0][6] = hotplug7_awake;
+#endif
   }
 
   dbs_tuners_ins.sampling_down_max_mom = orig_sampling_down_max_mom;	// ZZ: Sampling down momentum - restore max value
@@ -2254,6 +3110,12 @@ static int cpufreq_governor_dbs(struct cpufreq_policy *policy,
 
 	        unregister_early_suspend(&_powersave_early_suspend);
 
+#ifdef CONFIG_CPU_FREQ_LCD_FREQ_DFS
+		if (dbs_tuners_ins.lcdfreq_enable == true) {
+			lcdfreq_lock_current = 0;		// ZZ: LCDFreq Scaling disable at stop
+			_lcdfreq_lock(lcdfreq_lock_current);	// ZZ: LCDFreq Scaling disable at stop
+		}
+#endif
 		break;
 
 	case CPUFREQ_GOV_LIMITS:
