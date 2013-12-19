@@ -707,10 +707,10 @@ static inline void* dhd_rxf_dequeue(dhd_pub_t *dhdp)
 
 #if defined(PASS_ARP_PACKET) || defined(SUPPORT_IBSS)
 static int
-check_pass(int op_mode)
+check_pass(dhd_pub_t *dhd)
 {
 #if defined(SUPPORT_IBSS)
-	if (op_mode & DHD_FLAG_IBSS_MODE)
+	if (dhd->op_mode & DHD_FLAG_IBSS_MODE)
 		return 0;
 #endif
 #if defined(PASS_ARP_PACKET)
@@ -751,7 +751,7 @@ void dhd_enable_packet_filter(int value, dhd_pub_t *dhd)
 #if !defined(GAN_LITE_NAT_KEEPALIVE_FILTER) && (defined(PASS_ARP_PACKET) || \
 	defined(SUPPORT_IBSS))
 			if (value && (i == dhd->pktfilter_count -1) &&
-				check_pass(dhd->op_mode)) {
+				check_pass(dhd)) {
 				DHD_TRACE_HW4(("Do not turn on ARP white list pkt filter:"
 					"val %d, cnt %d, op_mode 0x%x\n",
 					value, i, dhd->op_mode));
