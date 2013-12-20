@@ -1,6 +1,6 @@
 <settingsRoot>
-  <settingsTab name="CPU">
-    <settingsPane description="CPU SETTINGS"
+<settingsTab name="CPU">
+<settingsPane description="CPU SETTINGS"
 		name="CPU Scaling Settings">
        <spinner description="This will set the default CPU governor. Default CPU governor will only be set during early stages of booting (before init.d execution) and can be overriden by later scripts or apps." name="Default CPU Governor" action="generic /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor">
              <spinnerItem name="pegasusq" value="pegasusq"/> 
@@ -30,6 +30,19 @@
       </spinner>
     </settingsPane>
   </settingsTab>
+<settingsTab name="BOOSTPULSE">
+<settingsPane description="Boostpulse for ondemand based governors. This will boost the CPU frequency when scrolling or opening apps for 0,5 seconds. Needs restart if turning on/off or when changing governors."
+	name="Boostpulse">
+	<checkbox description="Enable or Disable Boostpulse for ondemand and pegasusq." name="Boostpulse" action="generic /tmp/boostpulse" label="Boostpulse"/>
+	<spinner description="This will set the frequency used by boostpulse." name="Boostpulse Frequency" action="boostfreq">
+		<spinnerItem name="500" value="500"/> 
+		<spinnerItem name="800" value="800"/>
+		<spinnerItem name="1000" value="1000"/>
+		<spinnerItem name="1200" value="1200"/>
+		<spinnerItem name="1400" value="1400"/>
+</spinner>
+</settingsPane>	
+</settingsTab>   
 <settingsTab name="CPU VOLTAGE">
 <settingsPane description="CPU Voltage Controls." name="CPU Voltage Controls">
 <seekBar description="CPU Voltage for 1400 MHz. (Default: 1325 mV)"
@@ -52,6 +65,10 @@
 <checkbox description="Using ARCH_POWER enables the use of arm topology power functions instead of generic ones." name="ARCH_POWER" action="schedfeat ARCH_POWER" label="ARCH_POWER"/>
 </settingsPane>
 <settingsPane description="These settings control misc kernel and ROM tweaks." name="MISC tweaks">
+<spinner description="Set SELinux to permissive or enforce." name="SELinux Mode" action="selinux">
+             <spinnerItem name="Permissive" value="0"/>
+             <spinnerItem name="Enforce" value="1"/>
+       </spinner>
 <checkbox description="Enable or Disable Scrolling Cache (you should leave this on for smoothness, needs restart)" name="Scrolling Cache" action="scrollcache" label="Scrolling Cache"/>
 <checkbox description="Enable or Disable Navigation Bar (needs restart)" name="Navigation Bar" action="navigationbar" label="Navigation Bar"/>
 </settingsPane>

@@ -27,11 +27,14 @@ file /res/gpuwatch /home/gustavo/kernel/usr/galaxys2_initramfs_files/res/gpuwatc
 file /res/uci.sh /home/gustavo/kernel/usr/galaxys2_initramfs_files/res/uci.sh 755 01000 01003
 file /res/update.url /home/gustavo/kernel/usr/galaxys2_initramfs_files/res/update.url 755 01000 01003
 file /res/lights.exynos4.so /home/gustavo/kernel/usr/galaxys2_initramfs_files/res/lights.exynos4.so 755 0 0
+file /res/power.default.so /home/gustavo/kernel/usr/galaxys2_initramfs_files/res/power.default.so 755 0 0
+file /res/power.default.so.off /home/gustavo/kernel/usr/galaxys2_initramfs_files/res/power.default.so.off 755 0 0
 dir /res/customconfig 755 0 0
-file /res/customconfig/customconfig.xml /home/gustavo/kernel/usr/galaxys2_initramfs_files/res/customconfig/customconfig.xml.omni 755 0 0
+file /res/customconfig/customconfig.xml /home/gustavo/kernel/usr/galaxys2_initramfs_files/res/customconfig/customconfig.xml 755 0 0
 file /res/customconfig/customconfig-helper /home/gustavo/kernel/usr/galaxys2_initramfs_files/res/customconfig/customconfig-helper 755 0 0
-file /res/customconfig/default.profile /home/gustavo/kernel/usr/galaxys2_initramfs_files/res/customconfig/default.profile.omni 755 0 0
+file /res/customconfig/default.profile /home/gustavo/kernel/usr/galaxys2_initramfs_files/res/customconfig/default.profile 755 0 0
 dir /res/customconfig/actions 755 0 0
+file /res/customconfig/actions/boostfreq /home/gustavo/kernel/usr/galaxys2_initramfs_files/res/customconfig/actions/boostfreq 755 0 0
 file /res/customconfig/actions/bln_effect /home/gustavo/kernel/usr/galaxys2_initramfs_files/res/customconfig/actions/bln_effect 755 0 0
 file /res/customconfig/actions/lights /home/gustavo/kernel/usr/galaxys2_initramfs_files/res/customconfig/actions/lights 755 0 0
 file /res/customconfig/actions/chargecurrent /home/gustavo/kernel/usr/galaxys2_initramfs_files/res/customconfig/actions/chargecurrent 755 0 0

@@ -1,0 +1,30 @@
+#!/system/bin/sh
+
+if [ "a$2" != "a" ];then
+  boostfreq=$2
+fi
+
+mount -o remount,rw /
+GOVERNOR=$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor)
+BOOSTFREQ_PATH=/sys/devices/system/cpu/cpufreq/$GOVERNOR/boostfreq
+
+case "${boostfreq}" in
+	    500)  boostfreq=500  
+	    ;;
+	    800)  boostfreq=800  
+	    ;;
+	    1000) boostfreq=1000 
+	    ;;
+	    1200) boostfreq=1200 
+	    ;;
+	    1400) boostfreq=1400 
+	    ;;
+	esac
+
+chown system system $BOOSTFREQ_PATH
+chmod 0660 $BOOSTFREQ_PATH 
+echo ${boostfreq} > $BOOSTFREQ_PATH   
+
+mount -o remount,ro /
+
+echo $boostfreq

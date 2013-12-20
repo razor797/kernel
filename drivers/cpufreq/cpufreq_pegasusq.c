@@ -30,11 +30,14 @@
 #include <linux/slab.h>
 #include <linux/suspend.h>
 #include <linux/reboot.h>
+#include <linux/boostpulse.h>
 
 #ifdef CONFIG_HAS_EARLYSUSPEND
 #include <linux/earlysuspend.h>
 #endif
 #define EARLYSUSPEND_HOTPLUGLOCK 1
+
+#define BOOST_CONTROL 2
 
 /*
  * runqueue average
@@ -262,6 +265,9 @@ static struct dbs_tuners {
 	unsigned int dvfs_debug;
 	unsigned int max_freq;
 	unsigned int min_freq;
+    unsigned int boosted;
+    unsigned int freq_boost_time;
+    unsigned int boostfreq;
 #ifdef CONFIG_HAS_EARLYSUSPEND
 	int early_suspend;
 #endif
@@ -280,6 +286,8 @@ static struct dbs_tuners {
 	.min_cpu_lock = DEF_MIN_CPU_LOCK,
 	.hotplug_lock = ATOMIC_INIT(0),
 	.dvfs_debug = 0,
+	.freq_boost_time = DEFAULT_FREQ_BOOST_TIME,
+	.boostfreq = 0,
 #ifdef CONFIG_HAS_EARLYSUSPEND
 	.early_suspend = -1,
 #endif
@@ -478,6 +486,9 @@ show_one(up_nr_cpus, up_nr_cpus);
 show_one(max_cpu_lock, max_cpu_lock);
 show_one(min_cpu_lock, min_cpu_lock);
 show_one(dvfs_debug, dvfs_debug);
+show_one(boostpulse, boosted);
+show_one(boosttime, freq_boost_time);
+show_one(boostfreq, boostfreq);
 static ssize_t show_hotplug_lock(struct kobject *kobj,
 				struct attribute *attr, char *buf)
 {
@@ -640,6 +651,8 @@ static ssize_t store_ignore_nice_load(struct kobject *a, struct attribute *b,
 	}
 	return count;
 }
+
+#include <linux/store_boostpulse.h>
 
 static ssize_t store_down_differential(struct kobject *a, struct attribute *b,
 				       const char *buf, size_t count)
@@ -813,6 +826,8 @@ define_one_global_rw(max_cpu_lock);
 define_one_global_rw(min_cpu_lock);
 define_one_global_rw(hotplug_lock);
 define_one_global_rw(dvfs_debug);
+define_one_global_rw(boostpulse);
+define_one_global_rw(boostfreq);
 
 static struct attribute *dbs_attributes[] = {
 	&sampling_rate_min.attr,
@@ -828,6 +843,8 @@ static struct attribute *dbs_attributes[] = {
 	&cpu_up_freq.attr,
 	&cpu_down_freq.attr,
 	&up_nr_cpus.attr,
+    &boostpulse.attr,
+    &boostfreq.attr,
 	/* priority: hotplug_lock > max_cpu_lock > min_cpu_lock
 	   Exception: hotplug_lock on early_suspend uses min_cpu_lock */
 	&max_cpu_lock.attr,
@@ -1052,12 +1069,26 @@ static void dbs_check_cpu(struct cpu_dbs_info_s *this_dbs_info)
 
 	struct cpufreq_policy *policy;
 	unsigned int j;
+	unsigned int boostfreq;
 	int num_hist = hotplug_history->num_hist;
 	int max_hotplug_rate = max(dbs_tuners_ins.cpu_up_rate,
 				   dbs_tuners_ins.cpu_down_rate);
 	int up_threshold = dbs_tuners_ins.up_threshold;
 
 	policy = this_dbs_info->cur_policy;
+	
+
+	/* Only core0 controls the boost */
+    if (dbs_tuners_ins.boosted && policy->cpu == 0) {
+      if (ktime_to_us(ktime_get()) - freq_boosted_time_pegasusq >=
+            dbs_tuners_ins.freq_boost_time) {
+        dbs_tuners_ins.boosted = 0;
+      }
+    }
+    if (dbs_tuners_ins.boostfreq != 0)
+     boostfreq = dbs_tuners_ins.boostfreq;
+    else
+     boostfreq = policy->max;
 
 	hotplug_history->usage[num_hist].freq = policy->cur;
 	hotplug_history->usage[num_hist].rq_avg = get_nr_run_avg();
@@ -1156,6 +1187,13 @@ static void dbs_check_cpu(struct cpu_dbs_info_s *this_dbs_info)
 		return;
 	}
 
+/* check for frequency boost */
+    if (dbs_tuners_ins.boosted && policy->cur < boostfreq) {
+      dbs_freq_increase(policy, boostfreq);
+      dbs_tuners_ins.boostfreq = policy->cur;
+      return;
+    }
+
 	/* Check for frequency decrease */
 #ifndef CONFIG_ARCH_EXYNOS4
 	/* if we cannot reduce the frequency anymore, break out early */
@@ -1178,6 +1216,11 @@ static void dbs_check_cpu(struct cpu_dbs_info_s *this_dbs_info)
 		freq_next = max_load_freq /
 			(dbs_tuners_ins.up_threshold -
 			 dbs_tuners_ins.down_differential);
+			  
+		if (dbs_tuners_ins.boosted &&
+          freq_next < boostfreq) {
+        freq_next = boostfreq;
+      }
 
 		/* No longer fully busy, reset rate_mult */
 		this_dbs_info->rate_mult = 1;

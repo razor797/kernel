@@ -81,6 +81,28 @@ chown root.root /system/lib/hw/lights.exynos4.so
 chmod 0664 /system/lib/hw/lights.exynos4.so
 mount -o remount,ro /system
 
+if [ "$boostpulse" == "on" ];then
+# install boostpulse power hal
+GOVERNOR=$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor)
+BOOSTPULSE_PATH=/sys/devices/system/cpu/cpufreq/$GOVERNOR/boostpulse
+mount -o remount,rw /system
+rm /system/lib/hw/power.default.so
+cp /res/power.default.so /system/lib/hw/power.default.so
+chown root.root /system/lib/hw/power.default.so
+chmod 0664 /system/lib/hw/power.default.so
+mount -o remount,ro /system
+chown system system $BOOSTPULSE_PATH
+chown system system $BOOSTPULSE_PATH
+echo "1" > $BOOSTPULSE_PATH
+else
+mount -o remount,rw /system
+rm /system/lib/hw/power.default.so
+cp /res/power.default.so.off /system/lib/hw/power.default.so
+chown root.root /system/lib/hw/power.default.so
+chmod 0664 /system/lib/hw/power.default.so
+mount -o remount,ro /system
+fi
+
 # google dns
 setprop net.dns1 8.8.8.8
 setprop net.dns2 8.8.4.4
@@ -91,10 +113,6 @@ echo "1" > /sys/kernel/dyn_fsync/Dyn_fsync_active
 # enable JIT compiler for packet filters
 
 echo "1" > /proc/sys/net/core/bpf_jit_enable
-
-# disable hotplug on sleep for zzmoove
-
-echo "1" > /sys/devices/system/cpu/cpufreq/zzmoove/disable_hotplug_sleep
 
 # cgroup timer slack
 mount -t cgroup -o timer_slack none /sys/fs/cgroup
