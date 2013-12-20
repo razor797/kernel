@@ -31,9 +31,7 @@
     </settingsPane>
   </settingsTab>
 <settingsTab name="CPU VOLTAGE">
-<settingsPane description="CPU Voltage Controls. Voltage Range is 825~1500mV. Lower/higher are NOT SUPPORTED. USE this interface AT YOUR OWN RISK! If you get SOD before you can load this interface and can't fix your error, reset profiles from recovery." name="CPU Voltage Controls">
-<checkbox description="Main switch for Voltage Control! If disabled, all below settings have no effect! If you are using an external application or script to configure CPU voltage, don't tick this checkbox. Do NOT report freezes if you turn this on." 
-			name="CPU Voltage Main Switch" action="generic_cortex /tmp/cpu_voltage_switch" label="CPU Voltage Main Switch"/>
+<settingsPane description="CPU Voltage Controls." name="CPU Voltage Controls">
 <seekBar description="CPU Voltage for 1400 MHz. (Default: 1325 mV)"
 			name="CPU Voltage 1400 MHz" action="cpu-voltage 1" unit="mV" min="1225" reversed="false" step="25" max="1425"/>
 <seekBar description="CPU Voltage for 1200 MHz. (Default: 1275 mV)"

@@ -109,6 +109,7 @@ mali_dvfs_table mali_dvfs[MALI_DVFS_STEPS]={
 #define ASV_LEVEL_PD	13
 #define ASV_LEVEL_4210_12	8
 #define ASV_LEVEL_4210_14	5
+#endif
 
 #if defined(CONFIG_CPU_EXYNOS4212) || defined(CONFIG_CPU_EXYNOS4412)
 static unsigned int asv_3d_volt_9_table_1ghz_type[MALI_DVFS_STEPS-1][ASV_LEVEL] = {
