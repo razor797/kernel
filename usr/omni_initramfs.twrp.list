@@ -38,11 +38,6 @@ file /res/customconfig/actions/chargecurrent /home/gustavo/kernel/usr/galaxys2_i
 file /res/customconfig/actions/cpu-voltage /home/gustavo/kernel/usr/galaxys2_initramfs_files/res/customconfig/actions/cpu-voltage 755 0 0
 file /res/customconfig/actions/generic /home/gustavo/kernel/usr/galaxys2_initramfs_files/res/customconfig/actions/generic 755 0 0
 file /res/customconfig/actions/generic01 /home/gustavo/kernel/usr/galaxys2_initramfs_files/res/customconfig/actions/generic01 755 0 0
-file /res/customconfig/actions/generic_cortex /home/gustavo/kernel/usr/galaxys2_initramfs_files/res/customconfig/actions/generic_cortex 755 0 0
-file /res/customconfig/actions/gpu-freq /home/gustavo/kernel/usr/galaxys2_initramfs_files/res/customconfig/actions/gpu-freq 755 0 0
-file /res/customconfig/actions/gpu-staycount /home/gustavo/kernel/usr/galaxys2_initramfs_files/res/customconfig/actions/gpu-staycount 755 0 0
-file /res/customconfig/actions/gpu-thresh /home/gustavo/kernel/usr/galaxys2_initramfs_files/res/customconfig/actions/gpu-thresh 755 0 0
-file /res/customconfig/actions/gpu-voltage /home/gustavo/kernel/usr/galaxys2_initramfs_files/res/customconfig/actions/gpu-voltage 755 0 0
 file /res/customconfig/actions/navigationbar /home/gustavo/kernel/usr/galaxys2_initramfs_files/res/customconfig/actions/navigationbar 755 0 0
 file /res/customconfig/actions/reset-fuelgauge /home/gustavo/kernel/usr/galaxys2_initramfs_files/res/customconfig/actions/reset-fuelgauge 755 0 0
 file /res/customconfig/actions/schedfeat /home/gustavo/kernel/usr/galaxys2_initramfs_files/res/customconfig/actions/schedfeat 755 0 0
