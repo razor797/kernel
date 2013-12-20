@@ -827,6 +827,7 @@ define_one_global_rw(min_cpu_lock);
 define_one_global_rw(hotplug_lock);
 define_one_global_rw(dvfs_debug);
 define_one_global_rw(boostpulse);
+define_one_global_rw(boosttime);
 define_one_global_rw(boostfreq);
 
 static struct attribute *dbs_attributes[] = {
@@ -844,6 +845,7 @@ static struct attribute *dbs_attributes[] = {
 	&cpu_down_freq.attr,
 	&up_nr_cpus.attr,
     &boostpulse.attr,
+    &boosttime.attr,
     &boostfreq.attr,
 	/* priority: hotplug_lock > max_cpu_lock > min_cpu_lock
 	   Exception: hotplug_lock on early_suspend uses min_cpu_lock */

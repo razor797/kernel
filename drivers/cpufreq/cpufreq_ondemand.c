@@ -544,6 +544,7 @@ define_one_global_rw(powersave_bias);
 define_one_global_rw(down_differential);
 define_one_global_rw(freq_step);
 define_one_global_rw(boostpulse);
+define_one_global_rw(boosttime);
 define_one_global_rw(boostfreq);
 #ifdef CONFIG_CPU_FREQ_GOV_ONDEMAND_FLEXRATE
 static struct global_attr flexrate_request;
@@ -564,6 +565,7 @@ static struct attribute *dbs_attributes[] = {
 	&down_differential.attr,
 	&freq_step.attr,
     &boostpulse.attr,
+    &boosttime.attr,
     &boostfreq.attr,
 #ifdef CONFIG_CPU_FREQ_GOV_ONDEMAND_FLEXRATE
 	&flexrate_request.attr,

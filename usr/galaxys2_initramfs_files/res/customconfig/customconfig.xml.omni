@@ -41,6 +41,11 @@
 		<spinnerItem name="1200" value="1200"/>
 		<spinnerItem name="1400" value="1400"/>
 </spinner>
+<spinner description="This will set how long the boostpulse duration is. Higher values mean more performance and less battery." name="Boostpulse Duration" action="boosttime">
+		<spinnerItem name="0,5 sec" value="500000"/> 
+		<spinnerItem name="1 sec" value="1000000"/>
+		<spinnerItem name="2 sec" value="2000000"/>
+</spinner>
 </settingsPane>	
 </settingsTab>   
 <settingsTab name="CPU VOLTAGE">

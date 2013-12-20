@@ -11,6 +11,20 @@
 
 #if (BOOST_CONTROL == 1)
 u64 freq_boosted_time_ondemand;
+static ssize_t store_boosttime(struct kobject *kobj, struct attribute *attr,
+				const char *buf, size_t count)
+{
+	unsigned int input;
+	int ret;
+
+	ret = sscanf(buf, "%u", &input);
+	if (ret != 1)
+		return -EINVAL;
+
+	dbs_tuners_ins.freq_boost_time = input;
+	return count;
+}
+
 static ssize_t store_boostpulse(struct kobject *kobj, struct attribute *attr,
         const char *buf, size_t count)
 {
@@ -46,6 +60,19 @@ static ssize_t store_boostfreq(struct kobject *a, struct attribute *b,
 
 #if (BOOST_CONTROL == 2)
 u64 freq_boosted_time_pegasusq;
+static ssize_t store_boosttime(struct kobject *kobj, struct attribute *attr,
+				const char *buf, size_t count)
+{
+	unsigned int input;
+	int ret;
+
+	ret = sscanf(buf, "%u", &input);
+	if (ret != 1)
+		return -EINVAL;
+
+	dbs_tuners_ins.freq_boost_time = input;
+	return count;
+}
 static ssize_t store_boostpulse(struct kobject *kobj, struct attribute *attr,
         const char *buf, size_t count)
 {

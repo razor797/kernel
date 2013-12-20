@@ -4,6 +4,7 @@ scaling_min_freq=200000
 scheduler=sio
 boostpulse=on
 boostfreq=800
+boosttime=1000000
 cpu_voltage_switch=off
 CPUVOLT1=1325
 CPUVOLT2=1275
