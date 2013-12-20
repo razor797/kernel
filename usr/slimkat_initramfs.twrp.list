@@ -36,6 +36,7 @@ file /res/customconfig/default.profile /home/gustavo/kernel/usr/galaxys2_initram
 dir /res/customconfig/actions 755 0 0
 file /res/customconfig/actions/boostfreq /home/gustavo/kernel/usr/galaxys2_initramfs_files/res/customconfig/actions/boostfreq 755 0 0
 file /res/customconfig/actions/boosttime /home/gustavo/kernel/usr/galaxys2_initramfs_files/res/customconfig/actions/boosttime 755 0 0
+file /res/customconfig/actions/gps /home/gustavo/kernel/usr/galaxys2_initramfs_files/res/customconfig/actions/gps 755 0 0
 file /res/customconfig/actions/bln_effect /home/gustavo/kernel/usr/galaxys2_initramfs_files/res/customconfig/actions/bln_effect 755 0 0
 file /res/customconfig/actions/lights /home/gustavo/kernel/usr/galaxys2_initramfs_files/res/customconfig/actions/lights 755 0 0
 file /res/customconfig/actions/selinux /home/gustavo/kernel/usr/galaxys2_initramfs_files/res/customconfig/actions/selinux 755 0 0

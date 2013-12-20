@@ -31,7 +31,7 @@
     </settingsPane>
   </settingsTab>
 <settingsTab name="BOOSTPULSE">
-<settingsPane description="Boostpulse for ondemand based governors. This will boost the CPU frequency when scrolling or opening apps for 0,5 seconds. Needs restart if turning on/off or when changing governors."
+<settingsPane description="Boostpulse for ondemand based governors. This will boost the CPU frequency when scrolling or opening apps for a defined time. Needs restart if turning on/off or when changing governors."
 	name="Boostpulse">
 	<checkbox description="Enable or Disable Boostpulse for ondemand and pegasusq." name="Boostpulse" action="generic /tmp/boostpulse" label="Boostpulse"/>
 	<spinner description="This will set the frequency used by boostpulse." name="Boostpulse Frequency" action="boostfreq">
@@ -41,7 +41,7 @@
 		<spinnerItem name="1200" value="1200"/>
 		<spinnerItem name="1400" value="1400"/>
 </spinner>
-<spinner description="This will set how long the boostpulse duration is. Higher values mean more performance and less battery." name="Boostpulse Duration" action="boosttime">
+<spinner description="This will set how long the boostpulse duration is. Higher value means more performance and less battery." name="Boostpulse Duration" action="boosttime">
 		<spinnerItem name="0,5 sec" value="500000"/> 
 		<spinnerItem name="1 sec" value="1000000"/>
 		<spinnerItem name="2 sec" value="2000000"/>
@@ -70,6 +70,14 @@
 <checkbox description="Using ARCH_POWER enables the use of arm topology power functions instead of generic ones." name="ARCH_POWER" action="schedfeat ARCH_POWER" label="ARCH_POWER"/>
 </settingsPane>
 <settingsPane description="These settings control misc kernel and ROM tweaks." name="MISC tweaks">
+<spinner description="Set GPS tweaks based on your location." name="GPS Tweaks" action="gps">
+             <spinnerItem name="Africa" value="1"/>
+             <spinnerItem name="Asia" value="2"/>
+             <spinnerItem name="Europe" value="3"/>
+             <spinnerItem name="North America (AOSP default)" value="4"/>
+             <spinnerItem name="Oceania" value="5"/>
+             <spinnerItem name="South America" value="6"/>
+       </spinner>
 <checkbox description="Enable or Disable Scrolling Cache (you should leave this on for smoothness, needs restart)" name="Scrolling Cache" action="scrollcache" label="Scrolling Cache"/>
 <checkbox description="Enable or Disable Navigation Bar (needs restart)" name="Navigation Bar" action="navigationbar" label="Navigation Bar"/>
 </settingsPane>
