@@ -487,8 +487,10 @@ static int ion_exynos_contig_heap_allocate(struct ion_heap *heap,
 	}
 
 	buffer->flags = flags;
+#ifdef CONFIG_ION_EXYNOS_CONTIGHEAP_DEBUG
 	printk(KERN_INFO "[ION] alloc: 0x%x\n",
 		(unsigned int)buffer->priv_phys);
+#endif
 
 	return 0;
 }
@@ -503,8 +505,10 @@ static void ion_exynos_contig_heap_free(struct ion_buffer *buffer)
 #endif
 
 	ret = cma_free(buffer->priv_phys);
+#ifdef CONFIG_ION_EXYNOS_CONTIGHEAP_DEBUG
 	printk(KERN_INFO "[ION] free: 0x%x, [0x%x]\n",
 		(unsigned int)buffer->priv_phys, ret);
+#endif
 }
 
 static int ion_exynos_contig_heap_phys(struct ion_heap *heap,
@@ -848,7 +852,7 @@ static enum dma_data_direction ion_msync_dir_table[IMSYNC_BUF_TYPES_NUM] = {
 	DMA_BIDIRECTIONAL,
 };
 
-#if defined(CONFIG_CPU_EXYNOS4212) || defined(CONFIG_CPU_EXYNOS4412)
+
 static bool need_cache_invalidate(long dir)
 {
 	return !(ion_msync_dir_table[dir & IMSYNC_BUF_TYPES_MASK] ==
@@ -859,7 +863,6 @@ static void flush_local_cache_all(void *p)
 {
 	flush_cache_all();
 }
-#endif
 
 static long ion_exynos_heap_msync(struct ion_client *client,
 		struct ion_handle *handle, off_t offset, size_t size, long dir)
@@ -956,9 +959,7 @@ static long ion_exynos_heap_msync(struct ion_client *client,
 			ion_msync_dir_table[dir & IMSYNC_BUF_TYPES_MASK]);
 #endif
 
-#if defined(CONFIG_CPU_EXYNOS4212) || defined(CONFIG_CPU_EXYNOS4412)
 done:
-#endif
 err_buf_sync:
 	ion_unmap_dma(client, handle);
 	return ret;
