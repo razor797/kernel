@@ -31,17 +31,17 @@
  * It helps to keep variable names smaller, simpler
  */
 
-#define DEF_FREQUENCY_DOWN_DIFFERENTIAL		(15)
-#define DEF_FREQUENCY_UP_THRESHOLD		(70)
+#define DEF_FREQUENCY_DOWN_DIFFERENTIAL		(10)
+#define DEF_FREQUENCY_UP_THRESHOLD		(80)
 #define DEF_SAMPLING_DOWN_FACTOR		(2)
 #define MAX_SAMPLING_DOWN_FACTOR		(100000)
 
 #if defined(CONFIG_MACH_SLP_PQ)
-#define MICRO_FREQUENCY_DOWN_DIFFERENTIAL	(15)
-#define MICRO_FREQUENCY_UP_THRESHOLD		(70)
+#define MICRO_FREQUENCY_DOWN_DIFFERENTIAL	(5)
+#define MICRO_FREQUENCY_UP_THRESHOLD		(85)
 #else
-#define MICRO_FREQUENCY_DOWN_DIFFERENTIAL	(15)
-#define MICRO_FREQUENCY_UP_THRESHOLD		(70)
+#define MICRO_FREQUENCY_DOWN_DIFFERENTIAL	(3)
+#define MICRO_FREQUENCY_UP_THRESHOLD		(95)
 #endif
 
 #define MICRO_FREQUENCY_MIN_SAMPLE_RATE		(10000)
@@ -145,7 +145,7 @@ static struct dbs_tuners {
 	.down_differential = DEF_FREQUENCY_DOWN_DIFFERENTIAL,
 	.ignore_nice = 0,
 	.powersave_bias = 0,
-	.freq_step = 50,
+	.freq_step = 100,
 	.boosted = 1,
 	.freq_boost_time = 500000,
 	.boostfreq = 800000,
