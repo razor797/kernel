@@ -286,8 +286,9 @@ static struct dbs_tuners {
 	.min_cpu_lock = DEF_MIN_CPU_LOCK,
 	.hotplug_lock = ATOMIC_INIT(0),
 	.dvfs_debug = 0,
-	.freq_boost_time = DEFAULT_FREQ_BOOST_TIME,
-	.boostfreq = 0,
+	.boosted = 1,
+	.freq_boost_time = 500000,
+	.boostfreq = 800000,
 #ifdef CONFIG_HAS_EARLYSUSPEND
 	.early_suspend = -1,
 #endif

@@ -25,6 +25,7 @@
 #include <linux/pm_qos_params.h>
 #include <linux/boostpulse.h>
 
+#define BOOST_CONTROL 1
 /*
  * dbs is used in this file as a shortform for demandbased switching
  * It helps to keep variable names smaller, simpler
@@ -46,8 +47,6 @@
 #define MICRO_FREQUENCY_MIN_SAMPLE_RATE		(10000)
 #define MIN_FREQUENCY_UP_THRESHOLD		(11)
 #define MAX_FREQUENCY_UP_THRESHOLD		(100)
-
-#define BOOST_CONTROL 1
 
 /*
  * The polling frequency of this governor depends on the capability of
@@ -147,8 +146,9 @@ static struct dbs_tuners {
 	.ignore_nice = 0,
 	.powersave_bias = 0,
 	.freq_step = 50,
-	.freq_boost_time = DEFAULT_FREQ_BOOST_TIME,
-	.boostfreq = 0,
+	.boosted = 1,
+	.freq_boost_time = 500000,
+	.boostfreq = 800000,
 };
 
 static inline cputime64_t get_cpu_idle_time_jiffy(unsigned int cpu,
@@ -533,7 +533,6 @@ static ssize_t store_freq_step(struct kobject *a, struct attribute *b,
 	dbs_tuners_ins.freq_step = min(input, 100u);
 	return count;
 }
-
 
 define_one_global_rw(sampling_rate);
 define_one_global_rw(io_is_busy);

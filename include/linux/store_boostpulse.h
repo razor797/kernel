@@ -106,4 +106,3 @@ static ssize_t store_boostfreq(struct kobject *a, struct attribute *b,
 }
 #endif
 
-
